@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+<title>数据安全</title>
+<path d="M64 13l39 15v29c0 27-15 44-39 57-24-13-39-30-39-57V28z"/>
+<rect x="45" y="52" width="38" height="29" rx="5"/>
+<path d="M52 52v-7a12 12 0 0 1 24 0v7M64 64v7"/>
+</svg>

@@ -1,0 +1,257 @@
+[
+  {
+    "category": "core",
+    "name": "法院建筑",
+    "file": "icons/core/courthouse.svg"
+  },
+  {
+    "category": "core",
+    "name": "法槌与底座",
+    "file": "icons/core/gavel.svg"
+  },
+  {
+    "category": "core",
+    "name": "打开的法律书",
+    "file": "icons/core/law-book.svg"
+  },
+  {
+    "category": "core",
+    "name": "正义天平",
+    "file": "icons/core/scales.svg"
+  },
+  {
+    "category": "core",
+    "name": "卷轴文书",
+    "file": "icons/core/scroll.svg"
+  },
+  {
+    "category": "core",
+    "name": "带印章的文书",
+    "file": "icons/core/sealed-document.svg"
+  },
+  {
+    "category": "core",
+    "name": "证人席",
+    "file": "icons/core/witness-stand.svg"
+  },
+  {
+    "category": "cases",
+    "name": "证书绶带",
+    "file": "icons/cases/award-certificate.svg"
+  },
+  {
+    "category": "cases",
+    "name": "公文包",
+    "file": "icons/cases/briefcase.svg"
+  },
+  {
+    "category": "cases",
+    "name": "钱币",
+    "file": "icons/cases/coins.svg"
+  },
+  {
+    "category": "cases",
+    "name": "断裂合同",
+    "file": "icons/cases/contract-broken.svg"
+  },
+  {
+    "category": "cases",
+    "name": "合同签署",
+    "file": "icons/cases/contract-signing.svg"
+  },
+  {
+    "category": "cases",
+    "name": "版权",
+    "file": "icons/cases/copyright.svg"
+  },
+  {
+    "category": "cases",
+    "name": "欠条",
+    "file": "icons/cases/debt-note.svg"
+  },
+  {
+    "category": "cases",
+    "name": "员工工牌",
+    "file": "icons/cases/employee-badge.svg"
+  },
+  {
+    "category": "cases",
+    "name": "证据放大镜",
+    "file": "icons/cases/evidence-magnifier.svg"
+  },
+  {
+    "category": "cases",
+    "name": "家庭",
+    "file": "icons/cases/family.svg"
+  },
+  {
+    "category": "cases",
+    "name": "手铐",
+    "file": "icons/cases/handcuffs.svg"
+  },
+  {
+    "category": "cases",
+    "name": "握手",
+    "file": "icons/cases/handshake.svg"
+  },
+  {
+    "category": "cases",
+    "name": "房屋",
+    "file": "icons/cases/house.svg"
+  },
+  {
+    "category": "cases",
+    "name": "诉讼时效沙漏",
+    "file": "icons/cases/limitation-hourglass.svg"
+  },
+  {
+    "category": "cases",
+    "name": "结婚证",
+    "file": "icons/cases/marriage-certificate.svg"
+  },
+  {
+    "category": "cases",
+    "name": "亲子",
+    "file": "icons/cases/parent-child.svg"
+  },
+  {
+    "category": "cases",
+    "name": "房产证",
+    "file": "icons/cases/property-deed.svg"
+  },
+  {
+    "category": "cases",
+    "name": "防护盾牌",
+    "file": "icons/cases/protection-shield.svg"
+  },
+  {
+    "category": "cases",
+    "name": "注册商标",
+    "file": "icons/cases/registered-trademark.svg"
+  },
+  {
+    "category": "cases",
+    "name": "离职单",
+    "file": "icons/cases/resignation.svg"
+  },
+  {
+    "category": "evidence",
+    "name": "风险警示",
+    "file": "icons/evidence/alert.svg"
+  },
+  {
+    "category": "evidence",
+    "name": "录音证据",
+    "file": "icons/evidence/audio-evidence.svg"
+  },
+  {
+    "category": "evidence",
+    "name": "聊天记录",
+    "file": "icons/evidence/chat-evidence.svg"
+  },
+  {
+    "category": "evidence",
+    "name": "确认对勾",
+    "file": "icons/evidence/check-circle.svg"
+  },
+  {
+    "category": "evidence",
+    "name": "数据安全",
+    "file": "icons/evidence/data-protection.svg"
+  },
+  {
+    "category": "evidence",
+    "name": "诉讼时效日历",
+    "file": "icons/evidence/deadline-calendar.svg"
+  },
+  {
+    "category": "evidence",
+    "name": "证据档案夹",
+    "file": "icons/evidence/evidence-folder.svg"
+  },
+  {
+    "category": "evidence",
+    "name": "月桂花环",
+    "file": "icons/evidence/laurel.svg"
+  },
+  {
+    "category": "evidence",
+    "name": "放大镜取证",
+    "file": "icons/evidence/magnifier-evidence.svg"
+  },
+  {
+    "category": "evidence",
+    "name": "调解协商",
+    "file": "icons/evidence/mediation.svg"
+  },
+  {
+    "category": "evidence",
+    "name": "公证与遗嘱",
+    "file": "icons/evidence/notarized-will.svg"
+  },
+  {
+    "category": "evidence",
+    "name": "手机转账",
+    "file": "icons/evidence/phone-transfer.svg"
+  },
+  {
+    "category": "evidence",
+    "name": "隐私锁",
+    "file": "icons/evidence/privacy-lock.svg"
+  },
+  {
+    "category": "evidence",
+    "name": "答疑问号",
+    "file": "icons/evidence/question-bubble.svg"
+  },
+  {
+    "category": "evidence",
+    "name": "引号与引用",
+    "file": "icons/evidence/quotation.svg"
+  },
+  {
+    "category": "evidence",
+    "name": "事件时间线",
+    "file": "icons/evidence/timeline.svg"
+  },
+  {
+    "category": "accents",
+    "name": "证据链断裂",
+    "file": "icons/accents/broken-chain.svg"
+  },
+  {
+    "category": "accents",
+    "name": "核对清单",
+    "file": "icons/accents/checklist.svg"
+  },
+  {
+    "category": "accents",
+    "name": "装饰分割线",
+    "file": "icons/accents/divider.svg"
+  },
+  {
+    "category": "accents",
+    "name": "证据链",
+    "file": "icons/accents/evidence-chain.svg"
+  },
+  {
+    "category": "accents",
+    "name": "法条文书",
+    "file": "icons/accents/legal-document.svg"
+  },
+  {
+    "category": "accents",
+    "name": "签字笔",
+    "file": "icons/accents/pen.svg"
+  },
+  {
+    "category": "accents",
+    "name": "脉冲圆环",
+    "file": "icons/accents/pulse-rings.svg"
+  },
+  {
+    "category": "accents",
+    "name": "重点星标",
+    "file": "icons/accents/star.svg"
+  }
+]

@@ -69,6 +69,8 @@ return errs;   // 期望 []
 
 ## 6. 移植 Remotion（整段动画）
 
+完整合成配方（bundle 打包、KitShot 组件、整片骨架、已验证版本组合）见 [remotion.md](remotion.md)，本节只讲原理。
+
 `update(t01, P)` 是纯函数，移植只需换时钟：
 
 ```tsx

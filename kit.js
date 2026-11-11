@@ -366,10 +366,7 @@ function makeChar(root, who, variant, optExtra) {
       shadow.setAttribute('cx', cx);
       shadow.setAttribute('rx', (C.small ? 40 : 58) * cs);
       shadow.setAttribute('opacity', .16 * op);
-      tint.setAttribute('filter', gray > 0.02 ? 'url(#gray)' : 'none');
-      tint.setAttribute('opacity', 1);
-      if (gray > 0.02) tint.style.filter = `saturate(${1 - gray})`;
-      else tint.style.filter = '';
+      tint.style.filter = gray > 0.02 ? `saturate(${1 - gray})` : '';
     },
     hand(x, s, deg = 0, flip = 1) {
       const [hx, hy] = C.hand;

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" role="img">
+  <title>证人席</title>
+  <g id="person"><circle cx="63" cy="35" r="13"/><path d="M42 69c1-13 8-20 21-20s20 7 21 20"/></g>
+  <g id="stand"><path d="M25 72h78v9H25zM31 81v30h66V81M47 81v30M81 81v30M21 112h86"/><path d="M53 91h22"/></g>
+  <g id="microphone"><path d="M90 71V49l8-8M96 36l4 4"/></g>
+</svg>

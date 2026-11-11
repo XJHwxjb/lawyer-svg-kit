@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" role="img">
+  <title>打开的法律书</title>
+  <g id="open-book">
+    <path d="M64 40C52 28 38 26 19 29v64c18-3 33 0 45 11 12-11 27-14 45-11V29c-19-3-33-1-45 11Zm0 0v64"/>
+    <path d="M19 36h-7v65c22-3 38 0 52 10 14-10 30-13 52-10V36h-7"/>
+    <path d="M29 44c9-1 17 0 25 4M29 55c9-1 17 0 25 4M29 66c9-1 17 0 25 4M74 48c8-4 16-5 25-4M74 59c8-4 16-5 25-4M74 70c8-4 16-5 25-4"/>
+  </g>
+  <g id="bookmark"><path d="M89 28V16h10v13l-5-4-5 3Z"/></g>
+</svg>

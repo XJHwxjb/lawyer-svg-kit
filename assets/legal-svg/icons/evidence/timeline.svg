@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+<title>事件时间线</title>
+<path d="M15 73h10M37 73h21M70 73h21M103 73h10M108 66l8 7-8 7"/>
+<circle cx="31" cy="73" r="6"/><circle cx="64" cy="73" r="6"/><circle cx="97" cy="73" r="6"/>
+<path d="M31 66V43h17M64 66V30h17M97 66V49h14"/>
+<path d="M31 89h12M64 89h12M97 89h12"/>
+</svg>

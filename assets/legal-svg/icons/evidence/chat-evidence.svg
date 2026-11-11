@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+<title>聊天记录</title>
+<path d="M22 24h64a9 9 0 0 1 9 9v40a9 9 0 0 1-9 9H56L38 96V82H22a9 9 0 0 1-9-9V33a9 9 0 0 1 9-9z"/>
+<path d="M30 43h47M30 55h35M30 67h25"/><path d="M79 93l7 7 20-22"/>
+</svg>

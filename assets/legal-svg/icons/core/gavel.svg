@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" role="img">
+  <title>法槌与底座</title>
+  <g id="gavel" transform="rotate(-42 63 56)">
+    <rect x="33" y="25" width="62" height="27" rx="5"/>
+    <path d="M42 25v27M86 25v27M55 52v47a9 9 0 0 0 18 0V52M55 88h18"/>
+    <path d="M29 30v17M99 30v17"/>
+  </g>
+  <g id="base">
+    <path d="M37 104h54v10H37zM45 104v-7h38v7M30 116h68"/>
+  </g>
+</svg>

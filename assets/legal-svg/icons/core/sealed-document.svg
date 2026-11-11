@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" role="img">
+  <title>带印章的文书</title>
+  <g id="paper">
+    <path d="M28 16h50l22 22v62c0 5-4 9-9 9H37c-5 0-9-4-9-9V16Z"/>
+    <path d="M78 16v21h22M41 42h25M41 53h45M41 64h29M41 76h24"/>
+  </g>
+  <g id="seal">
+    <circle cx="83" cy="84" r="13"/>
+    <circle cx="83" cy="84" r="7"/>
+    <path d="m74 94-3 19 12-6 12 6-3-19"/>
+  </g>
+</svg>

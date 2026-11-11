@@ -10,6 +10,7 @@ const P = {
   orient: 'land',
 };
 const DEFAULTS = { ...P };
+delete DEFAULTS.orient; // 画幅是项目级单选，不属于可重置的风格参数
 
 const GROUP_COLORS = {
   party: '#4d8fd1', court: '#c25062', agent: '#3fa87c',
@@ -142,7 +143,13 @@ function setMode(m) {
   else setAction(lastActId || ACTIONS[0].id);
 }
 
-/* ---------- 画幅切换：横屏 16:9 / 竖屏 9:16 ---------- */
+/* ---------- 画幅切换：横屏 16:9 / 竖屏 9:16（项目级单选，自动保存） ---------- */
+function readOrient() {
+  try { return localStorage.getItem('lawyer-kit-orient'); } catch (e) { return null; }
+}
+function saveOrient(id) {
+  try { localStorage.setItem('lawyer-kit-orient', id); } catch (e) { /* 存储不可用时仅本次会话生效 */ }
+}
 function applyCanvas() {
   stage.setAttribute('viewBox', `0 0 ${W} ${H}`);
   $('bgRect').setAttribute('width', W);
@@ -176,6 +183,7 @@ function setOrient(id) {
   if (O.id === id) return;
   setOrientation(id);
   P.orient = id;
+  saveOrient(id);
   applyCanvas();
   applyStyle();
   if (mode === 'chars') setPortrait(lastChar, lastVariant);
@@ -416,7 +424,7 @@ function bind() {
   $('theme').onchange = e => { P.theme = e.target.value; applyStyle(); };
   $('bg').onchange = e => { P.bg = e.target.value; applyStyle(); };
   $('guides').onchange = e => { P.guides = e.target.checked; };
-  $('resetBtn').onclick = () => { Object.assign(P, DEFAULTS, { dur: act.dur }); setOrient(P.orient); applyStyle(); syncUI(); };
+  $('resetBtn').onclick = () => { Object.assign(P, DEFAULTS, { dur: act.dur }); applyStyle(); syncUI(); };
   $('randBtn').onclick = () => {
     const pick = a => a[Math.floor(Math.random() * a.length)];
     P.ease = pick(['smooth', 'spring', 'back', 'linear']);
@@ -426,7 +434,6 @@ function bind() {
     P.theme = pick(Object.keys(THEMES));
     P.bg = pick(['paper', 'home', 'court', 'register']);
     t = 0; playing = true;
-    setOrient(pick(['land', 'port']));
     applyStyle(); syncUI();
   };
   $('exportSvgBtn').onclick = exportSVG;
@@ -468,6 +475,8 @@ function exportJSON() {
 }
 
 /* ---------- 启动 ---------- */
+const storedOrient = readOrient();
+if (storedOrient === 'land' || storedOrient === 'port') P.orient = storedOrient;
 setOrientation(P.orient);
 buildLibs();
 bind();

@@ -17,6 +17,7 @@ python -m http.server 8734        # 或 npx serve / 任意静态服务
 - 左上切换：**动作库**（36 动作按五类分组）/ **人物图鉴**（16 人物按六组分组，+N 表示变体数）。
 - 图鉴模式舞台上方两行：**变体**（基础/各变体 pill）、**相关动作**（点 pill 跳回动作库播放）。
 - 舞台头：类别 chip + 名称 + **横屏/竖屏画幅切换**（16:9 / 9:16）+ 画布尺寸徽章 + 阶段 chip；右上大数字 = 库内序号。
+- 画幅是**项目级单选**：切换即选定，自动保存（localStorage `lawyer-kit-orient`），下次打开恢复；重置参数 / 随机风格**不改变**画幅；导出 SVG/JSON 跟随当前画幅。案件只交付选中的那一种画幅。
 - 右栏控件：速度 / 时长 / 缓动(smooth·spring·back·linear) / 幅度 / 缩放 / 描边 / 投影 / 色调(cream·mist·dusk) / 场景底(paper·home·court·register) / 参考线。
 - 走带：播放/暂停、重播、循环、时间轴 scrub；刻度 = 音效事件点。
 - 键盘：空格播放暂停，←→ 逐帧（1/30s），**O 切换画幅**。
@@ -57,6 +58,7 @@ return errs;   // 期望 []
 ```
 
 配合控制台监听（console error / pageerror 期望 0）、关键帧截图、移动端视口（390×844）截图。
+**双画幅 sweep 是库维护验收**（改 kit/actions 后跑一次，保证库在两种画幅都成立）；**按案件交付时只验收用户选中的画幅**（SKILL.md Step 4），不重复跑全库双画幅。
 截图时建议模拟 `prefers-reduced-motion: reduce`（CDP `Emulation.setEmulatedMedia`），避免无头环境 CSS transition 停在中途导致按钮高亮与状态不同步；页面本身已内置该媒体查询（无障碍）。
 本库开发期截图在 `qa/`：pXX-*.png 肖像、v-*.png 变体、a-*.png 动作关键帧、ui-*.png 界面、m-*.png 移动端。
 
@@ -76,7 +78,7 @@ useEffect(() => { api.update(frame / durationInFrames, P); }, [frame]);
 ```
 
 - 在 Remotion 组件 mount 时执行一次 `act.build(S)` 建 SVG 树（挂在 ref 容器内），之后每帧只调 update。
-- **先 `setOrientation(orientation.id)` 再 build**：composition 宽高用 JSON 的 `orientation.W/H`；横竖屏各建一个 composition 共用同一动作定义。
+- **先 `setOrientation(orientation.id)` 再 build**：composition 宽高用 JSON 的 `orientation.W/H`；**只建案件选中画幅这一个 composition**，不横竖各建一份。项目日后改画幅时切换后重建即可。
 - `P` 用 JSON 导出的 params 固定下来，保证逐帧确定性。
 - 需要透明底：去掉 bgRect/groundRect/grain 三层，只留 sceneRoot。
 - 音效：按 events 在 `<Audio>`/`<Sequence>` 上对齐 at × durationInFrames。

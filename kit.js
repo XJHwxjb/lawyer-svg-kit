@@ -1,9 +1,30 @@
 /* 固定层 SVG 人物 + 交换物动画库 · 基础构建器
-   所有动画均为 t 的纯函数，便于后续移植 Remotion（逐帧确定性渲染）。 */
+   所有动画均为 t 的纯函数，便于后续移植 Remotion（逐帧确定性渲染）。
+   双画幅：设计空间 1080×800 → setOrientation('land'|'port') 活画幅，X/Yg/Ys 自动映射。 */
 'use strict';
 
 const NS = 'http://www.w3.org/2000/svg';
-const W = 1080, H = 800, GROUND = 700;
+
+/* ---------- 双画幅坐标系统 ----------
+   动作一律按 1080×800 设计稿坐标书写（脚底基准 GROUND=700）。
+   X  → 横向位置映射；Yg → 贴地物件（桌/文书/印章/钱堆）；Ys → 天空 UI（chip/计数器）。
+   os 物件缩放 · vs 天空纵向展开 · cs 人物缩放 · ts 文字缩放。
+   横屏 16:9 = 1920×1080，竖屏 9:16 = 1080×1920，切换后必须重新 mount。 */
+const DESIGN = { W: 1080, H: 800, GROUND: 700 };
+const ORIENTATIONS = {
+  land: { id: 'land', label: '横屏 16:9', W: 1920, H: 1080, GROUND: 945, os: 1.15, vs: 1.6, cs: 1.15, ts: 1.15 },
+  port: { id: 'port', label: '竖屏 9:16', W: 1080, H: 1920, GROUND: 1640, os: 1.3, vs: 2.0, cs: 1.3, ts: 1.2 },
+};
+let O = ORIENTATIONS.land;
+let W = O.W, H = O.H, GROUND = O.GROUND;
+function setOrientation(id) {
+  O = ORIENTATIONS[id] || ORIENTATIONS.land;
+  W = O.W; H = O.H; GROUND = O.GROUND;
+  return O;
+}
+const X = x => x * W / DESIGN.W;
+const Yg = y => GROUND + (y - DESIGN.GROUND) * O.os;
+const Ys = y => GROUND + (y - DESIGN.GROUND) * O.vs;
 
 function el(tag, attrs, parent) {
   const n = document.createElementNS(NS, tag);
@@ -337,12 +358,13 @@ function makeChar(root, who, variant, optExtra) {
   C.draw(art, opt);
   return {
     who, shadow, outer, tint, C,
-    /* x: 脚底世界横坐标；deg: 绕脚底倾斜；flip: 水平翻转；gray: 0~1 去色；op: 透明度 */
+    /* x: 脚底设计稿横坐标（自动映射到当前画幅）；deg: 绕脚底倾斜；flip: 水平翻转；gray: 0~1 去色；op: 透明度 */
     set(x, s, deg = 0, flip = 1, gray = 0, op = 1) {
-      outer.setAttribute('transform', `translate(${x},${GROUND}) rotate(${deg}) scale(${s * flip},${s})`);
+      const cx = X(x), cs = s * O.cs;
+      outer.setAttribute('transform', `translate(${cx},${GROUND}) rotate(${deg}) scale(${cs * flip},${cs})`);
       outer.setAttribute('opacity', op);
-      shadow.setAttribute('cx', x);
-      shadow.setAttribute('rx', (C.small ? 40 : 58) * s);
+      shadow.setAttribute('cx', cx);
+      shadow.setAttribute('rx', (C.small ? 40 : 58) * cs);
       shadow.setAttribute('opacity', .16 * op);
       tint.setAttribute('filter', gray > 0.02 ? 'url(#gray)' : 'none');
       tint.setAttribute('opacity', 1);
@@ -351,9 +373,10 @@ function makeChar(root, who, variant, optExtra) {
     },
     hand(x, s, deg = 0, flip = 1) {
       const [hx, hy] = C.hand;
+      const cs = s * O.cs;
       const r = deg * Math.PI / 180;
-      const lx = hx * s * flip, ly = hy * s;
-      return [x + lx * Math.cos(r) - ly * Math.sin(r), GROUND + lx * Math.sin(r) + ly * Math.cos(r)];
+      const lx = hx * cs * flip, ly = hy * cs;
+      return [X(x) + lx * Math.cos(r) - ly * Math.sin(r), GROUND + lx * Math.sin(r) + ly * Math.cos(r)];
     },
   };
 }
@@ -425,9 +448,10 @@ function propTable(g, w = 300) {
   return g;
 }
 function chip(g, x, y, text, color, fs = 20) {
-  const w = text.length * fs + 36;
-  el('rect', { x: x - w / 2, y: y - fs * 0.95, width: w, height: fs * 1.9, rx: fs * 0.95, fill: color, opacity: .95 }, g);
-  txt(el('text', { x, y: y + fs * 0.36, 'text-anchor': 'middle', 'font-size': fs, 'font-weight': 700, fill: '#fff8ec' }, g), text);
+  const cx = X(x), cy = Ys(y), f = fs * O.ts;
+  const w = text.length * f + 36 * O.ts;
+  el('rect', { x: cx - w / 2, y: cy - f * 0.95, width: w, height: f * 1.9, rx: f * 0.95, fill: color, opacity: .95 }, g);
+  txt(el('text', { x: cx, y: cy + f * 0.36, 'text-anchor': 'middle', 'font-size': f, 'font-weight': 700, fill: '#fff8ec' }, g), text);
   return g;
 }
 function symbolAnger(g) {
@@ -444,34 +468,41 @@ function symbolSpark(g) {
   return g;
 }
 
-/* ---------- 场景底（章节背景锚点） ---------- */
+/* ---------- 场景底（章节背景锚点，双画幅自动映射） ---------- */
 function buildBG(root, kind, theme) {
   root.innerHTML = '';
   const T = THEMES[theme];
+  const os = O.os;
   if (kind === 'home') {
-    el('rect', { x: 120, y: 120, width: 200, height: 160, rx: 10, fill: T.line, opacity: .35 }, root);
-    el('rect', { x: 132, y: 132, width: 176, height: 136, rx: 6, fill: '#bcd6e8', opacity: .8 }, root);
-    el('path', { d: 'M220,132 v136 M132,200 h176', stroke: T.line, 'stroke-width': 6, opacity: .6 }, root);
-    el('rect', { x: 760, y: 150, width: 180, height: 130, rx: 8, fill: T.line, opacity: .3 }, root);
-    el('path', { d: 'M850,280 v60 M820,340 h60', stroke: '#8a5a33', 'stroke-width': 8, 'stroke-linecap': 'round' }, root);
-    el('circle', { cx: 850, cy: 250, r: 34, fill: PAL.jade, opacity: .7 }, root);
+    const win = el('g', { transform: `translate(${X(120)},${Yg(120)}) scale(${os})` }, root);
+    el('rect', { x: 0, y: 0, width: 200, height: 160, rx: 10, fill: T.line, opacity: .35 }, win);
+    el('rect', { x: 12, y: 12, width: 176, height: 136, rx: 6, fill: '#bcd6e8', opacity: .8 }, win);
+    el('path', { d: 'M100,12 v136 M12,80 h176', stroke: T.line, 'stroke-width': 6, opacity: .6 }, win);
+    const lamp = el('g', { transform: `translate(${X(850)},${Yg(250)}) scale(${os})` }, root);
+    el('rect', { x: -90, y: -100, width: 180, height: 130, rx: 8, fill: T.line, opacity: .3 }, lamp);
+    el('path', { d: 'M0,30 v60 M-30,90 h60', stroke: '#8a5a33', 'stroke-width': 8, 'stroke-linecap': 'round' }, lamp);
+    el('circle', { cx: 0, cy: 0, r: 34, fill: PAL.jade, opacity: .7 }, lamp);
   } else if (kind === 'court') {
-    el('rect', { x: 0, y: 90, width: W, height: 250, fill: '#8a5a33', opacity: .28 }, root);
-    for (let i = 0; i < 9; i++) el('rect', { x: 40 + i * 120, y: 90, width: 10, height: 250, fill: '#6d4526', opacity: .3 }, root);
-    el('circle', { cx: 540, cy: 180, r: 52, fill: PAL.seal, opacity: .85 }, root);
-    el('circle', { cx: 540, cy: 180, r: 40, fill: 'none', stroke: PAL.gold, 'stroke-width': 3 }, root);
-    el('path', { d: 'M540,158 l7,14 15,2 -11,11 3,15 -14,-7 -14,7 3,-15 -11,-11 15,-2 Z', fill: PAL.gold }, root);
-    el('rect', { x: 240, y: 560, width: 600, height: 60, rx: 8, fill: '#8a5a33' }, root);
-    el('rect', { x: 240, y: 560, width: 600, height: 12, rx: 6, fill: '#a06a3c' }, root);
+    el('rect', { x: 0, y: Yg(90), width: W, height: 250 * os, fill: '#8a5a33', opacity: .28 }, root);
+    for (let i = 0; i < 9; i++) el('rect', { x: X(40 + i * 120), y: Yg(90), width: 10 * os, height: 250 * os, fill: '#6d4526', opacity: .3 }, root);
+    const emb = el('g', { transform: `translate(${X(540)},${Yg(180)}) scale(${os})` }, root);
+    el('circle', { cx: 0, cy: 0, r: 52, fill: PAL.seal, opacity: .85 }, emb);
+    el('circle', { cx: 0, cy: 0, r: 40, fill: 'none', stroke: PAL.gold, 'stroke-width': 3 }, emb);
+    el('path', { d: 'M0,-22 l7,14 15,2 -11,11 3,15 -14,-7 -14,7 3,-15 -11,-11 15,-2 Z', fill: PAL.gold }, emb);
+    const bench = el('g', { transform: `translate(${X(540)},${Yg(560)}) scale(${os})` }, root);
+    el('rect', { x: -300, y: 0, width: 600, height: 60, rx: 8, fill: '#8a5a33' }, bench);
+    el('rect', { x: -300, y: 0, width: 600, height: 12, rx: 6, fill: '#a06a3c' }, bench);
     chip(root, 330, 592, '原告', PAL.azure, 18);
     chip(root, 750, 592, '被告', PAL.magenta, 18);
   } else if (kind === 'register') {
-    el('rect', { x: 0, y: 80, width: W, height: 280, fill: PAL.seal, opacity: .22 }, root);
-    el('circle', { cx: 540, cy: 190, r: 56, fill: PAL.seal, opacity: .8 }, root);
-    el('path', { d: 'M540,214 C520,196 508,182 508,168 C508,156 518,150 528,154 C534,157 538,162 540,166 C542,162 546,157 552,154 C562,150 572,156 572,168 C572,182 560,196 540,214 Z', fill: PAL.gold }, root);
-    el('rect', { x: 180, y: 560, width: 720, height: 56, rx: 8, fill: '#a06a3c' }, root);
-    el('rect', { x: 180, y: 560, width: 720, height: 10, rx: 5, fill: '#c08b52' }, root);
-    txt(el('text', { x: 540, y: 400, 'text-anchor': 'middle', 'font-size': 26, 'font-weight': 700, fill: T.line, opacity: .9 }, root), '婚姻登记处');
+    el('rect', { x: 0, y: Yg(80), width: W, height: 280 * os, fill: PAL.seal, opacity: .22 }, root);
+    const emb = el('g', { transform: `translate(${X(540)},${Yg(190)}) scale(${os})` }, root);
+    el('circle', { cx: 0, cy: 0, r: 56, fill: PAL.seal, opacity: .8 }, emb);
+    el('path', { d: 'M0,24 C-20,6 -32,-8 -32,-22 C-32,-34 -22,-40 -12,-36 C-6,-33 -2,-28 0,-24 C2,-28 6,-33 12,-36 C22,-40 32,-34 32,-22 C32,-8 20,6 0,24 Z', fill: PAL.gold }, emb);
+    const desk = el('g', { transform: `translate(${X(540)},${Yg(560)}) scale(${os})` }, root);
+    el('rect', { x: -360, y: 0, width: 720, height: 56, rx: 8, fill: '#a06a3c' }, desk);
+    el('rect', { x: -360, y: 0, width: 720, height: 10, rx: 5, fill: '#c08b52' }, desk);
+    txt(el('text', { x: X(540), y: Yg(400), 'text-anchor': 'middle', 'font-size': 26 * O.ts, 'font-weight': 700, fill: T.line, opacity: .9 }, root), '婚姻登记处');
   }
   return root;
 }

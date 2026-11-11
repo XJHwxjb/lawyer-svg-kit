@@ -14,7 +14,7 @@
 ## 2. 坐标契约
 
 - 局部坐标：脚底 `(0,0)`，向上为负。成人头心 ≈ `(0,-272)`，手 ≈ `(80,-158)`。
-- 世界：`GROUND=700`；`set(x,s,deg,flip,gray,op)` 把脚底放到 `(x,700)`。
+- 世界：设计空间 `GROUND=700`；`set(x,s,deg,flip,gray,op)` 把脚底放到 `(x,700)`，**内部自动映射到活画幅**（横屏 GROUND=945 / 竖屏 GROUND=1640，x 过 `X()`、s 乘 `O.cs`）。draw 函数只写局部坐标，永远不感知画幅。
 - 接物锚点写进注册表 `hand`；举手姿势用 `[55,-266]`（配合 `bodyBase({raise:true})`）。
 - 小孩等小体型：整体缩小画（头心 -170、手 [55,-105]）并标 `small:true`（影子半径自动变小）。
 
@@ -49,7 +49,7 @@ held(g, propFn, noProp, rot, sc)  // 把道具挂到 (80,-158)，noProp=true 时
 2. **改三件套**：帽子 path、制服色、手持道具（复用 `propFolder/propLawBook/propLedger/...`，没有就写一个无文字小道具函数）。
 3. **写 draw 函数**：`function drawXxx(g, o = {}) { bodyBase(g, {...}); /*帽/徽/条*/ hairCap(...); held(g, propYyy, o.noProp, rot); /*变体开关*/ }`。
 4. **注册**：在 `CHARS` 加一行 `{ label, group, hand, draw, desc, variants }`；只换色/换道具的需求做成 variants 的 `opt`，不要新 draw。
-5. **验收**：预览台人物图鉴点新角色看肖像；`__kit.setPortrait(id)` 截图；再把它塞进一个 actHandoff 当接物方，检查 `flip=-1` 镜像后道具/帽子不穿帮。
+5. **验收**：预览台人物图鉴点新角色看肖像；`__kit.setPortrait(id)` 在**横屏与竖屏各截图一次**；再把它塞进一个 actHandoff 当接物方，检查 `flip=-1` 镜像后道具/帽子不穿帮。
 
 ## 5. 完整示例：造"税务员"
 

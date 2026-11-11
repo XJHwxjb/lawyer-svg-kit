@@ -1,15 +1,17 @@
-/* 交换物动画库 · 8 个动作（4 类 × 2）
+/* 交换物动画库 · 36 个动作（5 类）+ 9 个动作工厂
    每个动作 = build(S) 返回 { update(t01,P), anchors(), guidePath(), phases, events, dur }
-   t01 ∈ [0,1]，全部状态由 t 纯函数决定 → 可 scrub、可移植 Remotion。 */
+   t01 ∈ [0,1]，全部状态由 t 纯函数决定 → 可 scrub、可移植 Remotion。
+   坐标写在设计空间 1080×800/GROUND=700，经 X/Yg/Ys 自动映射到横屏 16:9 / 竖屏 9:16。 */
 'use strict';
 
 const MANX = 320, WOMX = 760;
+/* 飞行弧线：端点已是画幅坐标，lift 按设计稿像素 × os 缩放 */
 const qbez = (a, b, lift, u) => {
-  const cx = (a[0] + b[0]) / 2, cy = (a[1] + b[1]) / 2 - lift;
+  const cx = (a[0] + b[0]) / 2, cy = (a[1] + b[1]) / 2 - lift * O.os;
   const v = 1 - u;
   return [v * v * a[0] + 2 * v * u * cx + u * u * b[0], v * v * a[1] + 2 * v * u * cy + u * u * b[1]];
 };
-const qd = (a, b, lift) => `M${a[0]},${a[1]} Q${(a[0] + b[0]) / 2},${(a[1] + b[1]) / 2 - lift} ${b[0]},${b[1]}`;
+const qd = (a, b, lift) => `M${a[0]},${a[1]} Q${(a[0] + b[0]) / 2},${(a[1] + b[1]) / 2 - lift * O.os} ${b[0]},${b[1]}`;
 
 const CATS = {
   hand: { name: '物件交接', color: '#4d8fd1' },
@@ -35,10 +37,10 @@ def({
         const s = P.scale;
         const mh = S.man.hand(MANX, s), wh = S.woman.hand(WOMX, s);
         let rot = -6, fx = 1;
-        if (t < .18) { pos = [mh[0], mh[1] - 12 * ease(P, seg(t, 0, .18))]; }
+        if (t < .18) { pos = [mh[0], mh[1] - 12 * O.os * ease(P, seg(t, 0, .18))]; }
         else if (t < .55) { const u = ease(P, seg(t, .18, .55)); pos = qbez(mh, wh, 150 * P.amp, u); rot = lerp(-8, 6, u); }
         else if (t < .75) { const v = seg(t, .55, .75); pos = wh; fx = Math.cos(v * Math.PI * 2); rot = 6; }
-        else { const w = seg(t, .75, 1); pos = [wh[0], wh[1] - 5 * Math.sin(w * Math.PI)]; rot = 4; }
+        else { const w = seg(t, .75, 1); pos = [wh[0], wh[1] - 5 * O.os * Math.sin(w * Math.PI)]; rot = 4; }
         doc.setAttribute('transform', `translate(${pos[0]},${pos[1]}) rotate(${rot}) scale(${fx},1)`);
         S.man.set(MANX, s, 3 * Math.sin(seg(t, .1, .3) * Math.PI));
         S.woman.set(WOMX, s, -3 * Math.sin(seg(t, .5, .7) * Math.PI));
@@ -59,37 +61,37 @@ def({
     const cM = propCert(el('g', {}, S.above));
     const cW = propCert(el('g', {}, S.above));
     const spark = symbolSpark(el('g', { opacity: 0 }, S.fx));
-    const flash = el('rect', { x: 536, y: 380, width: 8, height: 180, rx: 4, fill: '#fff', opacity: 0 }, S.fx);
-    const C = [540, 470];
+    const flash = el('rect', { x: X(536), y: Yg(380), width: 8 * O.os, height: 180 * O.os, rx: 4 * O.os, fill: '#fff', opacity: 0 }, S.fx);
+    const C = [X(540), Yg(470)];
     let pM = C, pW = C;
     return {
       update(t, P) {
         const s = P.scale;
         const mh = S.man.hand(MANX, s), wh = S.woman.hand(WOMX, s);
         const u1 = ease(P, seg(t, 0, .3));
-        const jM = [C[0] - 16, C[1] - 6], jW = [C[0] + 16, C[1] + 6];
+        const jM = [C[0] - 16 * O.os, C[1] - 6 * O.os], jW = [C[0] + 16 * O.os, C[1] + 6 * O.os];
         let rM = lerp(-10, -4, u1), rW = lerp(10, 4, u1), sc = 1;
         pM = [lerp(mh[0], jM[0], u1), lerp(mh[1], jM[1], u1)];
         pW = [lerp(wh[0], jW[0], u1), lerp(wh[1], jW[1], u1)];
         const p = seg(t, .3, .45);
         sc = 1 + .08 * Math.sin(p * Math.PI) * P.amp;
         spark.setAttribute('opacity', Math.sin(p * Math.PI));
-        spark.setAttribute('transform', `translate(${C[0]},${C[1] - 70}) scale(${.6 + .6 * Math.sin(p * Math.PI)}) rotate(${p * 90})`);
+        spark.setAttribute('transform', `translate(${C[0]},${C[1] - 70 * O.os}) scale(${(.6 + .6 * Math.sin(p * Math.PI)) * O.os}) rotate(${p * 90})`);
         if (t >= .6) {
           const u2 = ease(P, seg(t, .6, .85));
-          pM = [lerp(jM[0], mh[0], u2), lerp(jM[1], mh[1], u2) - 40 * Math.sin(u2 * Math.PI) * P.amp];
-          pW = [lerp(jW[0], wh[0], u2), lerp(jW[1], wh[1], u2) - 40 * Math.sin(u2 * Math.PI) * P.amp];
+          pM = [lerp(jM[0], mh[0], u2), lerp(jM[1], mh[1], u2) - 40 * O.os * Math.sin(u2 * Math.PI) * P.amp];
+          pW = [lerp(jW[0], wh[0], u2), lerp(jW[1], wh[1], u2) - 40 * O.os * Math.sin(u2 * Math.PI) * P.amp];
           rM = lerp(-4, -24, u2); rW = lerp(4, 24, u2);
           flash.setAttribute('opacity', .85 * Math.sin(seg(t, .6, .68) * Math.PI));
         } else flash.setAttribute('opacity', 0);
-        const bob = t > .85 ? 4 * Math.sin(seg(t, .85, 1) * Math.PI) : 0;
-        cM.setAttribute('transform', `translate(${pM[0]},${pM[1] - bob}) rotate(${rM}) scale(${sc})`);
-        cW.setAttribute('transform', `translate(${pW[0]},${pW[1] - bob}) rotate(${rW}) scale(${sc})`);
+        const bob = t > .85 ? 4 * O.os * Math.sin(seg(t, .85, 1) * Math.PI) : 0;
+        cM.setAttribute('transform', `translate(${pM[0]},${pM[1] - bob}) rotate(${rM}) scale(${sc * O.os})`);
+        cW.setAttribute('transform', `translate(${pW[0]},${pW[1] - bob}) rotate(${rW}) scale(${sc * O.os})`);
         S.man.set(MANX, s, 2 * Math.sin(seg(t, .6, .8) * Math.PI));
         S.woman.set(WOMX, s, -2 * Math.sin(seg(t, .6, .8) * Math.PI));
       },
       anchors: () => [pM, pW],
-      guidePath: () => `M${MANX + 80},542 L540,470 L${WOMX - 80},542`,
+      guidePath: () => `M${X(MANX + 80)},${Yg(542)} L${X(540)},${Yg(470)} L${X(WOMX - 80)},${Yg(542)}`,
     };
   },
 });
@@ -101,15 +103,15 @@ def({
   phases: [[.2, '钞票流出'], [.8, '计数累加'], [1.01, '落堆成山']],
   events: Array.from({ length: 10 }, (_, i) => ({ at: .06 + i * .055 + .32, sfx: 'ching' })),
   build(S) {
-    const N = 10, PILE = [880, 692];
+    const N = 10, PILE = [X(880), Yg(692)];
     const notes = Array.from({ length: N }, () => propNote(el('g', { opacity: 0 }, S.above)));
-    const pile = el('g', { transform: `translate(${PILE[0]},${PILE[1]})` }, S.above);
+    const pile = el('g', { transform: `translate(${PILE[0]},${PILE[1]}) scale(${O.os})` }, S.above);
     const layers = Array.from({ length: N }, (_, i) =>
       el('rect', { x: -58, y: -10 - i * 10, width: 116, height: 14, rx: 4, fill: i % 2 ? PAL.seal : '#c03328', stroke: PAL.sealDeep, 'stroke-width': 1, opacity: 0 }, pile));
     const topNote = propNote(el('g', { opacity: 0, transform: 'translate(0,-116) rotate(-4)' }, pile));
     const counter = el('g', {}, S.fx);
-    const cRect = el('rect', { x: 540 - 130, y: 250, width: 260, height: 62, rx: 31, fill: PAL.ink, opacity: .88 }, counter);
-    const cText = txt(el('text', { x: 540, y: 292, 'text-anchor': 'middle', 'font-size': 34, 'font-weight': 800, fill: PAL.gold }, counter), '¥0');
+    const cRect = el('rect', { x: X(540) - 130 * O.ts, y: Ys(250), width: 260 * O.ts, height: 62 * O.ts, rx: 31 * O.ts, fill: PAL.ink, opacity: .88 }, counter);
+    const cText = txt(el('text', { x: X(540), y: Ys(250) + 42 * O.ts, 'text-anchor': 'middle', 'font-size': 34 * O.ts, 'font-weight': 800, fill: PAL.gold }, counter), '¥0');
     let last = [0, 0];
     return {
       update(t, P) {
@@ -126,22 +128,22 @@ def({
             continue;
           }
           const e = E.smooth(u);
-          const pos = qbez(mh, [PILE[0], 620], (100 + Math.sin(i * 2.1) * 24) * P.amp, e);
+          const pos = qbez(mh, [PILE[0], Yg(620)], (100 + Math.sin(i * 2.1) * 24) * P.amp, e);
           last = pos;
           notes[i].setAttribute('opacity', 1);
-          notes[i].setAttribute('transform', `translate(${pos[0]},${pos[1]}) rotate(${Math.sin(u * Math.PI) * 20 * P.amp + (i % 3 - 1) * 6}) scale(${.8 + .2 * Math.sin(u * Math.PI)})`);
+          notes[i].setAttribute('transform', `translate(${pos[0]},${pos[1]}) rotate(${Math.sin(u * Math.PI) * 20 * P.amp + (i % 3 - 1) * 6}) scale(${(.8 + .2 * Math.sin(u * Math.PI)) * O.os})`);
         }
         topNote.setAttribute('opacity', arrived === N ? 1 : 0);
         const val = 660000 * E.smooth(seg(t, .06, .8));
         txt(cText, fmtMoney(val));
-        const w = cText.textContent.length * 20 + 50;
-        cRect.setAttribute('x', 540 - w / 2); cRect.setAttribute('width', w);
+        const w = cText.textContent.length * 20 * O.ts + 50 * O.ts;
+        cRect.setAttribute('x', X(540) - w / 2); cRect.setAttribute('width', w);
         counter.setAttribute('opacity', t > .04 ? 1 : 0);
         S.man.set(MANX, s, 2 * Math.sin(seg(t, .05, .25) * Math.PI));
         S.woman.set(WOMX, s, -2 * Math.sin(seg(t, .5, .7) * Math.PI));
       },
       anchors: () => [last, PILE],
-      guidePath: P => qd(S.man.hand(MANX, P.scale), [PILE[0], 620], 100 * P.amp),
+      guidePath: P => qd(S.man.hand(MANX, P.scale), [PILE[0], Yg(620)], 100 * P.amp),
     };
   },
 });
@@ -153,7 +155,7 @@ def({
   phases: [[.2, '总额示数'], [.35, '蓄力压缩'], [.7, '分裂飞送'], [1.01, '落定盖章']],
   events: [{ at: .35, sfx: 'whoosh' }, { at: .7, sfx: 'thud' }],
   build(S) {
-    propTable(el('g', { transform: 'translate(540,600)' }, S.below), 320);
+    propTable(el('g', { transform: `translate(${X(540)},${Yg(600)}) scale(${O.os})` }, S.below), 320);
     const all = propStack(el('g', {}, S.above), 6);
     const labAll = chip(el('g', {}, S.fx), 540, 400, '66万 · 彩礼总额', PAL.ink, 22);
     const L = propStack(el('g', { opacity: 0 }, S.above), 2);
@@ -162,7 +164,7 @@ def({
     const labR = chip(el('g', { opacity: 0 }, S.fx), 760, 330, '其余留存', PAL.jade, 20);
     const dust = Array.from({ length: 8 }, (_, i) =>
       el('circle', { r: 5, fill: '#b7a687', opacity: 0 }, S.fx));
-    let pL = [540, 588], pR = [540, 588];
+    let pL = [X(540), Yg(588)], pR = [X(540), Yg(588)];
     return {
       update(t, P) {
         const s = P.scale;
@@ -171,32 +173,35 @@ def({
         let sy = 1 - .12 * Math.sin(q * Math.PI) * P.amp, sx = 1 + .1 * Math.sin(q * Math.PI) * P.amp;
         const u = ease(P, seg(t, .35, .7));
         all.setAttribute('opacity', 1 - seg(u, 0, .2));
-        all.setAttribute('transform', `translate(540,588) scale(${sx * sc},${sy * sc})`);
+        all.setAttribute('transform', `translate(${X(540)},${Yg(588)}) scale(${sx * sc * O.os},${sy * sc * O.os})`);
         labAll.setAttribute('opacity', 1 - seg(t, .35, .45));
         const lift = 90 * P.amp;
         const mh = S.man.hand(MANX, s), wh = S.woman.hand(WOMX, s);
-        pL = qbez([540, 588], mh, lift, u);
-        pR = qbez([540, 588], wh, lift, u);
-        const bounce = t > .7 ? -10 * Math.sin(seg(t, .7, .85) * Math.PI) * P.amp : 0;
+        pL = qbez([X(540), Yg(588)], mh, lift, u);
+        pR = qbez([X(540), Yg(588)], wh, lift, u);
+        const bounce = t > .7 ? -10 * O.os * Math.sin(seg(t, .7, .85) * Math.PI) * P.amp : 0;
         L.setAttribute('opacity', seg(u, 0, .15));
         R.setAttribute('opacity', seg(u, 0, .15));
-        L.setAttribute('transform', `translate(${pL[0]},${pL[1] + bounce}) rotate(${-6 * Math.sin(u * Math.PI)})`);
-        R.setAttribute('transform', `translate(${pR[0]},${pR[1] + bounce}) rotate(${6 * Math.sin(u * Math.PI)})`);
+        L.setAttribute('transform', `translate(${pL[0]},${pL[1] + bounce}) rotate(${-6 * Math.sin(u * Math.PI)}) scale(${O.os})`);
+        R.setAttribute('transform', `translate(${pR[0]},${pR[1] + bounce}) rotate(${6 * Math.sin(u * Math.PI)}) scale(${O.os})`);
         labL.setAttribute('opacity', seg(t, .62, .75));
         labR.setAttribute('opacity', seg(t, .62, .75));
         const du = seg(t, .7, .92);
         dust.forEach((d, i) => {
-          const side = i < 4 ? 320 : 760, k = i % 4;
+          const side = X(i < 4 ? 320 : 760), k = i % 4;
           const ang = (-140 + k * 30) * Math.PI / 180;
           d.setAttribute('opacity', du > 0 && du < 1 ? (1 - du) * .8 : 0);
-          d.setAttribute('cx', side + Math.cos(ang) * lerp(12, 80, du) * (k % 2 ? 1 : -1));
-          d.setAttribute('cy', 600 + Math.sin(ang) * lerp(6, 46, du));
+          d.setAttribute('cx', side + Math.cos(ang) * lerp(12, 80, du) * O.os * (k % 2 ? 1 : -1));
+          d.setAttribute('cy', Yg(600) + Math.sin(ang) * lerp(6, 46, du) * O.os);
         });
         S.man.set(MANX, s, 2 * Math.sin(seg(t, .35, .6) * Math.PI));
         S.woman.set(WOMX, s, -2 * Math.sin(seg(t, .35, .6) * Math.PI));
       },
       anchors: () => [pL, pR],
-      guidePath: P => `M540,588 Q430,${588 - 90 * P.amp} ${MANX + 80 * P.scale},${700 - 158 * P.scale} M540,588 Q650,${588 - 90 * P.amp} ${WOMX - 80 * P.scale},${700 - 158 * P.scale}`,
+      guidePath: P => {
+        const mh = S.man.hand(MANX, P.scale), wh = S.woman.hand(WOMX, P.scale);
+        return `M${X(540)},${Yg(588)} Q${X(430)},${Yg(588) - 90 * P.amp * O.os} ${mh[0]},${mh[1]} M${X(540)},${Yg(588)} Q${X(650)},${Yg(588) - 90 * P.amp * O.os} ${wh[0]},${wh[1]}`;
+      },
     };
   },
 });
@@ -225,12 +230,12 @@ def({
         S.woman.set(xW - tr, s, -lean);
         const ap = seg(t, .42, .52);
         anger.setAttribute('opacity', ap * (1 - seg(t, .55, .65)));
-        anger.setAttribute('transform', `translate(${xM + 40},${GROUND - 330 * s}) scale(${E.back(ap) * .9})`);
+        anger.setAttribute('transform', `translate(${X(xM + 40)},${GROUND - 330 * s * O.cs}) scale(${E.back(ap) * .9 * O.os})`);
         dist.setAttribute('opacity', P.guides ? .9 : 0);
-        dLine.setAttribute('d', `M${xM + 60},430 L${xW - 60},430`);
+        dLine.setAttribute('d', `M${X(xM + 60)},${Yg(430)} L${X(xW - 60)},${Yg(430)}`);
       },
-      anchors: P => [[xM, GROUND - 158 * P.scale], [xW, GROUND - 158 * P.scale]],
-      guidePath: () => `M180,660 L430,660 M900,660 L650,660`,
+      anchors: P => [S.man.hand(xM, P.scale), S.woman.hand(xW, P.scale)],
+      guidePath: () => `M${X(180)},${Yg(660)} L${X(430)},${Yg(660)} M${X(900)},${Yg(660)} L${X(650)},${Yg(660)}`,
     };
   },
 });
@@ -243,8 +248,9 @@ def({
   events: [{ at: .45, sfx: 'crack' }, { at: .72, sfx: 'thud' }],
   build(S) {
     const d = 'M540,300 L528,360 L552,410 L530,470 L556,530 L534,600 L548,660 L540,700';
-    const crack = el('path', { d, fill: 'none', stroke: PAL.ink, 'stroke-width': 7, 'stroke-linejoin': 'round', opacity: 0 }, S.fx);
-    const core = el('path', { d, fill: 'none', stroke: '#fff8ec', 'stroke-width': 2, 'stroke-linejoin': 'round', opacity: 0 }, S.fx);
+    const crackG = el('g', { transform: `translate(${X(540)},${Yg(500)}) scale(${O.os}) translate(-540,-500)` }, S.fx);
+    const crack = el('path', { d, fill: 'none', stroke: PAL.ink, 'stroke-width': 7, 'stroke-linejoin': 'round', opacity: 0 }, crackG);
+    const core = el('path', { d, fill: 'none', stroke: '#fff8ec', 'stroke-width': 2, 'stroke-linejoin': 'round', opacity: 0 }, crackG);
     const Llen = crack.getTotalLength();
     crack.setAttribute('stroke-dasharray', Llen);
     core.setAttribute('stroke-dasharray', Llen);
@@ -267,10 +273,10 @@ def({
         S.woman.set(xW, s, 6 * v, 1, .85 * g, 1 - .25 * g);
         const hp = seg(t, .5, .62);
         heart.setAttribute('opacity', hp);
-        heart.setAttribute('transform', `translate(540,320) scale(${E.back(hp)})`);
+        heart.setAttribute('transform', `translate(${X(540)},${Yg(320)}) scale(${E.back(hp) * O.os})`);
       },
-      anchors: () => [[xM, 542], [xW, 542], [540, 500]],
-      guidePath: () => 'M460,660 L250,660 M620,660 L830,660',
+      anchors: () => [[X(xM), Yg(542)], [X(xW), Yg(542)], [X(540), Yg(500)]],
+      guidePath: () => `M${X(460)},${Yg(660)} L${X(250)},${Yg(660)} M${X(620)},${Yg(660)} L${X(830)},${Yg(660)}`,
     };
   },
 });
@@ -282,11 +288,11 @@ def({
   phases: [[.25, '举章'], [.38, '砸落'], [.6, '冲击余震'], [.85, '抬章'], [1.01, '认定完成']],
   events: [{ at: .25, sfx: 'whoosh' }, { at: .38, sfx: 'stamp' }],
   build(S) {
-    propTable(el('g', { transform: 'translate(540,600)' }, S.below), 320);
+    propTable(el('g', { transform: `translate(${X(540)},${Yg(600)}) scale(${O.os})` }, S.below), 320);
     const doc = propDoc(el('g', {}, S.above), '证据清单');
-    const imprint = propImprint(el('g', { opacity: 0, transform: 'translate(540,545)' }, S.above));
+    const imprint = propImprint(el('g', { opacity: 0, transform: `translate(${X(540)},${Yg(545)}) scale(${O.os})` }, S.above));
     const stamp = propStamp(el('g', {}, S.above));
-    const ring = el('circle', { cx: 540, cy: 545, r: 20, fill: 'none', stroke: PAL.seal, 'stroke-width': 6, opacity: 0 }, S.fx);
+    const ring = el('circle', { cx: X(540), cy: Yg(545), r: 20, fill: 'none', stroke: PAL.seal, 'stroke-width': 6, opacity: 0 }, S.fx);
     const dust = Array.from({ length: 6 }, () => el('circle', { r: 4.5, fill: '#b7a687', opacity: 0 }, S.fx));
     return {
       update(t, P) {
@@ -297,26 +303,26 @@ def({
         else if (t < .6) y = 545;
         else y = lerp(545, 320, ease(P, seg(t, .6, .85)));
         stamp.setAttribute('opacity', 1 - seg(t, .85, 1));
-        stamp.setAttribute('transform', `translate(540,${y})`);
+        stamp.setAttribute('transform', `translate(${X(540)},${Yg(y)}) scale(${O.os})`);
         const ru = seg(t, .38, .62);
-        ring.setAttribute('r', lerp(20, 150 * P.amp, E.smooth(ru)));
+        ring.setAttribute('r', lerp(20, 150 * P.amp, E.smooth(ru)) * O.os);
         ring.setAttribute('opacity', ru > 0 ? (1 - ru) * .8 : 0);
         const dx = shake(t, .38, .25, 6 * P.amp);
-        doc.setAttribute('transform', `translate(${540 + dx},520) rotate(${-3 + shake(t, .38, .25, 2 * P.amp)}) scale(.9)`);
+        doc.setAttribute('transform', `translate(${X(540) + dx * O.os},${Yg(520)}) rotate(${-3 + shake(t, .38, .25, 2 * P.amp)}) scale(${.9 * O.os})`);
         imprint.setAttribute('opacity', seg(t, .38, .5));
         const du = seg(t, .38, .6);
         dust.forEach((d, i) => {
           const ang = (i / 6) * Math.PI * 2;
           d.setAttribute('opacity', du > 0 && du < 1 ? (1 - du) * .85 : 0);
-          d.setAttribute('cx', 540 + Math.cos(ang) * lerp(16, 95 * P.amp, du));
-          d.setAttribute('cy', 545 + Math.sin(ang) * lerp(8, 40, du));
+          d.setAttribute('cx', X(540) + Math.cos(ang) * lerp(16, 95 * P.amp, du) * O.os);
+          d.setAttribute('cy', Yg(545) + Math.sin(ang) * lerp(8, 40, du) * O.os);
         });
         const lean = 3 * Math.sin(seg(t, .38, .55) * Math.PI);
         S.man.set(MANX, s, lean);
         S.woman.set(WOMX, s, -lean);
       },
-      anchors: () => [[540, 545], [540, 545]],
-      guidePath: () => 'M540,330 L540,545',
+      anchors: () => [[X(540), Yg(545)], [X(540), Yg(545)]],
+      guidePath: () => `M${X(540)},${Yg(330)} L${X(540)},${Yg(545)}`,
     };
   },
 });
@@ -328,8 +334,8 @@ def({
   phases: [[.2, '执笔就位'], [.7, '落笔签字'], [.85, '收笔返回'], [1.01, '签字确认']],
   events: [{ at: .05, sfx: 'paper' }, { at: .2, sfx: 'scratch' }, { at: .8, sfx: 'pop' }],
   build(S) {
-    propTable(el('g', { transform: 'translate(540,600)' }, S.below), 320);
-    const doc = propDoc(el('g', { transform: 'translate(540,520) rotate(-2) scale(.9)' }, S.above), '调解协议');
+    propTable(el('g', { transform: `translate(${X(540)},${Yg(600)}) scale(${O.os})` }, S.below), 320);
+    const doc = propDoc(el('g', { transform: `translate(${X(540)},${Yg(520)}) rotate(-2) scale(${.9 * O.os})` }, S.above), '调解协议');
     const sig = el('path', { d: 'M-40,44 C-24,10 -12,64 2,32 S 22,52 40,26', fill: 'none', stroke: PAL.ink, 'stroke-width': 3, 'stroke-linecap': 'round' }, doc);
     const SL = sig.getTotalLength();
     sig.setAttribute('stroke-dasharray', SL);
@@ -337,7 +343,7 @@ def({
     const pen = propPen(el('g', {}, S.above));
     const check = chip(el('g', { opacity: 0 }, S.fx), 540, 380, '签字确认', PAL.jade, 22);
     const rad = -2 * Math.PI / 180;
-    const docWorld = p => [540 + .9 * (p.x * Math.cos(rad) - p.y * Math.sin(rad)), 520 + .9 * (p.x * Math.sin(rad) + p.y * Math.cos(rad))];
+    const docWorld = p => [X(540) + .9 * O.os * (p.x * Math.cos(rad) - p.y * Math.sin(rad)), Yg(520) + .9 * O.os * (p.x * Math.sin(rad) + p.y * Math.cos(rad))];
     let pos = [0, 0];
     return {
       update(t, P) {
@@ -345,7 +351,7 @@ def({
         const mh = S.man.hand(MANX, s);
         const start = docWorld(sig.getPointAtLength(0));
         let rot = 0;
-        if (t < .2) { const u = ease(P, seg(t, 0, .2)); pos = [lerp(mh[0], start[0], u), lerp(mh[1], start[1], u) - 30 * Math.sin(u * Math.PI) * P.amp]; rot = lerp(0, -8, u); }
+        if (t < .2) { const u = ease(P, seg(t, 0, .2)); pos = [lerp(mh[0], start[0], u), lerp(mh[1], start[1], u) - 30 * O.os * Math.sin(u * Math.PI) * P.amp]; rot = lerp(0, -8, u); }
         else if (t < .7) {
           const w = seg(t, .2, .7);
           pos = docWorld(sig.getPointAtLength(SL * w));
@@ -355,19 +361,19 @@ def({
           sig.setAttribute('stroke-dashoffset', 0);
           const end = docWorld(sig.getPointAtLength(SL));
           const l = ease(P, seg(t, .7, .85));
-          pos = [lerp(end[0], mh[0], l), lerp(end[1], mh[1], l) - 30 * Math.sin(l * Math.PI) * P.amp];
+          pos = [lerp(end[0], mh[0], l), lerp(end[1], mh[1], l) - 30 * O.os * Math.sin(l * Math.PI) * P.amp];
           rot = lerp(-8, 0, l);
         }
-        pen.setAttribute('transform', `translate(${pos[0]},${pos[1]}) rotate(${rot})`);
+        pen.setAttribute('transform', `translate(${pos[0]},${pos[1]}) rotate(${rot}) scale(${O.os})`);
         const cp = seg(t, .8, .92);
         check.setAttribute('opacity', cp);
-        check.setAttribute('transform', `translate(0,${(1 - E.back(cp)) * -24}) scale(1)`);
+        check.setAttribute('transform', `translate(0,${(1 - E.back(cp)) * -24 * O.ts}) scale(1)`);
         const writing = t >= .2 && t < .7 ? 1 : 0;
         S.man.set(MANX, s, 2 * writing + 2 * Math.sin(seg(t, 0, .2) * Math.PI));
         S.woman.set(WOMX, s, -2 * writing);
       },
       anchors: () => [pos],
-      guidePath: () => 'M400,542 Q470,470 505,560',
+      guidePath: () => `M${X(400)},${Yg(542)} Q${X(470)},${Yg(470)} ${X(505)},${Yg(560)}`,
     };
   },
 });
@@ -403,11 +409,11 @@ function actHandoff(o) {
           const s = P.scale;
           const ah = A.hand(o.fromX, s, 0, fA), bh = B.hand(o.toX, s, 0, fB);
           let rot = -6, fx = 1;
-          if (t < .18) pos = [ah[0], ah[1] - 12 * ease(P, seg(t, 0, .18))];
+          if (t < .18) pos = [ah[0], ah[1] - 12 * O.os * ease(P, seg(t, 0, .18))];
           else if (t < .55) { const u = ease(P, seg(t, .18, .55)); pos = qbez(ah, bh, 150 * P.amp, u); rot = lerp(-8, 6, u); }
           else if (t < .75) { const v = seg(t, .55, .75); pos = bh; fx = Math.cos(v * Math.PI * 2); rot = 6; }
-          else { const w = seg(t, .75, 1); pos = [bh[0], bh[1] - 5 * Math.sin(w * Math.PI)]; rot = 4; }
-          prop.setAttribute('transform', `translate(${pos[0]},${pos[1]}) rotate(${rot}) scale(${fx},${o.propScale || 1})`);
+          else { const w = seg(t, .75, 1); pos = [bh[0], bh[1] - 5 * O.os * Math.sin(w * Math.PI)]; rot = 4; }
+          prop.setAttribute('transform', `translate(${pos[0]},${pos[1]}) rotate(${rot}) scale(${fx * O.os},${(o.propScale || 1) * O.os})`);
           A.set(o.fromX, s, 3 * Math.sin(seg(t, .1, .3) * Math.PI), fA);
           B.set(o.toX, s, -3 * Math.sin(seg(t, .5, .7) * Math.PI), fB);
         },
@@ -427,23 +433,23 @@ function actMoney(o) {
     build(S) {
       const A = S.chars[o.from], B = o.to ? S.chars[o.to] : null;
       const fA = faceFlip(A.C, 1), fB = B ? faceFlip(B.C, -1) : 1;
-      const N = 10, PILE = [o.pileX != null ? o.pileX : o.toX + 120, 692];
+      const N = 10, PILE = [X(o.pileX != null ? o.pileX : o.toX + 120), Yg(692)];
       const notes = Array.from({ length: N }, () => propNote(el('g', { opacity: 0 }, S.above)));
-      const pile = el('g', { transform: `translate(${PILE[0]},${PILE[1]})`, opacity: o.mode === 'chip' ? 0 : 1 }, S.above);
+      const pile = el('g', { transform: `translate(${PILE[0]},${PILE[1]}) scale(${O.os})`, opacity: o.mode === 'chip' ? 0 : 1 }, S.above);
       const layers = Array.from({ length: N }, (_, i) =>
         el('rect', { x: -58, y: -10 - i * 10, width: 116, height: 14, rx: 4, fill: i % 2 ? PAL.seal : '#c03328', stroke: PAL.sealDeep, 'stroke-width': 1, opacity: 0 }, pile));
       const topNote = propNote(el('g', { opacity: 0, transform: 'translate(0,-116) rotate(-4)' }, pile));
-      const target = o.mode === 'chip' ? chip(el('g', {}, S.fx), PILE[0], 620, o.chipText || '他人账户', PAL.ink, 20) : null;
+      const target = o.mode === 'chip' ? chip(el('g', {}, S.fx), o.pileX != null ? o.pileX : o.toX + 120, 620, o.chipText || '他人账户', PAL.ink, 20) : null;
       const counter = el('g', {}, S.fx);
-      const cRect = el('rect', { x: 410, y: 250, width: 260, height: 62, rx: 31, fill: PAL.ink, opacity: .88 }, counter);
-      const cText = txt(el('text', { x: 540, y: 292, 'text-anchor': 'middle', 'font-size': 32, 'font-weight': 800, fill: o.mode === 'chip' ? '#e08a63' : PAL.gold }, counter), '¥0');
+      const cRect = el('rect', { x: X(540) - 130 * O.ts, y: Ys(250), width: 260 * O.ts, height: 62 * O.ts, rx: 31 * O.ts, fill: PAL.ink, opacity: .88 }, counter);
+      const cText = txt(el('text', { x: X(540), y: Ys(250) + 42 * O.ts, 'text-anchor': 'middle', 'font-size': 32 * O.ts, 'font-weight': 800, fill: o.mode === 'chip' ? '#e08a63' : PAL.gold }, counter), '¥0');
       let last = [0, 0];
       return {
         update(t, P) {
           const s = P.scale;
           const ah = A.hand(o.fromX, s, 0, fA);
-          const start = o.sneak ? [o.fromX - 46 * s, GROUND - 150 * s] : ah;
-          const end = [PILE[0], 620];
+          const start = o.sneak ? [X(o.fromX - 46 * s), GROUND - 150 * s * O.cs] : ah;
+          const end = [PILE[0], Yg(620)];
           let arrived = 0;
           for (let i = 0; i < N; i++) {
             const st = .06 + i * .055, u = seg(t, st, st + .32);
@@ -458,20 +464,20 @@ function actMoney(o) {
             const pos = qbez(start, end, (o.sneak ? 60 : 100 + Math.sin(i * 2.1) * 24) * P.amp, e);
             last = pos;
             notes[i].setAttribute('opacity', o.mode === 'chip' ? .8 : 1);
-            notes[i].setAttribute('transform', `translate(${pos[0]},${pos[1]}) rotate(${Math.sin(u * Math.PI) * 20 * P.amp + (i % 3 - 1) * 6}) scale(${.8 + .2 * Math.sin(u * Math.PI)})`);
+            notes[i].setAttribute('transform', `translate(${pos[0]},${pos[1]}) rotate(${Math.sin(u * Math.PI) * 20 * P.amp + (i % 3 - 1) * 6}) scale(${(.8 + .2 * Math.sin(u * Math.PI)) * O.os})`);
           }
           topNote.setAttribute('opacity', arrived === N && o.mode !== 'chip' ? 1 : 0);
           if (target) target.setAttribute('transform', `scale(${1 + .06 * Math.sin(seg(t, .4, .9) * Math.PI * 3) * P.amp})`);
           txt(cText, (o.label ? o.label + ' ' : '') + fmtMoney(o.amount * E.smooth(seg(t, .06, .8))));
-          const w = cText.textContent.length * 19 + 50;
-          cRect.setAttribute('x', 540 - w / 2); cRect.setAttribute('width', w);
+          const w = cText.textContent.length * 19 * O.ts + 50 * O.ts;
+          cRect.setAttribute('x', X(540) - w / 2); cRect.setAttribute('width', w);
           counter.setAttribute('opacity', t > .04 ? 1 : 0);
           A.set(o.fromX, s, 2 * Math.sin(seg(t, .05, .25) * Math.PI), fA);
           if (B) B.set(o.toX, s, -2 * Math.sin(seg(t, .5, .7) * Math.PI), fB);
           if (o.extra) o.extra(S, t, P);
         },
         anchors: () => [last, PILE],
-        guidePath: P => qd(A.hand(o.fromX, P.scale, 0, fA), [PILE[0], 620], 100 * P.amp),
+        guidePath: P => qd(A.hand(o.fromX, P.scale, 0, fA), [PILE[0], Yg(620)], 100 * P.amp),
       };
     },
   });
@@ -486,11 +492,11 @@ function actStamp(o) {
     build(S) {
       const C = S.chars[o.caster], W = o.watch ? S.chars[o.watch] : null;
       const fC = faceFlip(C.C, 1);
-      propTable(el('g', { transform: 'translate(540,600)' }, S.below), 320);
+      propTable(el('g', { transform: `translate(${X(540)},${Yg(600)}) scale(${O.os})` }, S.below), 320);
       const doc = propDoc(el('g', {}, S.above), o.docTitle);
-      const imprint = propImprint(el('g', { opacity: 0, transform: 'translate(540,545)' }, S.above), o.imprintText);
+      const imprint = propImprint(el('g', { opacity: 0, transform: `translate(${X(540)},${Yg(545)}) scale(${O.os})` }, S.above), o.imprintText);
       const stamp = STAMP_FNS[o.prop || 'stamp'](el('g', {}, S.above));
-      const ring = el('circle', { cx: 540, cy: 545, r: 20, fill: 'none', stroke: PAL.seal, 'stroke-width': 6, opacity: 0 }, S.fx);
+      const ring = el('circle', { cx: X(540), cy: Yg(545), r: 20, fill: 'none', stroke: PAL.seal, 'stroke-width': 6, opacity: 0 }, S.fx);
       const dust = Array.from({ length: 6 }, () => el('circle', { r: 4.5, fill: '#b7a687', opacity: 0 }, S.fx));
       const done = chip(el('g', { opacity: 0 }, S.fx), 540, 370, o.chipText, o.chipColor || PAL.seal, 22);
       return {
@@ -502,29 +508,29 @@ function actStamp(o) {
           else if (t < .6) y = 545;
           else y = lerp(545, 320, ease(P, seg(t, .6, .85)));
           stamp.setAttribute('opacity', 1 - seg(t, .85, 1));
-          stamp.setAttribute('transform', `translate(540,${y})`);
+          stamp.setAttribute('transform', `translate(${X(540)},${Yg(y)}) scale(${O.os})`);
           const ru = seg(t, .38, .62);
-          ring.setAttribute('r', lerp(20, 150 * P.amp, E.smooth(ru)));
+          ring.setAttribute('r', lerp(20, 150 * P.amp, E.smooth(ru)) * O.os);
           ring.setAttribute('opacity', ru > 0 ? (1 - ru) * .8 : 0);
           const dx = shake(t, .38, .25, 6 * P.amp);
-          doc.setAttribute('transform', `translate(${540 + dx},520) rotate(${-3 + shake(t, .38, .25, 2 * P.amp)}) scale(.9)`);
+          doc.setAttribute('transform', `translate(${X(540) + dx * O.os},${Yg(520)}) rotate(${-3 + shake(t, .38, .25, 2 * P.amp)}) scale(${.9 * O.os})`);
           imprint.setAttribute('opacity', seg(t, .38, .5));
           const du = seg(t, .38, .6);
           dust.forEach((d, i) => {
             const ang = (i / 6) * Math.PI * 2;
             d.setAttribute('opacity', du > 0 && du < 1 ? (1 - du) * .85 : 0);
-            d.setAttribute('cx', 540 + Math.cos(ang) * lerp(16, 95 * P.amp, du));
-            d.setAttribute('cy', 545 + Math.sin(ang) * lerp(8, 40, du));
+            d.setAttribute('cx', X(540) + Math.cos(ang) * lerp(16, 95 * P.amp, du) * O.os);
+            d.setAttribute('cy', Yg(545) + Math.sin(ang) * lerp(8, 40, du) * O.os);
           });
           const dp = seg(t, .78, .9);
           done.setAttribute('opacity', dp);
-          done.setAttribute('transform', `translate(0,${(1 - E.back(dp)) * -24})`);
+          done.setAttribute('transform', `translate(0,${(1 - E.back(dp)) * -24 * O.ts})`);
           const lean = 3 * Math.sin(seg(t, .38, .55) * Math.PI);
           C.set(o.casterX, s, lean, fC);
           if (W) W.set(o.watchX || 760, s, -lean, W.C.face === -1 ? 1 : -1);
         },
-        anchors: () => [[540, 545]],
-        guidePath: () => 'M540,330 L540,545',
+        anchors: () => [[X(540), Yg(545)]],
+        guidePath: () => `M${X(540)},${Yg(330)} L${X(540)},${Yg(545)}`,
       };
     },
   });
@@ -543,7 +549,7 @@ function actFocus(o) {
       if (o.kind === 'doc') {
         prop = propDoc(el('g', { opacity: 0 }, S.above), o.title);
         lines = (o.lines || []).map((s, i) =>
-          txt(el('text', { x: 540, y: 452 + i * 26, 'text-anchor': 'middle', 'font-size': 15, 'font-weight': 600, fill: PAL.ink, opacity: 0 }, S.above), s));
+          txt(el('text', { x: X(540), y: Yg(452 + i * 26), 'text-anchor': 'middle', 'font-size': 15 * O.os, 'font-weight': 600, fill: PAL.ink, opacity: 0 }, S.above), s));
       } else if (o.kind === 'book') prop = propLawBook(el('g', { opacity: 0 }, S.above));
       else if (o.kind === 'ledger') prop = propLedger(el('g', { opacity: 0 }, S.above));
       const spark = symbolSpark(el('g', { opacity: 0 }, S.fx));
@@ -555,20 +561,20 @@ function actFocus(o) {
           if (prop) {
             prop.setAttribute('opacity', up);
             const sc = (o.kind === 'doc' ? .95 : 1.25) * (.8 + .2 * up);
-            prop.setAttribute('transform', `translate(540,${lerp(560, 470, up)}) scale(${sc})`);
+            prop.setAttribute('transform', `translate(${X(540)},${Yg(lerp(560, 470, up))}) scale(${sc * O.os})`);
           }
           lines.forEach((n, i) => n.setAttribute('opacity', seg(t, .3 + i * .12, .42 + i * .12)));
           const sp = seg(t, .7, .85);
-          const hx = o.kind === 'chip' ? C.hand(o.casterX, s, 0, fC) : [540, 400];
+          const hx = o.kind === 'chip' ? C.hand(o.casterX, s, 0, fC) : [X(540), Yg(400)];
           spark.setAttribute('opacity', Math.sin(sp * Math.PI));
-          spark.setAttribute('transform', `translate(${hx[0]},${hx[1] - 40}) scale(${.5 + .7 * Math.sin(sp * Math.PI)}) rotate(${sp * 90})`);
+          spark.setAttribute('transform', `translate(${hx[0]},${hx[1] - 40 * O.os}) scale(${(.5 + .7 * Math.sin(sp * Math.PI)) * O.os}) rotate(${sp * 90})`);
           const dp = seg(t, .75, .9);
           done.setAttribute('opacity', dp);
-          done.setAttribute('transform', `translate(0,${(1 - E.back(dp)) * -24})`);
+          done.setAttribute('transform', `translate(0,${(1 - E.back(dp)) * -24 * O.ts})`);
           C.set(o.casterX, s, 3 * Math.sin(seg(t, .1, .4) * Math.PI), fC);
           if (W) W.set(o.watchX || 760, s, -2 * Math.sin(seg(t, .3, .6) * Math.PI), W.C.face === -1 ? 1 : -1);
         },
-        anchors: () => [[540, 470]],
+        anchors: () => [[X(540), Yg(470)]],
         guidePath: () => '',
       };
     },
@@ -596,8 +602,8 @@ function actMovePair(o) {
           A.set(xa, s, o.leanA || 0, fA);
           B.set(xb + step, s, o.leanB || 0, fB, .8 * g, 1 - .2 * g);
         },
-        anchors: () => [[xa, 542], [xb, 542]],
-        guidePath: () => `M${o.a0},660 L${o.a1},660 M${o.b0},660 L${o.b1},660`,
+        anchors: () => [[X(xa), Yg(542)], [X(xb), Yg(542)]],
+        guidePath: () => `M${X(o.a0)},${Yg(660)} L${X(o.a1)},${Yg(660)} M${X(o.b0)},${Yg(660)} L${X(o.b1)},${Yg(660)}`,
       };
     },
   });
@@ -627,14 +633,14 @@ function actLock(o) {
           else if (t < .55) { const v = ease(P, seg(t, .35, .55)); pos = qbez(ah, bh, 80 * P.amp, v); }
           else pos = bh;
           cuffs.setAttribute('opacity', seg(t, .3, .4));
-          cuffs.setAttribute('transform', `translate(${pos[0]},${pos[1]}) scale(${1 + .1 * Math.sin(seg(t, .55, .7) * Math.PI)})`);
+          cuffs.setAttribute('transform', `translate(${pos[0]},${pos[1]}) scale(${(1 + .1 * Math.sin(seg(t, .55, .7) * Math.PI)) * O.os})`);
           const sp = seg(t, .55, .7);
           spark.setAttribute('opacity', Math.sin(sp * Math.PI));
-          spark.setAttribute('transform', `translate(${bh[0]},${bh[1] - 30}) scale(${.5 + .6 * Math.sin(sp * Math.PI)})`);
+          spark.setAttribute('transform', `translate(${bh[0]},${bh[1] - 30 * O.os}) scale(${(.5 + .6 * Math.sin(sp * Math.PI)) * O.os})`);
           const g = seg(t, .6, .9);
           const dp = seg(t, .75, .9);
           done.setAttribute('opacity', dp);
-          done.setAttribute('transform', `translate(0,${(1 - E.back(dp)) * -24})`);
+          done.setAttribute('transform', `translate(0,${(1 - E.back(dp)) * -24 * O.ts})`);
           A.set(xa, s, 2 * u, fA);
           B.set(o.b0, s, 8 * g, fB, .8 * g, 1 - .15 * g);
         },
@@ -656,7 +662,7 @@ function actJoint(o) {
       const M = o.mid ? S.chars[o.mid] : null;
       const fA = faceFlip(A.C, 1), fB = faceFlip(B.C, -1);
       const seal = o.mode === 'seal' ? propCompanySeal(el('g', {}, S.above)) : null;
-      if (o.mode === 'seal') propTable(el('g', { transform: 'translate(540,600)' }, S.below), 260);
+      if (o.mode === 'seal') propTable(el('g', { transform: `translate(${X(540)},${Yg(600)}) scale(${O.os})` }, S.below), 260);
       const spark = symbolSpark(el('g', { opacity: 0 }, S.fx));
       const done = chip(el('g', { opacity: 0 }, S.fx), 540, 330, o.chipText, o.chipColor || PAL.jade, 22);
       let xa = o.a0, xb = o.b0;
@@ -670,16 +676,16 @@ function actJoint(o) {
           A.set(xa + tr, s, lean, fA);
           B.set(xb - tr, s, -lean, fB);
           if (M) M.set(540, s * .95, 0, 1, 0, .9);
-          if (seal) seal.setAttribute('transform', `translate(${540 + tr},545) scale(1.2)`);
+          if (seal) seal.setAttribute('transform', `translate(${X(540 + tr)},${Yg(545)}) scale(${1.2 * O.os})`);
           const sp = seg(t, .55, .75);
           spark.setAttribute('opacity', Math.sin(sp * Math.PI));
-          spark.setAttribute('transform', `translate(540,${GROUND - 158 * s - (seal ? 60 : 30)}) scale(${.5 + .8 * Math.sin(sp * Math.PI)}) rotate(${sp * 90})`);
+          spark.setAttribute('transform', `translate(${X(540)},${GROUND - 158 * s * O.cs - (seal ? 60 : 30) * O.os}) scale(${(.5 + .8 * Math.sin(sp * Math.PI)) * O.os}) rotate(${sp * 90})`);
           const dp = seg(t, .7, .88);
           done.setAttribute('opacity', dp);
-          done.setAttribute('transform', `translate(0,${(1 - E.back(dp)) * -24})`);
+          done.setAttribute('transform', `translate(0,${(1 - E.back(dp)) * -24 * O.ts})`);
         },
-        anchors: P => [[540, GROUND - 158 * P.scale]],
-        guidePath: () => `M${o.a0},660 L${o.a1},660 M${o.b0},660 L${o.b1},660`,
+        anchors: P => [[X(540), GROUND - 158 * P.scale * O.cs]],
+        guidePath: () => `M${X(o.a0)},${Yg(660)} L${X(o.a1)},${Yg(660)} M${X(o.b0)},${Yg(660)} L${X(o.b1)},${Yg(660)}`,
       };
     },
   });
@@ -699,19 +705,19 @@ function actGray(o) {
         update(t, P) {
           const s = P.scale;
           const u = E.inQuad(seg(t, .05, .3));
-          tag.setAttribute('transform', `translate(0,${lerp(160, GROUND - 330 * s, u) - 200})`);
+          tag.setAttribute('transform', `translate(0,${lerp(Ys(160), GROUND - 330 * s * O.cs, u) - Ys(200)})`);
           const g = seg(t, .3, .7);
           C.set(540, s, 8 * g, 1, .85 * g, 1 - .2 * g);
           const du = seg(t, .3, .55);
           dust.forEach((d, i) => {
             const ang = (i / 6) * Math.PI * 2;
             d.setAttribute('opacity', du > 0 && du < 1 ? (1 - du) * .8 : 0);
-            d.setAttribute('cx', 540 + Math.cos(ang) * lerp(14, 80 * P.amp, du));
-            d.setAttribute('cy', GROUND - 320 * s + Math.sin(ang) * lerp(6, 30, du));
+            d.setAttribute('cx', X(540) + Math.cos(ang) * lerp(14, 80 * P.amp, du) * O.os);
+            d.setAttribute('cy', GROUND - 320 * s * O.cs + Math.sin(ang) * lerp(6, 30, du) * O.os);
           });
         },
-        anchors: () => [[540, 370]],
-        guidePath: () => 'M540,160 L540,370',
+        anchors: () => [[X(540), Yg(370)]],
+        guidePath: () => `M${X(540)},${Ys(160)} L${X(540)},${Yg(370)}`,
       };
     },
   });
@@ -739,13 +745,13 @@ function actCustody(o) {
           W.set(760, s, -3 * Math.sin(seg(t, .5, .8) * Math.PI), 1);
           const dp = seg(t, .65, .8);
           done.setAttribute('opacity', dp);
-          done.setAttribute('transform', `translate(0,${(1 - E.back(dp)) * -24})`);
+          done.setAttribute('transform', `translate(0,${(1 - E.back(dp)) * -24 * O.ts})`);
           const sp = seg(t, .7, .85);
           spark.setAttribute('opacity', Math.sin(sp * Math.PI));
-          spark.setAttribute('transform', `translate(${xk},${GROUND - 220 * s}) scale(${.5 + .6 * Math.sin(sp * Math.PI)})`);
+          spark.setAttribute('transform', `translate(${X(xk)},${GROUND - 220 * s * O.cs}) scale(${(.5 + .6 * Math.sin(sp * Math.PI)) * O.os})`);
         },
-        anchors: () => [[xk, 542]],
-        guidePath: () => `M540,660 L${o.toX},660`,
+        anchors: () => [[X(xk), Yg(542)]],
+        guidePath: () => `M${X(540)},${Yg(660)} L${X(o.toX)},${Yg(660)}`,
       };
     },
   });

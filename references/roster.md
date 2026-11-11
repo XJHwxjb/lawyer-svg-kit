@@ -1,6 +1,7 @@
 # 人物与动作总表（选角查这一份）
 
 > 新造人物/动作后必须回写本表。id 即代码键名，预览台 `__kit.setAction(id)` / `__kit.setPortrait(who, variant)` 可直接调用。
+> 全库人物与动作均支持双画幅：`__kit.setOrientation('land')` 横屏 16:9 / `('port')` 竖屏 9:16，坐标自动重排（契约见 studio.md §8）。
 
 ## 1. 人物库 · 16 基础剪影 + 14 变体
 

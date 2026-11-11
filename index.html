@@ -16,7 +16,7 @@
     </svg>
     <div>
       <h1>法律视频 · 人物动作素材库</h1>
-      <span class="ver">SVG KIT v0.2 · 16 人物 · 36 动作 · 纯时间函数驱动</span>
+      <span class="ver">SVG KIT v0.3 · 16 人物 · 36 动作 · 双画幅 16:9 / 9:16</span>
     </div>
   </div>
   <div class="topRight">
@@ -38,12 +38,23 @@
     <div class="stageHead">
       <span id="catChip" class="catChip">物件交接</span>
       <strong id="actName">文书递接</strong>
+      <div class="orientToggle" role="tablist" aria-label="画幅">
+        <button id="orientLand" class="orientBtn on" role="tab" aria-selected="true">
+          <svg viewBox="0 0 20 14" aria-hidden="true"><rect x="1" y="1" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+          横屏<span class="ratio">16:9</span>
+        </button>
+        <button id="orientPort" class="orientBtn" role="tab" aria-selected="false">
+          <svg viewBox="0 0 20 14" aria-hidden="true"><rect x="5" y="0.5" width="10" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+          竖屏<span class="ratio">9:16</span>
+        </button>
+      </div>
+      <span id="canvasBadge" class="canvasBadge">1920 × 1080</span>
       <span id="phaseChip" class="phaseChip"></span>
     </div>
     <div id="variantRow" class="chipRow" hidden></div>
     <div id="charActs" class="chipRow" hidden></div>
     <div class="stageBox">
-      <svg id="stage" viewBox="0 60 1080 740" preserveAspectRatio="xMidYMid meet" font-family="'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif">
+      <svg id="stage" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid meet" font-family="'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif">
         <defs>
           <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
             <stop id="bgStop1" offset="0" stop-color="#f6ecd9"/>
@@ -62,19 +73,19 @@
             <feComponentTransfer><feFuncA type="linear" slope=".07"/></feComponentTransfer>
           </filter>
         </defs>
-        <rect id="bgRect" width="1080" height="800" fill="url(#bgGrad)"/>
-        <rect id="groundRect" y="700" width="1080" height="100" fill="#d9c9a8"/>
-        <line id="groundLine" x1="0" y1="700" x2="1080" y2="700" stroke="#b7a687" stroke-width="2"/>
-        <text id="stageVert" x="66" y="104" writing-mode="vertical-rl" font-size="25" font-weight="700" letter-spacing="7" fill="#b7a687" opacity=".8">法律视频 · 人物动作素材库</text>
-        <text id="stageNum" x="1014" y="238" text-anchor="end" font-size="150" font-weight="900" fill="#b7a687" opacity=".14">01</text>
+        <rect id="bgRect" width="1920" height="1080" fill="url(#bgGrad)"/>
+        <rect id="groundRect" y="945" width="1920" height="135" fill="#d9c9a8"/>
+        <line id="groundLine" x1="0" y1="945" x2="1920" y2="945" stroke="#b7a687" stroke-width="2"/>
+        <text id="stageVert" x="117" y="96" writing-mode="vertical-rl" font-size="28.8" font-weight="700" letter-spacing="7" fill="#b7a687" opacity=".8">法律视频 · 人物动作素材库</text>
+        <text id="stageNum" x="1803" y="259" text-anchor="end" font-size="172.5" font-weight="900" fill="#b7a687" opacity=".14">01</text>
         <g id="bgFurn"></g>
         <g id="sceneRoot"></g>
         <g id="guidesLayer" opacity="0">
-          <path d="M0,700 H1080 M540,80 V700" stroke="#4d8fd1" stroke-width="1.5" stroke-dasharray="6 8" opacity=".45" fill="none"/>
+          <path id="guideBase" d="M0,945 H1920 M960,-15 V945" stroke="#4d8fd1" stroke-width="1.5" stroke-dasharray="6 8" opacity=".45" fill="none"/>
           <path id="guidePath" fill="none" stroke="#4d8fd1" stroke-width="2.5" stroke-dasharray="10 8" opacity=".8"/>
           <g id="guideCross" stroke="#c25062" stroke-width="2.5" fill="none" opacity=".9"></g>
         </g>
-        <rect width="1080" height="800" filter="url(#grain)" opacity=".5" pointer-events="none"/>
+        <rect id="grainRect" width="1920" height="1080" filter="url(#grain)" opacity=".5" pointer-events="none"/>
       </svg>
     </div>
     <div class="stageFoot">
@@ -145,7 +156,7 @@
         <button id="exportJsonBtn" class="wide">导出参数 JSON</button>
       </div>
     </div>
-    <p class="hint">空格 播放/暂停 · ← → 逐帧 · 时间轴可拖动 scrub<br>刻度标记 = 音效事件点</p>
+    <p class="hint">空格 播放/暂停 · ← → 逐帧 · O 切换画幅 · 时间轴可拖动 scrub<br>刻度标记 = 音效事件点</p>
   </aside>
 </main>
 

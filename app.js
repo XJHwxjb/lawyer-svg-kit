@@ -7,6 +7,7 @@ const stage = $('stage');
 const P = {
   speed: 1, ease: 'smooth', amp: 1, scale: 1.12, outline: 6, shadow: 10,
   theme: 'cream', bg: 'paper', guides: false, loop: true, sound: true, dur: 4.6,
+  orient: 'land',
 };
 const DEFAULTS = { ...P };
 
@@ -138,6 +139,46 @@ function markLibs() {
 function setMode(m) {
   if (mode === m) return;
   if (m === 'chars') setPortrait(lastChar, lastVariant);
+  else setAction(lastActId || ACTIONS[0].id);
+}
+
+/* ---------- 画幅切换：横屏 16:9 / 竖屏 9:16 ---------- */
+function applyCanvas() {
+  stage.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  $('bgRect').setAttribute('width', W);
+  $('bgRect').setAttribute('height', H);
+  $('groundRect').setAttribute('y', GROUND);
+  $('groundRect').setAttribute('width', W);
+  $('groundRect').setAttribute('height', H - GROUND);
+  $('groundLine').setAttribute('x2', W);
+  $('groundLine').setAttribute('y1', GROUND);
+  $('groundLine').setAttribute('y2', GROUND);
+  $('grainRect').setAttribute('width', W);
+  $('grainRect').setAttribute('height', H);
+  $('guideBase').setAttribute('d', `M0,${GROUND} H${W} M${X(540)},${Ys(100)} V${GROUND}`);
+  const v = $('stageVert');
+  v.setAttribute('x', X(66));
+  v.setAttribute('y', Math.max(96, H * .085));
+  v.setAttribute('font-size', 25 * O.ts);
+  const n = $('stageNum');
+  n.setAttribute('x', W - X(66));
+  n.setAttribute('y', H * .24);
+  n.setAttribute('font-size', 150 * O.os);
+  $('canvasBadge').textContent = `${W} × ${H}`;
+  $('orientLand').classList.toggle('on', O.id === 'land');
+  $('orientPort').classList.toggle('on', O.id === 'port');
+  $('orientLand').setAttribute('aria-selected', O.id === 'land');
+  $('orientPort').setAttribute('aria-selected', O.id === 'port');
+  document.querySelector('.stageBox').style.aspectRatio = `${W} / ${H}`;
+}
+
+function setOrient(id) {
+  if (O.id === id) return;
+  setOrientation(id);
+  P.orient = id;
+  applyCanvas();
+  applyStyle();
+  if (mode === 'chars') setPortrait(lastChar, lastVariant);
   else setAction(lastActId || ACTIONS[0].id);
 }
 
@@ -350,6 +391,8 @@ function syncUI() {
 function bind() {
   $('modeActs').onclick = () => { audio(); setMode('acts'); };
   $('modeChars').onclick = () => { audio(); setMode('chars'); };
+  $('orientLand').onclick = () => { audio(); setOrient('land'); };
+  $('orientPort').onclick = () => { audio(); setOrient('port'); };
   $('playBtn').onclick = () => { audio(); if (!playing && t >= P.dur) t = 0; playing = !playing; };
   $('restartBtn').onclick = () => { audio(); t = 0; playing = true; lastFrame = -1; };
   $('loopBtn').onclick = () => { P.loop = !P.loop; syncUI(); };
@@ -373,7 +416,7 @@ function bind() {
   $('theme').onchange = e => { P.theme = e.target.value; applyStyle(); };
   $('bg').onchange = e => { P.bg = e.target.value; applyStyle(); };
   $('guides').onchange = e => { P.guides = e.target.checked; };
-  $('resetBtn').onclick = () => { Object.assign(P, DEFAULTS, { dur: act.dur }); applyStyle(); syncUI(); };
+  $('resetBtn').onclick = () => { Object.assign(P, DEFAULTS, { dur: act.dur }); setOrient(P.orient); applyStyle(); syncUI(); };
   $('randBtn').onclick = () => {
     const pick = a => a[Math.floor(Math.random() * a.length)];
     P.ease = pick(['smooth', 'spring', 'back', 'linear']);
@@ -383,6 +426,7 @@ function bind() {
     P.theme = pick(Object.keys(THEMES));
     P.bg = pick(['paper', 'home', 'court', 'register']);
     t = 0; playing = true;
+    setOrient(pick(['land', 'port']));
     applyStyle(); syncUI();
   };
   $('exportSvgBtn').onclick = exportSVG;
@@ -392,6 +436,7 @@ function bind() {
     if (e.code === 'Space') { e.preventDefault(); $('playBtn').click(); }
     if (e.code === 'ArrowRight') { t = Math.min(t + 1 / 30, P.dur); render(); }
     if (e.code === 'ArrowLeft') { t = Math.max(t - 1 / 30, 0); render(); }
+    if (e.code === 'KeyO') setOrient(O.id === 'land' ? 'port' : 'land');
   });
 }
 
@@ -405,24 +450,28 @@ function download(name, blob) {
 function exportSVG() {
   const clone = stage.cloneNode(true);
   clone.setAttribute('xmlns', NS);
-  clone.setAttribute('width', W); clone.setAttribute('height', 740);
+  clone.setAttribute('width', W); clone.setAttribute('height', H);
+  clone.setAttribute('viewBox', `0 0 ${W} ${H}`);
   clone.querySelectorAll('[style]').forEach(n => {
     if (n.style.filter) n.setAttribute('style', `filter:${n.style.filter}`);
   });
   const src = new XMLSerializer().serializeToString(clone);
-  download(`svg-kit-${act.id}-f${Math.round(t * 30)}.svg`, new Blob([src], { type: 'image/svg+xml' }));
+  download(`svg-kit-${act.id}-${O.id}-f${Math.round(t * 30)}.svg`, new Blob([src], { type: 'image/svg+xml' }));
 }
 function exportJSON() {
   const data = {
     action: act.id, category: act.cat || null, time: +t.toFixed(3), frame: Math.round(t * 30),
+    orientation: { id: O.id, label: O.label, W, H, GROUND, os: O.os, vs: O.vs, cs: O.cs, ts: O.ts },
     params: { ...P }, events: act.events, phases: act.phases, cast: act.cast || null,
   };
-  download(`svg-kit-${act.id}-params.json`, new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+  download(`svg-kit-${act.id}-${O.id}-params.json`, new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
 }
 
 /* ---------- 启动 ---------- */
+setOrientation(P.orient);
 buildLibs();
 bind();
+applyCanvas();
 applyStyle();
 setAction(ACTIONS[0].id);
 requestAnimationFrame(tick);
@@ -435,7 +484,10 @@ window.__kit = {
   setAction,
   setPortrait,
   setMode,
+  setOrientation: setOrient,
   get time() { return t; },
   get action() { return act.id; },
   get mode() { return mode; },
+  get orientation() { return O.id; },
+  get canvas() { return { W, H, GROUND }; },
 };

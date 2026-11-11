@@ -30,6 +30,9 @@ body {
 }
 button { font-family: inherit; cursor: pointer; }
 :focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
 
 .top {
   height: 58px; display: flex; align-items: center; justify-content: space-between;
@@ -98,11 +101,28 @@ button { font-family: inherit; cursor: pointer; }
 .pill.act:hover { background: rgba(77, 143, 209, .14); color: var(--azure); }
 
 .stageWrap { display: flex; flex-direction: column; min-width: 0; min-height: 0; gap: 10px; }
-.stageHead { display: flex; align-items: center; gap: 10px; }
+.stageHead { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .catChip { padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 800; color: #fff8ec; }
 .stageHead strong { font-size: 18px; font-weight: 800; letter-spacing: 1px; }
+.orientToggle {
+  display: flex; gap: 4px; margin-left: auto; padding: 3px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+}
+.orientBtn {
+  display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px;
+  border: 1px solid transparent; background: transparent; color: var(--mut);
+  font-size: 12px; font-weight: 800; transition: all .15s;
+}
+.orientBtn svg { width: 18px; height: 13px; flex: none; }
+.orientBtn .ratio { font-size: 10px; opacity: .7; font-family: ui-monospace, Consolas, monospace; }
+.orientBtn:hover { color: var(--cream); }
+.orientBtn.on { background: var(--panel2); border-color: var(--amber); color: var(--amber); box-shadow: 0 0 10px rgba(235, 166, 63, .18); }
+.canvasBadge {
+  font-family: ui-monospace, Consolas, monospace; font-size: 11px; color: var(--mut);
+  border: 1px dashed var(--line2); padding: 3px 9px; border-radius: 999px; white-space: nowrap;
+}
 .phaseChip {
-  margin-left: auto; padding: 4px 12px; border-radius: 999px;
+  margin-left: 10px; padding: 4px 12px; border-radius: 999px;
   background: var(--panel2); border: 1px solid var(--line); color: var(--amber);
   font-size: 12px; font-weight: 700; min-width: 86px; text-align: center;
 }

@@ -9,7 +9,9 @@
  *
  * 产出：
  *   frames/%05d.jpg    全局帧序列（含交叉淡化帧），compose.sh 直接读取
- *   events.json        音效事件绝对秒点 [{time, sfx, shot}]，mix_sfx.py 读取
+ *   events.json        音效事件绝对秒点 [{time, sfx, shot}]，mix_sound.py 读取
+ *                      （含每个镜头边界的自动转场 whoosh，保证每镜头 ≥1 音效）
+ *   sound.json         声音配置（BGM mood/bpm/sections + 总时长），make_bgm.py 读取
  *   film.info.json     时间轴/镜头元数据（验收与对轨用）
  *
  * 与旧版 flash 工程的区别（修掉的坑）：
@@ -225,11 +227,19 @@ async function main() {
     /* 3) 元数据与音效事件（绝对秒点 = (起始帧 + at*(帧数-1)) / fps） */
     if (LIMIT >= info.shots.length) {
       const events = [];
-      for (const s of info.shots)
+      for (const s of info.shots) {
         for (const e of s.events || [])
           events.push({ time: +((s.startFrame + e.at * (s.frames - 1)) / FPS).toFixed(3), sfx: e.sfx, shot: s.id });
+        const cfg = FILM.shots[s.index] || {};
+        const muted = Array.isArray(cfg.sfx) && cfg.sfx.length === 0;
+        if (!muted)
+          events.push({ time: +Math.max(0, s.startFrame / FPS - 0.2).toFixed(3), sfx: 'whoosh', shot: s.id, auto: 'transition' });
+      }
       events.sort((a, b) => a.time - b.time);
       fs.writeFileSync(path.join(ROOT, 'events.json'), JSON.stringify(events, null, 2));
+      const sound = Object.assign({ bgm: 'auto', mood: 'serious', bpm: 0, sections: [] }, FILM.sound || {});
+      sound.dur = +(info.totalFrames / FPS).toFixed(3);
+      fs.writeFileSync(path.join(ROOT, 'sound.json'), JSON.stringify(sound, null, 2));
       fs.writeFileSync(path.join(ROOT, 'film.info.json'), JSON.stringify(info, null, 2));
       const files = fs.readdirSync(FRAMES).filter(f => f.endsWith('.jpg')).length;
       console.log('FRAME_SEQUENCE ' + JSON.stringify({ total: info.totalFrames, files, events: events.length }));

@@ -1,4 +1,4 @@
-# pipeline/ — 零依赖整片模板（v0.5）
+# pipeline/ — 零依赖整片模板（v0.6）
 
 把律师口播变成成片的**可照抄流水线**：`film.config.js 配置 → render.cjs 逐帧截图 → compose.sh 合成`。
 不用 Remotion、不用 npm install，只需要本机 **Edge/Chrome + Node ≥ 22 + ffmpeg + python3**。
@@ -15,7 +15,7 @@ Remotion 路线（references/remotion.md）功能等价，二选一，不要混�
 | 镜头之间硬切 | film.html 双缓冲交叉淡化（`transition` 帧数），帧级确定性 |
 | `hold<1` 导致结尾冻结 | t01 = local/(frames-1)，最后一帧恰好完成，禁止 hold 参数 |
 | 数字一闪而过 / 累加合计乱跳 | 配置层约束 + delivery-qa.md 的停帧抽查（见 SKILL.md §0.5） |
-| 没有音效 | events.json 自动产出 + make_sfx.py/mix_sfx.py 混音 |
+| 没有音效/干口播 | 声音三层：events.json（含自动转场 whoosh）+ make_bgm.py BGM + mix_sound.py 自动 ducking，见 references/sound.md |
 | 分镜文档与代码漂移 | 单一 STORYBOARD.md → film.config.js 一一对应 |
 
 ## 0. 前置检查
@@ -36,7 +36,7 @@ python --version   # 3.8+；音效脚本用
 ```
 来自 Skill 根目录：  kit.js  camera.js  actions.js
 来自 pipeline/：     film.html  film.config.js  case-actions.js  render.cjs  compose.sh
-来自 scripts/：      make_sfx.py  mix_sfx.py   → 放到工程的 scripts/ 子目录
+来自 scripts/：      make_sfx.py  make_bgm.py  mix_sound.py   → 放到工程的 scripts/ 子目录
 ```
 
 复制后工程结构：
@@ -46,7 +46,7 @@ python --version   # 3.8+；音效脚本用
 ├── kit.js  camera.js  actions.js        # 资产库（只读，不改）
 ├── film.html  film.config.js  case-actions.js
 ├── render.cjs  compose.sh
-├── scripts/make_sfx.py  scripts/mix_sfx.py
+├── scripts/make_sfx.py  scripts/make_bgm.py  scripts/mix_sound.py
 ├── voice.wav  captions.ass  person.mp4  # 案件素材（下一步准备）
 └── out/                                 # 成片输出
 ```
@@ -88,7 +88,7 @@ ffmpeg -i captions.srt captions.ass
 
 自定义动作写 case-actions.js（文件内有示例），注册后 `act` 用其 id。
 
-## 4. 生成音效素材（一次即可）
+## 4. 生成声音素材（音效一次即可，BGM 每片自动生成）
 
 ```bash
 python scripts/make_sfx.py --out assets/sfx
@@ -96,6 +96,10 @@ python scripts/make_sfx.py --out assets/sfx
 
 产出 8 个 wav（whoosh/paper/ching/thud/stamp/crack/pop/scratch），全部 ffmpeg 合成，无版权风险。
 想要更高质量的音效可自行替换同名文件（必须有使用权限）。
+
+BGM 由 compose.sh 自动调 `make_bgm.py` 按 `sound.json`（render.cjs 从 film.config.js 的
+`sound` 字段产出）生成：3 种情绪 + 章节分段 + 边界呼吸，纯 Python 合成无版权风险。
+规则与门禁见 [../references/sound.md](../references/sound.md)。
 
 ## 5. 冒烟渲染（先渲 3 个镜头检查）
 
@@ -119,13 +123,14 @@ node render.cjs
 
 ## 7. 合成成片
 
-改 compose.sh 顶部「案件配置」（NAME/ORIENT_LABEL/FPS/VOICE/PERSON/CAPTIONS），然后：
+改 compose.sh 顶部「案件配置」（NAME/ORIENT_LABEL/FPS/VOICE/PERSON/CAPTIONS/BGM），然后：
 
 ```bash
 bash compose.sh
 ```
 
 - 有 events.json + assets/sfx 时自动混音（音效音量 0.5，不压口播）。
+- BGM 默认 auto（程序化生成，间隙 −7dB / 说话 −17dB 自动 ducking）；填路径 = 自有授权音乐；off = 无 BGM（须向用户声明）。
 - PERSON 留空 = 纯动画；填路径 = 左下角 Ø300 真人小圆（循环播放，声音忽略）。
 - 响度统一 loudnorm I=-16；首尾 0.35s/0.6s 淡入淡出。
 - 输出 `out/<NAME>_<ORIENT_LABEL>.mp4`——文件名必须与配置一致，别手改 OUT。
@@ -137,6 +142,8 @@ bash compose.sh
 ```bash
 # 冻结门禁：任何 ≥0.5s 的静止段都要解释（合法静止只有结尾淡出前）
 ffmpeg -i out/成片.mp4 -vf freezedetect=n=-60dB:d=0.5 -f null - 2>&1 | grep freeze
+# 声音连续性门禁：句间不应有静音段（BGM 连续铺设）
+ffmpeg -i out/成片.mp4 -af silencedetect=n=-40dB:d=0.4 -f null - 2>&1 | grep -c silence_start
 # 时长/分辨率核对
 ffprobe -v error -show_entries format=duration:stream=width,height -of json out/成片.mp4
 ```
@@ -158,3 +165,4 @@ ffprobe -v error -show_entries format=duration:stream=width,height -of json out/
 | 字幕压到真人小圆 | captions.ass 的 MarginV 加到 ≥ 360 |
 | 渲染很慢 | 正常：1080p 约 3–8 帧/秒。900 帧自动重启浏览器；可断点续渲 |
 | 合成极慢/画面卡在约 1 秒 | 个别 ffmpeg 构建的 aac 在"纯数字静音+衰减尾音"上掉进 denormal 浮点陷阱（慢约百倍）。compose.sh 已混入 -86dBFS 不可闻抖动噪声消除；自改音频链路时务必保留那路 amix |
+| 成片干巴巴/句间全静音 | 音轨只 map 了原声（自建引擎常见）。按 references/sound.md 引擎无关强制补 make_bgm + mix_sound 链路，音轨用 mixed.wav |

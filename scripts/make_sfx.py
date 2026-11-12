@@ -11,7 +11,7 @@
     pop     气泡/出现      scratch 书写/划动
 
 全部由 lavfi 信号源合成，不含任何第三方素材。想要更高质量的音效，
-用有使用权限的同名 wav 覆盖即可（mix_sfx.py 按文件名取用）。
+用有使用权限的同名 wav 覆盖即可（mix_sound.py 按文件名取用）。
 """
 import argparse
 import shutil

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# compose.sh — 合成成片（pipeline 模板，v0.5）
-# 动画帧序列 + 口播原声 + ASS 字幕 + 音效（可选）+ 真人小圆（可选）
+# compose.sh — 合成成片（pipeline 模板，v0.6）
+# 动画帧序列 + 口播原声 + ASS 字幕 + 声音三层（BGM+音效）+ 真人小圆（可选）
 # 用法：改下方「案件配置」→ bash compose.sh
-# 依赖：ffmpeg / ffprobe（PATH 中）；音效混音另需 python3 + scripts/mix_sfx.py
+# 依赖：ffmpeg / ffprobe（PATH 中）；声音混音另需 python3 + scripts/mix_sound.py
 #
 # 命名规则（必须遵守）：out/<案件名>_<画幅>.mp4，画幅标签 = 横屏16x9 / 竖屏9x16
 # 隐私：本脚本只读本目录素材，不上传任何内容。
@@ -17,6 +17,10 @@ VOICE="voice.wav"          # ← 口播音频（也可填口播视频路径，�
 PERSON=""                  # ← 真人视频路径；留空 = 纯动画成片
 CAPTIONS="captions.ass"    # ← ASS 字幕路径；留空 = 无字幕（文件名用 ASCII，避免转义问题）
 DUR=""                     # ← 成片总秒数；留空 = 自动取 VOICE 时长（推荐）
+BGM="auto"                 # ← auto=程序化生成（无版权风险）| 填路径=自有授权音乐 | off=无BGM（须向用户声明）
+BGM_MOOD="serious"         # ← 无 sound.json 时的兜底基调：serious|steady|upbeat
+BGM_BPM=0                  # ← 0=按 mood 默认(76/96/124)
+BGM_SECTIONS=""            # ← 无 sound.json 时的兜底分段：JSON 字符串或文件路径
 # ────────────────────────────────────────────────────────────────────
 
 OUT="out/${NAME}_${ORIENT_LABEL}.mp4"
@@ -29,15 +33,33 @@ if [ -z "$DUR" ]; then
 fi
 FADEOUT=$(awk "BEGIN{printf \"%.2f\", $DUR-0.6}")
 
-# 音效混音：events.json（render.cjs 产出）+ assets/sfx/*.wav（make_sfx.py 产出）
-# mix_sfx.py 只做 adelay+音量+amix，不做 loudnorm；响度统一在本脚本最后处理。
+# 声音三层混音（v0.6，references/sound.md）：口播 + BGM(自动ducking) + 音效 → mixed.wav
+# mix_sound.py 纯 Python、与渲染引擎无关；不做 loudnorm，响度统一在本脚本最后处理。
 AUDIO="$VOICE"
-if [ -f events.json ] && [ -d assets/sfx ] && [ -f scripts/mix_sfx.py ]; then
-  python scripts/mix_sfx.py --voice "$VOICE" --events events.json --sfx-dir assets/sfx --out mixed.wav
-  AUDIO="mixed.wav"
-  echo "SFX 已混入 mixed.wav"
+BED=""
+if [ "$BGM" = "off" ]; then
+  echo "BGM=off：成片无 BGM，交付时必须向用户声明（references/sound.md）"
+elif [ "$BGM" = "auto" ]; then
+  if [ -f sound.json ]; then
+    python scripts/make_bgm.py --dur "$DUR" --config sound.json --out bgm.wav
+  else
+    SECT_ARGS=()
+    [ -n "$BGM_SECTIONS" ] && SECT_ARGS=(--sections "$BGM_SECTIONS")
+    python scripts/make_bgm.py --dur "$DUR" --mood "$BGM_MOOD" --bpm "$BGM_BPM" "${SECT_ARGS[@]}" --out bgm.wav
+  fi
+  BED="bgm.wav"
 else
-  echo "跳过音效（缺 events.json / assets/sfx / scripts/mix_sfx.py）"
+  if [ ! -f "$BGM" ]; then echo "缺 BGM 文件: $BGM"; exit 1; fi
+  BED="$BGM"
+fi
+if [ -f scripts/mix_sound.py ]; then
+  BED_ARGS=(); [ -n "$BED" ] && BED_ARGS=(--bgm "$BED")
+  EV_ARGS=(); [ -f events.json ] && EV_ARGS=(--events events.json)
+  python scripts/mix_sound.py --voice "$VOICE" --out mixed.wav "${BED_ARGS[@]}" "${EV_ARGS[@]}" --sfx-dir assets/sfx
+  AUDIO="mixed.wav"
+  echo "声音三层已混入 mixed.wav"
+else
+  echo "WARN 缺 scripts/mix_sound.py，只用原声（不满足 v0.6 声音门禁）"
 fi
 
 # 字幕 + 首尾淡入淡出（字幕在淡入淡出之前叠加，避免字幕被一起淡掉）
@@ -81,4 +103,4 @@ else
 fi
 
 echo "OK -> $OUT"
-echo "下一步：按 references/delivery-qa.md 对成片实听实看 + freezedetect 冻结门禁"
+echo "下一步：按 references/delivery-qa.md 实听实看 + freezedetect 冻结门禁 + silencedetect 声音连续性门禁"

@@ -18,7 +18,8 @@ python -m http.server 8734        # 或 npx serve / 任意静态服务
 - 图鉴模式舞台上方两行：**变体**（基础/各变体 pill）、**相关动作**（点 pill 跳回动作库播放）。
 - 舞台头：类别 chip + 名称 + **横屏/竖屏画幅切换**（16:9 / 9:16）+ 画布尺寸徽章 + 阶段 chip；右上大数字 = 库内序号。
 - 画幅是**项目级单选**：切换即选定，自动保存（localStorage `lawyer-kit-orient`），下次打开恢复；重置参数 / 随机风格**不改变**画幅；导出 SVG/JSON 跟随当前画幅。案件只交付选中的那一种画幅。
-- 右栏控件：速度 / 时长 / 缓动(smooth·spring·back·linear) / 幅度 / 缩放 / 描边 / 投影 / 色调(cream·mist·dusk) / 场景底(paper·home·court·register) / 参考线。
+- 右栏控件：速度 / 时长 / 缓动(smooth·spring·back·linear) / 幅度 / 缩放 / 描边 / 投影 / 色调(cream·mist·dusk) / 场景底(paper·home·court·register·office·warehouse) / **镜头(off·push·hold·impact·pan·breathe)** / 参考线。
+- 镜头控件（v0.5）：选择后整个舞台世界（地面+场景底+人物）按 camera.js preset 运动，焦点自动取动作第一个锚点；水印/背景渐变不动。数字镜头验收用 `hold`，敲槌验收用 `impact`。
 - 走带：播放/暂停、重播、循环、时间轴 scrub；刻度 = 音效事件点。
 - 键盘：空格播放暂停，←→ 逐帧（1/30s），**O 切换画幅**。
 - 工具：重置参数 / 随机风格 / 导出当前帧 SVG / 导出参数 JSON。
@@ -30,11 +31,13 @@ __kit.setAction('gavel-drop')      // 切动作（重置时钟并播放）
 __kit.setPortrait('police','traffic') // 切人物肖像（固定剪影+名字chip）
 __kit.setMode('acts' | 'chars')    // 切库模式
 __kit.setOrientation('land' | 'port') // 切画幅：横屏16:9 / 竖屏9:16（重排当前动作/肖像）
+__kit.setCamera('off' | 'push' | 'hold' | 'impact' | 'pan' | 'breathe') // 镜头 preset（v0.5）
 __kit.seek(0.62)                   // 定位到 t01 并暂停（确定性截图用）
 __kit.pause() / __kit.play()
-__kit.params                       // 实时参数对象 P（可直接改 scale/amp/ease/theme/orient…）
+__kit.params                       // 实时参数对象 P（可直接改 scale/amp/ease/theme/camera…）
 __kit.time / __kit.action / __kit.mode
 __kit.orientation                  // 'land' | 'port'
+__kit.camera                       // 当前镜头 preset 名
 __kit.canvas                       // { W, H, GROUND } 当前活画幅
 ```
 
@@ -52,6 +55,28 @@ for (const orient of ['land', 'port']) {
       __kit.setAction(a.id);
       for (const f of [0, .12, .3, .5, .7, .9, 1]) __kit.seek(f);
     } catch (e) { errs.push(orient + '/' + a.id + ': ' + e.message); }
+  }
+}
+// v0.5 追加：镜头 preset × 场景底抽查（每画幅跑一遍）
+for (const orient of ['land', 'port']) {
+  __kit.setOrientation(orient);
+  __kit.setAction('gavel-drop');
+  for (const cam of ['push', 'hold', 'impact', 'pan', 'breathe']) {
+    try {
+      __kit.setCamera(cam);
+      for (const f of [0, .5, 1]) {
+        __kit.seek(f);
+        const tr = document.getElementById('camWorld').getAttribute('transform') || '';
+        if (!/scale\(/.test(tr)) errs.push(orient + '/cam/' + cam + '@' + f + ': transform 缺失');
+      }
+    } catch (e) { errs.push(orient + '/cam/' + cam + ': ' + e.message); }
+  }
+  __kit.setCamera('off');
+  for (const bg of ['home', 'court', 'register', 'office', 'warehouse']) {
+    const sel = document.getElementById('bg');
+    sel.value = bg;
+    sel.dispatchEvent(new Event('change'));
+    if (!document.getElementById('bgFurn').childNodes.length) errs.push(orient + '/bg/' + bg + ': 空');
   }
 }
 return errs;   // 期望 []

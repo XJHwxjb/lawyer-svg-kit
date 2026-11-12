@@ -1,5 +1,7 @@
 # 用口播视频和 SRT 合成：Remotion 起步配方
 
+> **路线选择（v0.5）**：整片合成有两条等价路线——本文件的 Remotion 配方，或零依赖的 [../pipeline/README.md](../pipeline/README.md)（film.config.js → render.cjs → compose.sh，不需要 npm/React）。环境装不了 Remotion 或不熟悉 React 时走 pipeline；二选一，不要混用。两条路线都必须满足 SKILL.md §0.5（数字呈现）与 §0.6（动感最低要求）：每镜头有镜头运动或持续动作、镜头间有转场、场景底不全片 paper、音效实现或声明。Remotion 路线的镜头用 CameraRig（camera.md），数字镜头用"推近→保持"关键帧并给足 ≥1.2s 阅读停留。
+
 本配方帮助 Agent 从视频与带时间戳的字幕搭起**可运行的基底**：真人/头像层 + 逐句字幕层 + 主库动画场景层。它不自动理解法律稿件或生成分镜；场景内容必须按 [workflow.md](workflow.md) 的分镜逐句替换。所有命令在**复制出的案件项目目录**执行，不是 Skill 安装目录；客户素材不得放入公开仓库、Skill 目录或云端。
 
 `source.mp4`、`input.srt`、`lawyer-film.mp4` 是演示名称。先复制并重命名副本，禁止覆盖原件。只有普通稿件没有 SRT 时，先用本地可用工具转写并对照录音校对；没有工具时如实说明，不能编造时间戳。

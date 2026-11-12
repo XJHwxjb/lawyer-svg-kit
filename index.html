@@ -16,7 +16,7 @@
     </svg>
     <div>
       <h1>法律视频 · 人物动作素材库</h1>
-      <span class="ver">SVG KIT v0.4 · 16 人物 · 36 动作 · 双画幅 16:9 / 9:16</span>
+      <span class="ver">SVG KIT v0.5 · 16 人物 · 36 动作 · 双画幅 · 镜头/场景底</span>
     </div>
   </div>
   <div class="topRight">
@@ -74,16 +74,18 @@
           </filter>
         </defs>
         <rect id="bgRect" width="1920" height="1080" fill="url(#bgGrad)"/>
-        <rect id="groundRect" y="945" width="1920" height="135" fill="#d9c9a8"/>
-        <line id="groundLine" x1="0" y1="945" x2="1920" y2="945" stroke="#b7a687" stroke-width="2"/>
         <text id="stageVert" x="117" y="96" writing-mode="vertical-rl" font-size="28.8" font-weight="700" letter-spacing="7" fill="#b7a687" opacity=".8">法律视频 · 人物动作素材库</text>
         <text id="stageNum" x="1803" y="259" text-anchor="end" font-size="172.5" font-weight="900" fill="#b7a687" opacity=".14">01</text>
-        <g id="bgFurn"></g>
-        <g id="sceneRoot"></g>
-        <g id="guidesLayer" opacity="0">
-          <path id="guideBase" d="M0,945 H1920 M960,-15 V945" stroke="#4d8fd1" stroke-width="1.5" stroke-dasharray="6 8" opacity=".45" fill="none"/>
-          <path id="guidePath" fill="none" stroke="#4d8fd1" stroke-width="2.5" stroke-dasharray="10 8" opacity=".8"/>
-          <g id="guideCross" stroke="#c25062" stroke-width="2.5" fill="none" opacity=".9"></g>
+        <g id="camWorld">
+          <rect id="groundRect" y="945" width="1920" height="135" fill="#d9c9a8"/>
+          <line id="groundLine" x1="0" y1="945" x2="1920" y2="945" stroke="#b7a687" stroke-width="2"/>
+          <g id="bgFurn"></g>
+          <g id="sceneRoot"></g>
+          <g id="guidesLayer" opacity="0">
+            <path id="guideBase" d="M0,945 H1920 M960,-15 V945" stroke="#4d8fd1" stroke-width="1.5" stroke-dasharray="6 8" opacity=".45" fill="none"/>
+            <path id="guidePath" fill="none" stroke="#4d8fd1" stroke-width="2.5" stroke-dasharray="10 8" opacity=".8"/>
+            <g id="guideCross" stroke="#c25062" stroke-width="2.5" fill="none" opacity=".9"></g>
+          </g>
         </g>
         <rect id="grainRect" width="1920" height="1080" filter="url(#grain)" opacity=".5" pointer-events="none"/>
       </svg>
@@ -141,6 +143,14 @@
         <select id="bg">
           <option value="paper">白纸纹理</option><option value="home">家中·桌</option>
           <option value="court">法庭·席</option><option value="register">登记处</option>
+          <option value="office">办公室·柜</option><option value="warehouse">仓库·货架</option>
+        </select>
+      </label>
+      <label class="row sel"><span class="lbl">镜头</span>
+        <select id="camera">
+          <option value="off">固定</option><option value="push">全程推进</option>
+          <option value="hold">推近停留</option><option value="impact">冲击</option>
+          <option value="pan">横移</option><option value="breathe">呼吸</option>
         </select>
       </label>
       <label class="row switchRow"><span class="lbl">参考线</span>
@@ -161,6 +171,7 @@
 </main>
 
 <script src="kit.js"></script>
+<script src="camera.js"></script>
 <script src="actions.js"></script>
 <script src="app.js"></script>
 </body>

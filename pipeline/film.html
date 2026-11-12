@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>整片合成页（pipeline 模板）</title>
+<style>html,body{margin:0;padding:0;background:#000;overflow:hidden}svg{display:block}</style>
+</head>
+<body>
+<!-- 整片渲染舞台：两个世界槽 worldA/worldB 做确定性交叉淡化。
+     本页面由 render.cjs 通过 CDP 逐帧驱动，不依赖时钟，不要手动播放。
+     加载顺序固定：kit.js → camera.js → actions.js → case-actions.js → film.config.js → 引擎。 -->
+<svg id="stage" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080"
+     font-family="'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop id="bgStop1" offset="0" stop-color="#f6ecd9"/>
+      <stop id="bgStop2" offset="1" stop-color="#e7dabf"/>
+    </linearGradient>
+    <filter id="cutout" x="-40%" y="-40%" width="180%" height="180%">
+      <feMorphology id="cutDilate" in="SourceAlpha" operator="dilate" radius="6" result="d"/>
+      <feFlood flood-color="#fff6e8" result="f"/>
+      <feComposite in="f" in2="d" operator="in" result="o"/>
+      <feDropShadow id="cutShadow" in="o" dx="0" dy="9" stdDeviation="6" flood-color="#1a1408" flood-opacity=".35" result="s"/>
+      <feMerge><feMergeNode in="s"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope=".07"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <rect id="bgRect" width="1920" height="1080" fill="url(#bgGrad)"/>
+  <g id="worldA"></g>
+  <g id="worldB" opacity="0"></g>
+  <rect id="grainRect" width="1920" height="1080" filter="url(#grain)" opacity=".5" pointer-events="none"/>
+</svg>
+<script src="kit.js"></script>
+<script src="camera.js"></script>
+<script src="actions.js"></script>
+<script src="case-actions.js"></script>
+<script src="film.config.js"></script>
+<script>
+'use strict';
+/* ---------- 整片引擎：全局帧 → 镜头 → 双缓冲交叉淡化 ----------
+   renderFrame(g) 是纯函数：同一 g 永远得到同一画面（可断点续渲、可抽查）。
+   转场 = 每个镜头开头 T 帧内，worldB 显示上一镜头的完成态(t01=1)，
+   worldA 显示当前镜头，透明度按 (local+0.5)/T 线性混合。不用 ffmpeg xfade。 */
+
+if (typeof FILM === 'undefined') throw new Error('缺少 film.config.js（必须定义 const FILM = {...}）');
+if (!FILM.shots || !FILM.shots.length) throw new Error('FILM.shots 不能为空');
+if (FILM.orient !== 'land' && FILM.orient !== 'port') throw new Error("FILM.orient 必须是 'land' 或 'port'");
+
+setOrientation(FILM.orient);
+const FPS = FILM.fps || 30;
+const THEME = FILM.theme || 'cream';
+const TRANS = Math.max(0, FILM.transition == null ? 12 : FILM.transition);
+const T = THEMES[THEME];
+if (!T) throw new Error('未知色调: ' + THEME);
+
+const stage = document.getElementById('stage');
+stage.setAttribute('viewBox', `0 0 ${W} ${H}`);
+stage.setAttribute('width', W); stage.setAttribute('height', H);
+for (const id of ['bgRect', 'grainRect']) {
+  const n = document.getElementById(id);
+  n.setAttribute('width', W); n.setAttribute('height', H);
+}
+document.getElementById('bgStop1').setAttribute('stop-color', T.bg1);
+document.getElementById('bgStop2').setAttribute('stop-color', T.bg2);
+document.getElementById('cutDilate').setAttribute('radius', FILM.outline == null ? 6 : FILM.outline);
+const SHADOW = FILM.shadow == null ? 10 : FILM.shadow;
+document.getElementById('cutShadow').setAttribute('stdDeviation', (SHADOW * .6).toFixed(1));
+document.getElementById('cutShadow').setAttribute('dy', (SHADOW * .9).toFixed(1));
+
+/* 世界槽：cam(镜头层) 包 地面+场景底+人物场景；背景渐变与颗粒在槽外不动 */
+function makeWorld(id) {
+  const root = document.getElementById(id);
+  root.innerHTML = '';
+  const cam = el('g', {}, root);
+  const ground = el('rect', { y: GROUND, width: W, height: H - GROUND, fill: T.ground }, cam);
+  const line = el('line', { x1: 0, y1: GROUND, x2: W, y2: GROUND, stroke: T.line, 'stroke-width': 2 }, cam);
+  const furn = el('g', {}, cam);
+  const scene = el('g', {}, cam);
+  return { root, cam, ground, line, furn, scene };
+}
+const worldA = makeWorld('worldA'), worldB = makeWorld('worldB');
+
+function resolveAct(a) {
+  if (typeof a === 'string') {
+    const f = ACTIONS.find(x => x.id === a);
+    if (!f) throw new Error('找不到动作 id: ' + a + '（检查拼写 / case-actions.js 是否注册）');
+    return f;
+  }
+  if (a && typeof a.build === 'function') return a;
+  throw new Error('shot.act 必须是动作 id 字符串或含 build(S) 的动作对象');
+}
+
+/* 时间轴：每镜头帧数 = round(dur*fps)，至少 2 帧；start 为全局起始帧 */
+const TL = [];
+let TOTAL = 0;
+FILM.shots.forEach((s, i) => {
+  const act = resolveAct(s.act);
+  const dur = s.dur || act.dur;
+  if (!(dur > 0)) throw new Error(`镜头 ${i} 的 dur 必须 > 0`);
+  const frames = Math.max(2, Math.round(dur * FPS));
+  TL.push({ shot: s, act, index: i, start: TOTAL, frames, dur });
+  TOTAL += frames;
+});
+
+function mountShot(world, entry) {
+  const s = entry.shot, act = entry.act;
+  world.scene.innerHTML = '';
+  const P = Object.assign({ ease: 'smooth', amp: 1, scale: 1.12 }, s.params || {});
+  const cast = s.cast || act.cast || [{ id: 'man', who: 'man' }, { id: 'woman', who: 'woman' }];
+  const below = el('g', {}, world.scene);
+  const chars = {};
+  for (const c of cast) chars[c.id] = makeChar(world.scene, c.who, c.variant, c.opt);
+  const above = el('g', {}, world.scene);
+  const fx = el('g', {}, world.scene);
+  const S = { below, above, fx, chars, man: chars.man, woman: chars.woman };
+  const api = act.build(S);
+  api.update(0, P); // 先初始化再取锚点（部分动作 anchors 依赖 update 后的状态）
+  const pts = api.anchors(P) || [];
+  const a0 = pts[0];
+  const focusPt = s.focus ? camFocus(s.focus[0], s.focus[1])
+    : (a0 && (a0[0] || a0[1]) ? a0 : [W / 2, H * .55]);
+  buildBG(world.furn, s.bg || 'paper', THEME);
+  const camKeys = s.camera && s.camera !== 'off' ? presetCamera(s.camera, focusPt) : null;
+  return { api, P, camKeys };
+}
+
+const slotA = { i: -1, state: null }, slotB = { i: -1, state: null };
+
+function drive(world, slot, entry, t01) {
+  if (slot.i !== entry.index) { slot.state = mountShot(world, entry); slot.i = entry.index; }
+  slot.state.api.update(t01, slot.state.P);
+  if (slot.state.camKeys) applyCamera(world.cam, cameraAt(t01, slot.state.camKeys));
+  else world.cam.removeAttribute('transform');
+}
+
+/** 渲染全局第 g 帧（0 ≤ g < TOTAL）。确定性：同一 g 同一画面。 */
+function renderFrame(g) {
+  if (!Number.isInteger(g) || g < 0 || g >= TOTAL) throw new Error('帧号越界: ' + g);
+  let i = TL.findIndex(e => g < e.start + e.frames);
+  if (i < 0) i = TL.length - 1;
+  const e = TL[i], local = g - e.start;
+  drive(worldA, slotA, e, local / (e.frames - 1));
+  const Tn = i > 0 ? Math.min(TRANS, e.frames, TL[i - 1].frames) : 0;
+  if (Tn > 0 && local < Tn) {
+    drive(worldB, slotB, TL[i - 1], 1); // 上一镜头完成态
+    const mix = (local + .5) / Tn;
+    worldA.root.setAttribute('opacity', mix.toFixed(3));
+    worldB.root.setAttribute('opacity', (1 - mix).toFixed(3));
+  } else {
+    worldA.root.setAttribute('opacity', 1);
+    worldB.root.setAttribute('opacity', 0);
+  }
+}
+
+/** 资产验收用：单独挂载第 i 个镜头并定位到 t01（不影响转场逻辑） */
+function seekShot(i, t01) {
+  const e = TL[i];
+  if (!e) throw new Error('镜头不存在: ' + i);
+  drive(worldA, slotA, e, clamp01(t01));
+  worldA.root.setAttribute('opacity', 1);
+  worldB.root.setAttribute('opacity', 0);
+}
+
+window.__film = {
+  renderFrame, seekShot,
+  sceneHTML: () => worldA.scene.innerHTML,
+  camTransform: () => worldA.cam.getAttribute('transform'),
+  info: {
+    name: FILM.name || 'film', fps: FPS, orient: O.id, W, H, GROUND,
+    theme: THEME, totalFrames: TOTAL, transition: TRANS,
+    shots: TL.map(e => ({
+      index: e.index,
+      id: typeof e.shot.act === 'string' ? e.shot.act : (e.act.id || 'custom-' + e.index),
+      name: e.act.name || '', startFrame: e.start, frames: e.frames, dur: e.dur,
+      bg: e.shot.bg || 'paper', camera: e.shot.camera || 'off',
+      events: (e.shot.sfx == null ? (e.act.events || []) : e.shot.sfx),
+    })),
+  },
+};
+window.__ready = true;
+</script>
+</body>
+</html>

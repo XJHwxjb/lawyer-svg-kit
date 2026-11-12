@@ -500,6 +500,38 @@ function buildBG(root, kind, theme) {
     el('rect', { x: -360, y: 0, width: 720, height: 56, rx: 8, fill: '#a06a3c' }, desk);
     el('rect', { x: -360, y: 0, width: 720, height: 10, rx: 5, fill: '#c08b52' }, desk);
     txt(el('text', { x: X(540), y: Yg(400), 'text-anchor': 'middle', 'font-size': 26 * O.ts, 'font-weight': 700, fill: T.line, opacity: .9 }, root), '婚姻登记处');
+  } else if (kind === 'office') {
+    const win = el('g', { transform: `translate(${X(90)},${Yg(110)}) scale(${os})` }, root);
+    el('rect', { x: 0, y: 0, width: 230, height: 170, rx: 8, fill: T.line, opacity: .35 }, win);
+    el('rect', { x: 10, y: 10, width: 210, height: 150, rx: 4, fill: '#cfe0ea', opacity: .75 }, win);
+    for (let i = 0; i < 6; i++) el('rect', { x: 10, y: 16 + i * 24, width: 210, height: 9, fill: T.line, opacity: .4 }, win);
+    const clock = el('g', { transform: `translate(${X(730)},${Yg(140)}) scale(${os})` }, root);
+    el('circle', { cx: 0, cy: 0, r: 34, fill: PAL.paper, stroke: T.line, 'stroke-width': 4, opacity: .9 }, clock);
+    el('path', { d: 'M0,0 V-20 M0,0 L13,7', stroke: PAL.ink, 'stroke-width': 3.5, 'stroke-linecap': 'round' }, clock);
+    const cab = el('g', { transform: `translate(${X(880)},${Yg(430)}) scale(${os})` }, root);
+    el('rect', { x: -70, y: 0, width: 140, height: 270, rx: 8, fill: '#8a5a33', opacity: .85 }, cab);
+    for (let i = 0; i < 3; i++) {
+      el('rect', { x: -58, y: 14 + i * 86, width: 116, height: 72, rx: 5, fill: '#a06a3c' }, cab);
+      el('rect', { x: -16, y: 44 + i * 86, width: 32, height: 8, rx: 4, fill: '#6d4526' }, cab);
+    }
+  } else if (kind === 'warehouse') {
+    for (const sx of [150, 810]) {
+      const shelf = el('g', { transform: `translate(${X(sx)},${Yg(330)}) scale(${os})` }, root);
+      el('rect', { x: -110, y: 0, width: 12, height: 370, fill: '#8a5a33', opacity: .8 }, shelf);
+      el('rect', { x: 98, y: 0, width: 12, height: 370, fill: '#8a5a33', opacity: .8 }, shelf);
+      for (let i = 0; i < 3; i++) {
+        el('rect', { x: -110, y: 60 + i * 120, width: 220, height: 10, fill: '#a06a3c', opacity: .9 }, shelf);
+        el('rect', { x: -92, y: 18 + i * 120, width: 52, height: 42, rx: 3, fill: PAL.gold, opacity: .75 }, shelf);
+        el('rect', { x: -30, y: 26 + i * 120, width: 44, height: 34, rx: 3, fill: '#c08b52', opacity: .75 }, shelf);
+        el('rect', { x: 24, y: 14 + i * 120, width: 56, height: 46, rx: 3, fill: PAL.goldDeep, opacity: .6 }, shelf);
+      }
+    }
+    for (const lx of [330, 540, 750]) {
+      const lamp = el('g', { transform: `translate(${X(lx)},${Yg(90)}) scale(${os})` }, root);
+      el('path', { d: 'M0,0 v40', stroke: T.line, 'stroke-width': 4, opacity: .6 }, lamp);
+      el('path', { d: 'M-26,40 h52 l-10,18 h-32 z', fill: T.line, opacity: .55 }, lamp);
+      el('ellipse', { cx: 0, cy: 64, rx: 16, ry: 6, fill: PAL.gold, opacity: .5 }, lamp);
+    }
   }
   return root;
 }

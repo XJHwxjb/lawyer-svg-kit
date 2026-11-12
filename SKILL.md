@@ -1,6 +1,6 @@
 ---
 name: lawyer-svg-kit
-description: 法律科普/案件讲解视频的一站式 Skill：人物动作资产库 + 整片制作流程。当用户要做法律类视频、需要案件人物插画或交换/抓捕/敲槌等动作动画、或提到"彩礼案/律师视频/人物库/造人物/造动作"时使用。提供 16 个固定剪影人物（30+ 变体）、36 个纯时间函数动作、51 个法律图标、横屏 16:9 或竖屏 9:16 单选生成、可交互预览台、口播/SRT 对齐与 Remotion 合成配方、成片验收，以及缺人物/缺动作时的制造教程。
+description: 法律科普/案件讲解视频的一站式 Skill：人物动作资产库 + 整片制作流程。当用户要做法律类视频、需要案件人物插画或交换/抓捕/敲槌等动作动画、或提到"彩礼案/律师视频/人物库/造人物/造动作"时使用。提供 16 个固定剪影人物（14 个换装变体）、36 个纯时间函数动作、51 个法律图标、横屏 16:9 或竖屏 9:16 单选生成、可交互预览台、口播/SRT 对齐、零依赖整片管线（镜头/场景底/转场/音效）与 Remotion 合成配方、成片验收，以及缺人物/缺动作时的制造教程。
 ---
 
 # lawyer-svg-kit · 律师视频一站式 Skill
@@ -8,7 +8,7 @@ description: 法律科普/案件讲解视频的一站式 Skill：人物动作资
 两层能力，一个入口：
 
 - **资产层**：零依赖、纯 SVG、纯时间函数的人物与动作库。每个角色只有一张固定剪影（无表情、色块轮廓、贴纸描边），所有剧情靠"交换物动画"表达。全部状态由 `t ∈ [0,1]` 的纯函数决定 → 可 scrub、可逐帧导出、可直接移植 Remotion。同一套动作支持横屏 16:9（1920×1080）与竖屏 9:16（1080×1920），**按项目单选其一生成**，坐标自动重排，竖屏上方留标题/字幕安全区。
-- **制作层**：把律师口播变成完整视频——素材清点、SRT 时间轴、逐句分镜、选角配动作、Remotion 合成（真人/头像 + 字幕 + 动画场景）、渲染与成片验收。
+- **制作层**：把律师口播变成完整视频——素材清点、SRT 时间轴、逐句分镜、选角配动作、合成整片（**零依赖管线 pipeline/ 或 Remotion 二选一**：真人/头像 + 字幕 + 动画场景 + 镜头 + 音效）、渲染与成片验收。
 
 ## 0. 硬约束（每次任务先读）
 
@@ -16,6 +16,20 @@ description: 法律科普/案件讲解视频的一站式 Skill：人物动作资
 2. **事实**：法条编号、金额、日期、判决结果一律使用用户稿件提供的值。库内演示默认值（如 ¥660,000、《民法典》第1042条）**仅供预览**，成片必须替换为稿件值；稿件没给的数字不得编造。约定/请求/实付/判决金额分别登记，不能混标或自行相减当作已查明事实。
 3. **风格**：人物保持"无表情极简剪影"语法（见 references/character-forge.md）。不要加五官、不要换写实风格、不要引入带表情的卡通人物——这是用户验收过的风格。
 4. **画幅单选**：横屏 16:9 或竖屏 9:16 由律师选定，**只生成选中的那一种**；稿件没写就先问律师，问清再开工。选定后分镜、验收、导出、composition 全部只跟随这一个画幅。
+5. **数字呈现**（防止"数字一闪而过/暂停时数字是错的"）：
+   - 计数动画（count-up）必须随语义推进并**精确停在稿件值**——不得停在近似值，不得在停稳后继续累加。纯数字揭示（无伴随动画）的 count-up ≤ 0.6 秒；伴随实物流动的 count-up（如 money-flow 钞票逐张到账）允许与流动同步，但必须算好停留窗口。
+   - 精确值在画面上停留 ≥ 1.2 秒（从停稳到转场开始），期间不被淡出/切镜吃掉。算法：`镜头dur × (1 − 计数结束的t01) ≥ 1.2`。例：money-flow 计数在 t=.8 结束 → 该镜头 dur 必须 ≥ 6s（默认 5.4s 只有 1.08s 停留，不够）。
+   - **禁止滚动合计**：多个数字的"合计"只在口播说到合计的时刻一次性显示稿件值，不做实时累加动画（观众暂停时会看到错误的中间值）。
+   - 约定/请求/实付/判决数字分别带标签显示（见第 2 条），标签与数字同帧出现；不同法律含义的数字不得画成可自动相减的账目。
+   - 数字镜头用推近后停留的镜头：pipeline 填 `camera: 'hold'` 并 `focus` 指向数字位置；Remotion 用推近→保持的关键帧。
+   - 验收方法：在精确值停留窗口内任取一帧暂停，读出的数字必须等于稿件值（delivery-qa.md 停帧抽查）。
+6. **动感最低要求**（防止"成片像幻灯片"）：
+   - 每个镜头内部必须有**随时间变化的镜头运动**（camera ≠ off）或**持续的动作/部件运动**，二者至少其一。元素入场后完全静止等下一镜 = 不合格。
+   - 镜头之间必须有转场：pipeline 默认 12 帧交叉淡化（`transition` 可调）；Remotion 用 DocumentTransition 或明确设计的切镜。禁止全片硬切。
+   - 场景底不得全片 `paper`：按剧情地点选 home/court/register/office/warehouse（kit.js `buildBG`，预览台"场景底"可预览）。
+   - 音效必须实现（pipeline：`make_sfx.py` 生成 + `mix_sfx.py` 按 events.json 混音；Remotion：按 `events[].at × dur` 贴 SFX），或向用户明确声明"本片无音效"及原因。
+   - 构图：横屏人物高度 ≥ 画面高度 35%（默认参数约 36%）；自定义窄画幅或缩小构图时用 `cs/os ≥ 1.4` 或 `P.scale ≥ 1.3` 补回，不得让人物缩成角落小人。连续 3 个以上镜头画面上方 1/3 全空 = 构图单调，应加天空 UI（chip/计数器）或换景别。
+   - 验收方法：freezedetect 冻结门禁 + 抽段连续播放（delivery-qa.md）。
 
 ## 1. 先判断入口
 
@@ -54,7 +68,7 @@ description: 法律科普/案件讲解视频的一站式 Skill：人物动作资
 ### Step 5 · 导出进片
 - 单帧：预览台"导出当前帧 SVG"（独立可打开的 .svg，尺寸即当前画幅 1920×1080 或 1080×1920）。
 - 参数：导出 JSON（action/cast/params/events/phases/**orientation**），供 Remotion 或剪辑软件对轨；orientation 块含画幅 id 与 W/H/GROUND/缩放因子。
-- 整段：按 [references/remotion.md](references/remotion.md) 把 `update(t01, P)` 映射到 Remotion `useCurrentFrame()`，逐帧渲染同一棵 SVG 树；composition 宽高取 JSON 的 orientation 块，**只建选中画幅这一个 composition**。
+- 整段：两条路线二选一——按 [references/remotion.md](references/remotion.md) 把 `update(t01, P)` 映射到 Remotion `useCurrentFrame()`，逐帧渲染同一棵 SVG 树；或直接用 [pipeline/](pipeline/README.md) 零依赖管线（film.config.js 引用动作 id，无需移植代码）。composition/画布宽高取 JSON 的 orientation 块，**只建选中画幅这一个 composition**。
 - 音效事件点 `events[].at` 与画面冲击帧对齐，混音时按此贴 SFX。
 
 ## 3. 整片制作流程
@@ -65,7 +79,10 @@ description: 法律科普/案件讲解视频的一站式 Skill：人物动作资
 2. **可靠时间轴**：ffprobe 检查素材；SRT 逐句对照原声校对；用 [scripts/prepare_timing.py](scripts/prepare_timing.py) 生成 timing.json。不猜测法律事实与数字。
 3. **逐句分镜**：STORYBOARD.md 覆盖完整时长，每行含原句/含义/人物动作（roster 动作 id）/道具流向/revealAt/转场。叙事与节奏方法见 [references/narrative.md](references/narrative.md)——先事实表，再行为，最后图表文字；避免整片像幻灯片。
 4. **选角与动作准备**：复用 §2（查库 → 造 → 预览台在选中画幅验收）。
-5. **合成整片**：按 [references/remotion.md](references/remotion.md) 搭真人/头像层 + 字幕层 + 主库动画场景层；镜头推进用 [references/camera.md](references/camera.md)；图标动效与文书转场用 [remotion/](remotion/README.md) 组件。原声只播放一次，字幕不改变法律含义。
+5. **合成整片**：两条路线**二选一，不要混用**，都必须满足 §0.5 数字呈现与 §0.6 动感最低要求：
+   - **零依赖管线（默认推荐）**：按 [pipeline/README.md](pipeline/README.md) 把模板复制进案件工程，填 `film.config.js` → `node render.cjs` → `bash compose.sh`。镜头推拉、6 种场景底、交叉淡化、音效混音已内置，不需要 npm/React。
+   - **Remotion**：需要更复杂合成且环境允许时，按 [references/remotion.md](references/remotion.md) 搭真人/头像层 + 字幕层 + 主库动画场景层；镜头推进用 [references/camera.md](references/camera.md)；图标动效与文书转场用 [remotion/](remotion/README.md) 组件。
+   原声只播放一次，字幕不改变法律含义。
 6. **成片验收交付**：按 [references/delivery-qa.md](references/delivery-qa.md) 对实际导出的 MP4 实听实看；交付成片 + 可编辑工程路径，说明时长、画幅、已完成检查与限制。
 
 用户只要样片时做到样片就交付并等待反馈；要完整视频时 10 秒样片只是内部检查，不能当作完成。
@@ -73,21 +90,25 @@ description: 法律科普/案件讲解视频的一站式 Skill：人物动作资
 ## 4. 资产地图
 
 ```
-kit.js        基础构建器：坐标契约 / 剪影语法 / 16 人物 draw / 道具 / makeChar
+kit.js        基础构建器：坐标契约 / 剪影语法 / 16 人物 draw / 道具 / makeChar / 6 种场景底 buildBG
+camera.js     零依赖镜头模块：cameraAt / applyCamera / camFocus / 5 个 preset + off（与 CameraRig 同数学）
 actions.js    9 个动作工厂 + 36 个动作定义（cast / phases / events）
 app.js        预览台驱动：时钟 / 控件 / 音效 / 导出 / 双模式库
 index.html    预览台页面（SVG 舞台 + 控件）
 style.css     预览台样式
 references/   资产层：roster · character-forge · action-forge · studio
               制作层：workflow · narrative · remotion · camera · legal-icons · delivery-qa
+pipeline/     零依赖整片模板：film.html(双缓冲转场) · film.config.js · case-actions.js ·
+              render.cjs(CDP 逐帧) · compose.sh(ffmpeg 合成) · README.md(照抄指南)
 assets/legal-svg/   51 个法律图标 + catalog.json + 预览图（图示/证据板用）
 remotion/     CameraRig（镜头分层）· LegalMotion（图标动效）· DocumentTransition（文书转场）
-scripts/      prepare_timing.py（SRT + 视频 → timing.json）
+scripts/      prepare_timing.py（SRT + 视频 → timing.json）· make_sfx.py（ffmpeg 合成 8 音效）·
+              mix_sfx.py（按 events.json 混音）
 docs/         公开 README 截图
 qa/           开发期验收截图（不属于运行资产）
 ```
 
-资产层运行只需浏览器打开 `index.html`（建议本地静态服务），无构建、无 npm 依赖；制作层的 Remotion 工程在案件项目目录搭建（依赖见 remotion.md），不在 Skill 目录内写入客户素材。
+资产层运行只需浏览器打开 `index.html`（建议本地静态服务），无构建、无 npm 依赖；制作层两条路线（pipeline/ 零依赖管线、Remotion 工程）都在案件项目目录搭建，不在 Skill 目录内写入客户素材。
 
 ## 5. 关键契约速查
 
@@ -99,6 +120,7 @@ qa/           开发期验收截图（不属于运行资产）
 - 动作 `build(S)` → `{ update(t01,P), anchors(P), guidePath(P) }`；`S = { below, above, fx, chars, man, woman }`，角色一律走 `S.chars[id]`。
 - 飞行道具的给出方加 `opt:{noProp:true}`（去掉 baked 手持道具）；接物方用 `faceFlip(C, want)` 镜像。
 - baked 手持道具**不得含文字**（镜像后文字会反）；文字只出现在飞行道具与 chip 上。
+- **镜头（零依赖）**：`camera.js` 的 `cameraAt(t01, keys[{at,x,y,scale}])` 求值 + `applyCamera(g, cam)` 写 transform；焦点用 `camFocus(x, y)` 传设计空间坐标；全舞台镜头 scale ≥ 1（否则边缘露底）；preset：push/hold/impact/pan/breathe。与 Remotion CameraRig 同一套数学，两条路线观感一致。
 - Remotion 里**全局帧与局部帧不混用**：Sequence 内 `useCurrentFrame()` 从 0 起算；`t01 = 局部帧 / durationInFrames`。
 
 ## 6. 交付前自检
@@ -111,8 +133,11 @@ qa/           开发期验收截图（不属于运行资产）
 - [ ] 导出 SVG 单独打开无报错、滤镜完整
 
 整片交付（另加）：
-- [ ] 分镜覆盖完整口播时长，无漏句/空白/重叠
+- [ ] 分镜覆盖完整口播时长，无漏句/空白/重叠；**只有一份 STORYBOARD.md**，配置/代码与之一致
 - [ ] 原声只播放一次、音画同步，字幕与稿件一致
+- [ ] 数字停帧抽查：每个关键金额在停留窗口内暂停读值 = 稿件值；count-up ≤ 0.6s、停稳 ≥ 1.2s；无滚动合计（§0.5）
+- [ ] freezedetect 冻结门禁通过（≥ 0.5s 静止段均已解释）；每镜头有镜头运动或持续动作（§0.6）
+- [ ] 转场已实现（非全片硬切）；场景底按剧情选择（非全片 paper）；音效已混音或已声明无音效
 - [ ] 成片 MP4 实听实看验收（delivery-qa.md），检查记录留存
-- [ ] 交付成片 + 可编辑工程路径，说明已完成检查与限制
+- [ ] 交付成片 + 可编辑工程路径，说明已完成检查与限制；成片文件名 = out/<案件名>_<画幅>.mp4
 - [ ] 私密材料未离开授权目录

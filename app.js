@@ -6,7 +6,7 @@ const stage = $('stage');
 
 const P = {
   speed: 1, ease: 'smooth', amp: 1, scale: 1.12, outline: 6, shadow: 10,
-  theme: 'cream', bg: 'paper', guides: false, loop: true, sound: true, dur: 4.6,
+  theme: 'cream', bg: 'paper', camera: 'off', guides: false, loop: true, sound: true, dur: 4.6,
   orient: 'land',
 };
 const DEFAULTS = { ...P };
@@ -20,9 +20,11 @@ const GROUP_COLORS = {
 let act = null, api = null, S = null;
 let t = 0, playing = true, scrubbing = false, lastFrame = -1;
 let mode = 'acts', lastActId = null, lastChar = 'man', lastVariant = null;
+let camFocusPt = null; // mount 时取一次锚点作镜头焦点，避免每帧换焦点导致抖动
 
 /* ---------- 场景装配 ---------- */
 const sceneRoot = $('sceneRoot');
+const camWorld = $('camWorld');
 const guidesG = $('guidesLayer');
 const guideCross = $('guideCross');
 const guidePath = $('guidePath');
@@ -39,6 +41,10 @@ function mount() {
   const fx = el('g', {}, sceneRoot);
   S = { below, above, fx, chars, man: chars.man, woman: chars.woman };
   api = act.build(S);
+  api.update(0, P); // 先初始化状态再取锚点，否则部分动作的 anchors 还是 [0,0]
+  const pts = api.anchors(P) || [];
+  const a0 = pts[0];
+  camFocusPt = a0 && (a0[0] || a0[1]) ? a0 : [W / 2, H * .55]; // [0,0] 视为锚点未就绪，回退画面中心
   $('actName').textContent = act.name;
   $('actDesc').textContent = act.desc;
   const c = act.group
@@ -207,6 +213,9 @@ function applyStyle() {
 function render() {
   const t01 = Math.min(t / P.dur, 1);
   api.update(t01, P);
+  const camKeys = P.camera === 'off' ? null : presetCamera(P.camera, camFocusPt);
+  if (camKeys) applyCamera(camWorld, cameraAt(t01, camKeys));
+  else camWorld.removeAttribute('transform');
   guidesG.setAttribute('opacity', P.guides ? 1 : 0);
   if (P.guides) {
     const pts = api.anchors(P) || [];
@@ -389,6 +398,7 @@ function syncUI() {
   $('shadow').value = P.shadow; $('shadowVal').textContent = P.shadow + 'px';
   $('theme').value = P.theme;
   $('bg').value = P.bg;
+  $('camera').value = P.camera;
   $('guides').checked = P.guides;
   $('loopBtn').classList.toggle('on', P.loop);
   $('loopBtn').setAttribute('aria-pressed', P.loop);
@@ -423,6 +433,7 @@ function bind() {
   $('shadow').oninput = e => { P.shadow = +e.target.value; $('shadowVal').textContent = P.shadow + 'px'; applyStyle(); };
   $('theme').onchange = e => { P.theme = e.target.value; applyStyle(); };
   $('bg').onchange = e => { P.bg = e.target.value; applyStyle(); };
+  $('camera').onchange = e => { P.camera = e.target.value; };
   $('guides').onchange = e => { P.guides = e.target.checked; };
   $('resetBtn').onclick = () => { Object.assign(P, DEFAULTS, { dur: act.dur }); applyStyle(); syncUI(); };
   $('randBtn').onclick = () => {
@@ -432,7 +443,8 @@ function bind() {
     P.dur = Math.min(8, Math.max(2, Math.round(act.dur * (0.8 + Math.random() * .5) * 2) / 2));
     P.speed = pick([.75, 1, 1.25, 1.5]);
     P.theme = pick(Object.keys(THEMES));
-    P.bg = pick(['paper', 'home', 'court', 'register']);
+    P.bg = pick(['paper', 'home', 'court', 'register', 'office', 'warehouse']);
+    P.camera = pick(['off', 'push', 'hold', 'breathe', 'impact']);
     t = 0; playing = true;
     applyStyle(); syncUI();
   };
@@ -494,9 +506,11 @@ window.__kit = {
   setPortrait,
   setMode,
   setOrientation: setOrient,
+  setCamera: name => { P.camera = name; syncUI(); },
   get time() { return t; },
   get action() { return act.id; },
   get mode() { return mode; },
   get orientation() { return O.id; },
+  get camera() { return P.camera; },
   get canvas() { return { W, H, GROUND }; },
 };

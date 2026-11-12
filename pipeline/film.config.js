@@ -22,11 +22,12 @@ const FILM = {
                              // 不要超过最短镜头帧数的一半。
   voiceDuration: 0,          // 口播总秒数（ffprobe 测得）；render.cjs 用它核对总帧数，0=跳过核对
 
-  sound: {                   // v0.6 声音三层（references/sound.md）：口播+BGM+音效，BGM 默认必加
-    bgm: 'auto',             // auto=make_bgm.py 程序化生成（无版权风险）| 'off'=无BGM（须向用户声明）
-    mood: 'serious',         // 整体基调：serious 低频钢琴/弦乐 | steady 中性脉冲 | upbeat 轻快鼓点
-    bpm: 0,                  // 0=按 mood 默认(76/96/124)。关键数字/金句/开头尽量落拍 t=n×60/bpm
-    sections: [              // 分段铺设：章节边界切 mood + 0.5s 呼吸，与 STORYBOARD 章节对齐
+  sound: {                   // v0.7 声音三层（references/sound.md）：口播+真实BGM+真实音效，BGM 默认必加
+    bgm: 'auto',             // auto=Mixkit 真实曲目运行时下载（需网络，许可见 assets/bgm/catalog.json）
+                             // 网络失败 compose.sh 自动回退合成曲并声明；'off'=无BGM（须声明）
+    mood: 'serious',         // 整体基调：serious 悬念/叙事 | steady 平稳分析 | upbeat 轻快解决
+    bpm: 0,                  // 仅合成兜底曲用：0=按 mood 默认(76/96/124)。关键数字/金句/开头尽量落拍
+    sections: [              // 分段铺设：章节边界切 mood（真实曲目间 0.8s 交叉淡化），与 STORYBOARD 章节对齐
       // { at: 0, mood: 'serious' }, { at: 34.1, mood: 'steady' }, { at: 76, mood: 'upbeat' },
     ],
   },

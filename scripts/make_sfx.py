@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
-"""make_sfx.py — 用 ffmpeg 合成 8 个法律动画音效（v0.5，无版权风险的占位音）
+"""make_sfx.py — 离线兜底：用 ffmpeg 合成 8 个法律动画音效（v0.7 兜底合成音）
+
+默认音效是 assets/sfx 真实录音库（CC0，见 assets/sfx/LICENSES.md）。
+本脚本仅在离线/真实库缺失时使用，产出到 assets/sfx-synth，不覆盖真实库；
+混音时用 mix_sound.py --sfx-dir assets/sfx-synth 指向它（交付时须声明是合成音）。
 
 用法：
-    python scripts/make_sfx.py --out assets/sfx
-    python scripts/make_sfx.py --out assets/sfx --only whoosh,paper
+    python scripts/make_sfx.py --out assets/sfx-synth
+    python scripts/make_sfx.py --out assets/sfx-synth --only whoosh,paper
 
 产出（48kHz 单声道 wav，与 app.js 预览台音效同名同语义）：
     whoosh  挥动/飞出      paper   纸张/翻面     ching   金钱/到账
     thud    重物落地       stamp   盖章          crack   碎裂/撕毁
     pop     气泡/出现      scratch 书写/划动
 
-全部由 lavfi 信号源合成，不含任何第三方素材。想要更高质量的音效，
-用有使用权限的同名 wav 覆盖即可（mix_sound.py 按文件名取用）。
+全部由 lavfi 信号源合成，不含任何第三方素材。
 """
 import argparse
 import shutil
@@ -79,8 +82,8 @@ SFX = {
 
 
 def main():
-    ap = argparse.ArgumentParser(description="ffmpeg 合成 8 个法律动画音效")
-    ap.add_argument("--out", default="assets/sfx", help="输出目录（默认 assets/sfx）")
+    ap = argparse.ArgumentParser(description="ffmpeg 离线兜底合成 8 个法律动画音效")
+    ap.add_argument("--out", default="assets/sfx-synth", help="输出目录（默认 assets/sfx-synth，勿覆盖真实库 assets/sfx）")
     ap.add_argument("--only", default="", help="只生成逗号分隔的部分音效，如 whoosh,paper")
     args = ap.parse_args()
 

@@ -1,0 +1,1202 @@
+{
+ "kit": {
+  "whoosh": {
+   "file": "whoosh.ogg",
+   "lib": "lib/kit/whoosh.ogg",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/qubodup/sounds/60013/",
+   "attribution": "\"Whoosh\" by qubodup (https://freesound.org/people/qubodup/sounds/60013/), CC0"
+  },
+  "paper": {
+   "file": "paper.wav",
+   "lib": "lib/ave/paper-handle-1.wav",
+   "license": "CC0 1.0",
+   "source_url": "https://opengameart.org/content/various-paper-sound-effects",
+   "attribution": "Luckius"
+  },
+  "ching": {
+   "file": "ching.wav",
+   "lib": "lib/ave/cash-register-cha-ching.wav",
+   "license": "MIT (composite of CC0)",
+   "source_url": "https://github.com/kmilo93sd/agent-video-editor",
+   "attribution": "agent-video-editor (Kenney handleCoins + synth bell)"
+  },
+  "thud": {
+   "file": "thud.ogg",
+   "lib": "lib/impact/kenney-impact-impactpunch-heavy-000.ogg",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/impact-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional"
+  },
+  "stamp": {
+   "file": "stamp.wav",
+   "lib": "lib/ave/stamp-thud.wav",
+   "license": "MIT (composite of CC0)",
+   "source_url": "https://github.com/kmilo93sd/agent-video-editor",
+   "attribution": "agent-video-editor (Kenney bookPlace1 + impactSoft)"
+  },
+  "crack": {
+   "file": "crack.ogg",
+   "lib": "lib/impact/fs-222517-dramatic-hit.ogg",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/qubodup/sounds/222517/",
+   "attribution": "qubodup via Freesound (CC0; credit optional)"
+  },
+  "pop": {
+   "file": "pop.ogg",
+   "lib": "lib/kit/pop.ogg",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/ethernel0/sounds/776016/",
+   "attribution": "\"POP SFX Neutral\" by ethernel0 (https://freesound.org/people/ethernel0/sounds/776016/), CC0"
+  },
+  "scratch": {
+   "file": "scratch.wav",
+   "lib": "lib/ave/pencil-write.wav",
+   "license": "CC0 1.0",
+   "source_url": "https://opengameart.org/content/pencil-sounds",
+   "attribution": "AntumDeluge / NachtmahrTV (freesound 571800)"
+  }
+ },
+ "lib": [
+  {
+   "file": "whoosh/fs-264777-swoosh.ogg",
+   "category": "whoosh",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/Shinplaster/sounds/264777/",
+   "attribution": "Shinplaster via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 4.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "whoosh/fs-169867-swoosh.ogg",
+   "category": "whoosh",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/Halgrimm/sounds/169867/",
+   "attribution": "Halgrimm via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 2.21,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "whoosh/fs-127197-fast-simple-chop-5-aif.ogg",
+   "category": "whoosh",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/dave.des/sounds/127197/",
+   "attribution": "dave.des via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 0.48,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "whoosh/fs-683101-quick-woosh.ogg",
+   "category": "whoosh",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/florianreichelt/sounds/683101/",
+   "attribution": "florianreichelt via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 1.86,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "pop/fs-447910-plop.ogg",
+   "category": "pop",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/Breviceps/sounds/447910/",
+   "attribution": "Breviceps via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 0.24,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "pop/fs-467951-ui-button-click.ogg",
+   "category": "pop",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/benzix2/sounds/467951/",
+   "attribution": "benzix2 via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 0.12,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "pop/fs-258269-mouth-pop.ogg",
+   "category": "pop",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/jcallison/sounds/258269/",
+   "attribution": "jcallison via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 0.32,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "pop/fs-514833-user-interface-menu-sounds-wav.ogg",
+   "category": "pop",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/oussamaben/sounds/514833/",
+   "attribution": "oussamaben via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 4.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "pop/fs-824189-pop-in-sfx.ogg",
+   "category": "pop",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/Sadiquecat/sounds/824189/",
+   "attribution": "Sadiquecat via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 0.45,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "typing/fs-323432-typing.ogg",
+   "category": "typing",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/Alivvie/sounds/323432/",
+   "attribution": "Alivvie via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 4.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "typing/fs-79388-keyboard-typing-wav.ogg",
+   "category": "typing",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/j1987/sounds/79388/",
+   "attribution": "j1987 via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 4.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "typing/fs-416777-digital-typing-wav.ogg",
+   "category": "typing",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/Sky_Motion/sounds/416777/",
+   "attribution": "Sky_Motion via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 1.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "typing/fs-511418-data-reveal-sound.ogg",
+   "category": "typing",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/Sky_Motion/sounds/511418/",
+   "attribution": "Sky_Motion via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 2.03,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "typing/fs-447909-keyboard-typing.ogg",
+   "category": "typing",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/Breviceps/sounds/447909/",
+   "attribution": "Breviceps via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 3.8,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "riser/fs-685256-riser-sound-effect-short-wav.ogg",
+   "category": "riser",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/syntheffects/sounds/685256/",
+   "attribution": "syntheffects via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 2.46,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "riser/fs-396161-scary-hits-risers-001.ogg",
+   "category": "riser",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/Xinematix/sounds/396161/",
+   "attribution": "Xinematix via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 6.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "riser/fs-396160-scary-hits-risers-002.ogg",
+   "category": "riser",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/Xinematix/sounds/396160/",
+   "attribution": "Xinematix via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 6.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "riser/fs-174363-rewind.ogg",
+   "category": "riser",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/kasa90/sounds/174363/",
+   "attribution": "kasa90 via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 6.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "riser/fs-464250-echo-chromatic-riser-wav.ogg",
+   "category": "riser",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/DylanTheFish/sounds/464250/",
+   "attribution": "DylanTheFish via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 6.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "impact/fs-177242-cinematic-impact.ogg",
+   "category": "impact",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/deleted_user_3277771/sounds/177242/",
+   "attribution": "deleted_user_3277771 via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 4.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "impact/fs-222517-dramatic-hit.ogg",
+   "category": "impact",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/qubodup/sounds/222517/",
+   "attribution": "qubodup via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 4.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "impact/fs-347561-micheal-bay-hit.ogg",
+   "category": "impact",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/Kinoton/sounds/347561/",
+   "attribution": "Kinoton via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 4.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ding/fs-349504-triangle-open-04.ogg",
+   "category": "ding",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/cabled_mess/sounds/349504/",
+   "attribution": "cabled_mess via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 4.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ding/fs-634690-lil-pip.ogg",
+   "category": "ding",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/adh.dreaming/sounds/634690/",
+   "attribution": "adh.dreaming via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 0.07,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ding/fs-571513-soft-notifications-bell-ding-d.ogg",
+   "category": "ding",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/LegitCheese/sounds/571513/",
+   "attribution": "LegitCheese via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 0.76,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "transition/fs-702773-swipe-wav.ogg",
+   "category": "transition",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/LilMati/sounds/702773/",
+   "attribution": "LilMati via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 0.84,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "transition/fs-786514-swoosh-v2.ogg",
+   "category": "transition",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/migoreng1/sounds/786514/",
+   "attribution": "migoreng1 via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 0.3,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "transition/fs-856168-cyberpunk-glitch-hologram-tran.ogg",
+   "category": "transition",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/brktkrgll/sounds/856168/",
+   "attribution": "brktkrgll via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 2.99,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "transition/fs-816262-broomstick-whoosh-3-quiet-okm1.ogg",
+   "category": "transition",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/Sadiquecat/sounds/816262/",
+   "attribution": "Sadiquecat via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 0.41,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "transition/fs-850347-swipe-various.ogg",
+   "category": "transition",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/Gravy42/sounds/850347/",
+   "attribution": "Gravy42 via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 4.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "transition/fs-683096-woosh.ogg",
+   "category": "transition",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/florianreichelt/sounds/683096/",
+   "attribution": "florianreichelt via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 1.59,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "glitch/fs-402451-fast-forward.ogg",
+   "category": "glitch",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/plasterbrain/sounds/402451/",
+   "attribution": "plasterbrain via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 4.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "glitch/fs-339521-vhs-rewind-forward-and-eject.ogg",
+   "category": "glitch",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/lucaslima/sounds/339521/",
+   "attribution": "lucaslima via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 4.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "glitch/fs-144546-touchs-wav.ogg",
+   "category": "glitch",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/garogourou/sounds/144546/",
+   "attribution": "garogourou via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 4.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ambience/fs-329533-room-tone-in-an-apartment-livi.ogg",
+   "category": "ambience",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/leonelmail/sounds/329533/",
+   "attribution": "leonelmail via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 17.31,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ambience/fs-426767-apartment-room-tone-wav.ogg",
+   "category": "ambience",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/cMilan/sounds/426767/",
+   "attribution": "cMilan via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 20.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ambience/fs-329569-roomtone-bedroom-yew.ogg",
+   "category": "ambience",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/leonelmail/sounds/329569/",
+   "attribution": "leonelmail via Freesound (CC0; credit optional)",
+   "note": "Freesound HQ preview of a CC0 sound",
+   "duration_s": 20.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "click/kenney-interface-click-001.ogg",
+   "category": "click",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.1,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "click/kenney-interface-select-001.ogg",
+   "category": "click",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.04,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "click/kenney-interface-select-002.ogg",
+   "category": "click",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.04,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "click/kenney-interface-select-003.ogg",
+   "category": "click",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.37,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "click/kenney-interface-tick-001.ogg",
+   "category": "click",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.04,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "click/kenney-interface-toggle-001.ogg",
+   "category": "click",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.14,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "click/kenney-interface-toggle-002.ogg",
+   "category": "click",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.14,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ui-blip/kenney-ui-rollover1.ogg",
+   "category": "ui-blip",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/ui-audio",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney ui-audio pack",
+   "duration_s": 0.22,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ui-blip/kenney-ui-rollover2.ogg",
+   "category": "ui-blip",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/ui-audio",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney ui-audio pack",
+   "duration_s": 0.05,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ui-blip/kenney-ui-rollover3.ogg",
+   "category": "ui-blip",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/ui-audio",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney ui-audio pack",
+   "duration_s": 0.07,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ui-blip/kenney-ui-rollover4.ogg",
+   "category": "ui-blip",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/ui-audio",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney ui-audio pack",
+   "duration_s": 0.07,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ui-blip/kenney-digital-twotone1.ogg",
+   "category": "ui-blip",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/digital-audio",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney digital-audio pack",
+   "duration_s": 0.61,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ui-blip/kenney-digital-twotone2.ogg",
+   "category": "ui-blip",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/digital-audio",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney digital-audio pack",
+   "duration_s": 0.63,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ui-blip/kenney-digital-threetone1.ogg",
+   "category": "ui-blip",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/digital-audio",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney digital-audio pack",
+   "duration_s": 0.76,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ui-blip/kenney-digital-threetone2.ogg",
+   "category": "ui-blip",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/digital-audio",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney digital-audio pack",
+   "duration_s": 0.76,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ui-blip/kenney-digital-pepsound1.ogg",
+   "category": "ui-blip",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/digital-audio",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney digital-audio pack",
+   "duration_s": 0.4,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ui-blip/kenney-digital-pepsound2.ogg",
+   "category": "ui-blip",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/digital-audio",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney digital-audio pack",
+   "duration_s": 0.45,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ui-blip/kenney-digital-pepsound3.ogg",
+   "category": "ui-blip",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/digital-audio",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney digital-audio pack",
+   "duration_s": 0.36,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "glitch/kenney-interface-glitch-002.ogg",
+   "category": "glitch",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.03,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "glitch/kenney-sci-computernoise-000.ogg",
+   "category": "glitch",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/sci-fi-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney sci-fi-sounds pack",
+   "duration_s": 4.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "glitch/kenney-sci-computernoise-001.ogg",
+   "category": "glitch",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/sci-fi-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney sci-fi-sounds pack",
+   "duration_s": 4.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "glitch/kenney-sci-computernoise-002.ogg",
+   "category": "glitch",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/sci-fi-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney sci-fi-sounds pack",
+   "duration_s": 4.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "impact/kenney-impact-impactpunch-heavy-000.ogg",
+   "category": "impact",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/impact-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney impact-sounds pack",
+   "duration_s": 0.65,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "impact/kenney-impact-impactpunch-heavy-001.ogg",
+   "category": "impact",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/impact-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney impact-sounds pack",
+   "duration_s": 0.54,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "impact/kenney-impact-impactsoft-heavy-000.ogg",
+   "category": "impact",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/impact-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney impact-sounds pack",
+   "duration_s": 0.53,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "impact/kenney-impact-impactsoft-heavy-001.ogg",
+   "category": "impact",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/impact-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney impact-sounds pack",
+   "duration_s": 0.57,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "impact/kenney-sci-lowfrequency-explosion-000.ogg",
+   "category": "impact",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/sci-fi-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney sci-fi-sounds pack",
+   "duration_s": 1.99,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "impact/kenney-sci-lowfrequency-explosion-001.ogg",
+   "category": "impact",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/sci-fi-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney sci-fi-sounds pack",
+   "duration_s": 0.99,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ding/kenney-interface-confirmation-001.ogg",
+   "category": "ding",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.29,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ding/kenney-interface-confirmation-002.ogg",
+   "category": "ding",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.54,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ding/kenney-interface-confirmation-003.ogg",
+   "category": "ding",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.32,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ding/kenney-interface-bong-001.ogg",
+   "category": "ding",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.12,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ding/kenney-interface-glass-001.ogg",
+   "category": "ding",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.28,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ding/kenney-interface-glass-002.ogg",
+   "category": "ding",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.12,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "pop/kenney-interface-drop-001.ogg",
+   "category": "pop",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.13,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "pop/kenney-interface-drop-002.ogg",
+   "category": "pop",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.19,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "pop/kenney-interface-drop-003.ogg",
+   "category": "pop",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.19,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "pop/kenney-interface-pluck-001.ogg",
+   "category": "pop",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.1,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "pop/kenney-interface-pluck-002.ogg",
+   "category": "pop",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.16,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "pop/kenney-interface-maximize-001.ogg",
+   "category": "pop",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.25,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "pop/kenney-interface-maximize-002.ogg",
+   "category": "pop",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.25,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "transition/kenney-interface-maximize-005.ogg",
+   "category": "transition",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.5,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "transition/kenney-interface-maximize-006.ogg",
+   "category": "transition",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.38,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "transition/kenney-interface-minimize-001.ogg",
+   "category": "transition",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.26,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "transition/kenney-interface-minimize-002.ogg",
+   "category": "transition",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 0.26,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "transition/kenney-interface-scroll-001.ogg",
+   "category": "transition",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 1.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "transition/kenney-interface-scroll-002.ogg",
+   "category": "transition",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/interface-sounds",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney interface-sounds pack",
+   "duration_s": 1.0,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "riser/kenney-digital-phaserup1.ogg",
+   "category": "riser",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/digital-audio",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney digital-audio pack",
+   "duration_s": 0.42,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "riser/kenney-digital-phaserup2.ogg",
+   "category": "riser",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/digital-audio",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney digital-audio pack",
+   "duration_s": 0.33,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "riser/kenney-digital-phaserup3.ogg",
+   "category": "riser",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/digital-audio",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney digital-audio pack",
+   "duration_s": 0.46,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "riser/kenney-digital-powerup1.ogg",
+   "category": "riser",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/digital-audio",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney digital-audio pack",
+   "duration_s": 1.11,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "riser/kenney-digital-powerup2.ogg",
+   "category": "riser",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/digital-audio",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney digital-audio pack",
+   "duration_s": 0.35,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "riser/kenney-digital-powerup3.ogg",
+   "category": "riser",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/digital-audio",
+   "attribution": "Kenney (kenney.nl), CC0; credit optional",
+   "note": "Kenney digital-audio pack",
+   "duration_s": 1.01,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "whoosh/fs830856.ogg",
+   "category": "whoosh",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/MeanRaccoon/sounds/830856/",
+   "attribution": "MeanRaccoon via Freesound (CC0; credit given voluntarily)",
+   "note": "whoosh low by MeanRaccoon",
+   "duration_s": 0.35,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "whoosh/fs810485.ogg",
+   "category": "whoosh",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/CVLTIV8R/sounds/810485/",
+   "attribution": "CVLTIV8R via Freesound (CC0; credit given voluntarily)",
+   "note": "Analog Bass, Sweeps, and FX-001 by CVLTIV8R",
+   "duration_s": 0.58,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "whoosh/fs393811.ogg",
+   "category": "whoosh",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/deleted_user_6479820/sounds/393811/",
+   "attribution": "deleted_user_6479820 via Freesound (CC0; credit given voluntarily)",
+   "note": "Swish Single 4 by deleted_user_6479820",
+   "duration_s": 0.2,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "click/fs788933.ogg",
+   "category": "click",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/Mediasaur/sounds/788933/",
+   "attribution": "Mediasaur via Freesound (CC0; credit given voluntarily)",
+   "note": "Mouse_Click_1 by Mediasaur",
+   "duration_s": 0.13,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "pop/fs527522.ogg",
+   "category": "pop",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/Narjara/sounds/527522/",
+   "attribution": "Narjara via Freesound (CC0; credit given voluntarily)",
+   "note": "ppop.wav by Narjara",
+   "duration_s": 0.08,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "pop/fs323738.ogg",
+   "category": "pop",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/Reitanna/sounds/323738/",
+   "attribution": "Reitanna via Freesound (CC0; credit given voluntarily)",
+   "note": "mouth pop4.wav by Reitanna",
+   "duration_s": 0.08,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "pop/fs202230.ogg",
+   "category": "pop",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/deraj/sounds/202230/",
+   "attribution": "deraj via Freesound (CC0; credit given voluntarily)",
+   "note": "Pop sound by deraj",
+   "duration_s": 0.22,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "riser/fs867126.ogg",
+   "category": "riser",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/Diim_1/sounds/867126/",
+   "attribution": "Diim_1 via Freesound (CC0; credit given voluntarily)",
+   "note": "Short Glitch Riser SFX by Diim_1",
+   "duration_s": 2.01,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "impact/fs524817.ogg",
+   "category": "impact",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/DeVern/sounds/524817/",
+   "attribution": "DeVern via Freesound (CC0; credit given voluntarily)",
+   "note": "Oil Drum Soft Impact.wav by DeVern",
+   "duration_s": 0.66,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "impact/fs745291.ogg",
+   "category": "impact",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/SamsterBirdies/sounds/745291/",
+   "attribution": "SamsterBirdies via Freesound (CC0; credit given voluntarily)",
+   "note": "Ceramic clack / glass hit by SamsterBirdies",
+   "duration_s": 0.29,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "tick/fs528561.ogg",
+   "category": "tick",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/Jummit/sounds/528561/",
+   "attribution": "Jummit via Freesound (CC0; credit given voluntarily)",
+   "note": "Soft UI Button Click by Jummit",
+   "duration_s": 0.11,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "tick/fs384187.ogg",
+   "category": "tick",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/malle99/sounds/384187/",
+   "attribution": "malle99 via Freesound (CC0; credit given voluntarily)",
+   "note": "Click Tick.wav by malle99",
+   "duration_s": 0.13,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "tick/fs721514.ogg",
+   "category": "tick",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/BaggoNotes/sounds/721514/",
+   "attribution": "BaggoNotes via Freesound (CC0; credit given voluntarily)",
+   "note": "Points_Tick2 by BaggoNotes",
+   "duration_s": 0.04,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "kit/whoosh.ogg",
+   "category": "whoosh",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/qubodup/sounds/60013/",
+   "attribution": "\"Whoosh\" by qubodup (https://freesound.org/people/qubodup/sounds/60013/), CC0",
+   "note": "Whoosh",
+   "duration_s": null,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "kit/click.ogg",
+   "category": "click",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/adh.dreaming/sounds/671105/",
+   "attribution": "\"Classic Click\" by adh.dreaming (https://freesound.org/people/adh.dreaming/sounds/671105/), CC0",
+   "note": "Classic Click",
+   "duration_s": null,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "kit/pop.ogg",
+   "category": "pop",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/ethernel0/sounds/776016/",
+   "attribution": "\"POP SFX Neutral\" by ethernel0 (https://freesound.org/people/ethernel0/sounds/776016/), CC0",
+   "note": "POP SFX Neutral",
+   "duration_s": null,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "kit/riser.ogg",
+   "category": "riser",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/BeaconStudio/sounds/859482/",
+   "attribution": "\"Cinematic Riser #3 subtle\" by BeaconStudio (https://freesound.org/people/BeaconStudio/sounds/859482/), CC0",
+   "note": "Cinematic Riser #3 subtle",
+   "duration_s": null,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "kit/impact.ogg",
+   "category": "impact",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/peoplearehappy/sounds/841274/",
+   "attribution": "\"soft_impact3\" by peoplearehappy (https://freesound.org/people/peoplearehappy/sounds/841274/), CC0",
+   "note": "soft_impact3",
+   "duration_s": null,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "kit/tick.ogg",
+   "category": "tick",
+   "license": "CC0 1.0",
+   "source_url": "https://freesound.org/people/Squirrel_404/sounds/683048/",
+   "attribution": "\"Click / Tick\" by Squirrel_404 (https://freesound.org/people/Squirrel_404/sounds/683048/), CC0",
+   "note": "Click / Tick",
+   "duration_s": null,
+   "origin": "Barty-Bart/motion-graphics"
+  },
+  {
+   "file": "ave/page-turn.wav",
+   "duration_s": null,
+   "note": "page-turn.wav",
+   "category": "paper",
+   "license": "CC0 1.0",
+   "source_url": "https://kenney.nl/assets/rpg-audio",
+   "attribution": "Kenney (rpg-audio, bookFlip1)",
+   "origin": "kmilo93sd/agent-video-editor"
+  },
+  {
+   "file": "ave/pencil-write.wav",
+   "duration_s": null,
+   "note": "pencil-write.wav",
+   "category": "scratch",
+   "license": "CC0 1.0",
+   "source_url": "https://opengameart.org/content/pencil-sounds",
+   "attribution": "AntumDeluge / NachtmahrTV (freesound 571800)",
+   "origin": "kmilo93sd/agent-video-editor"
+  },
+  {
+   "file": "ave/paper-handle-1.wav",
+   "duration_s": null,
+   "note": "paper-handle-1.wav",
+   "category": "paper",
+   "license": "CC0 1.0",
+   "source_url": "https://opengameart.org/content/various-paper-sound-effects",
+   "attribution": "Luckius",
+   "origin": "kmilo93sd/agent-video-editor"
+  },
+  {
+   "file": "ave/cash-register-cha-ching.wav",
+   "duration_s": null,
+   "note": "cash-register-cha-ching.wav",
+   "category": "ching",
+   "license": "MIT (composite of CC0)",
+   "source_url": "https://github.com/kmilo93sd/agent-video-editor",
+   "attribution": "agent-video-editor (Kenney handleCoins + synth bell)",
+   "origin": "kmilo93sd/agent-video-editor"
+  },
+  {
+   "file": "ave/stamp-thud.wav",
+   "duration_s": null,
+   "note": "stamp-thud.wav",
+   "category": "stamp",
+   "license": "MIT (composite of CC0)",
+   "source_url": "https://github.com/kmilo93sd/agent-video-editor",
+   "attribution": "agent-video-editor (Kenney bookPlace1 + impactSoft)",
+   "origin": "kmilo93sd/agent-video-editor"
+  }
+ ]
+}

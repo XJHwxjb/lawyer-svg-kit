@@ -1,6 +1,6 @@
 ---
 name: lawyer-svg-kit
-description: 法律科普/案件讲解视频的一站式 Skill：人物动作资产库 + 整片制作流程。当用户要做法律类视频、需要案件人物插画或交换/抓捕/敲槌等动作动画、或提到"彩礼案/律师视频/人物库/造人物/造动作"时使用。提供 16 个固定剪影人物（14 个换装变体）、36 个纯时间函数动作、51 个法律图标、横屏 16:9 或竖屏 9:16 单选生成、可交互预览台、口播/SRT 对齐、零依赖整片管线（镜头/场景底/转场/声音三层 BGM+音效）与 Remotion 合成配方、成片验收，以及缺人物/缺动作时的制造教程。
+description: 法律科普/案件讲解视频的一站式 Skill：人物动作资产库 + 整片制作流程。当用户要做法律类视频、需要案件人物插画或交换/抓捕/敲槌等动作动画、或提到"彩礼案/律师视频/人物库/造人物/造动作"时使用。提供 16 个固定剪影人物（14 个换装变体）、36 个纯时间函数动作、51 个法律图标、横屏 16:9 或竖屏 9:16 单选生成、可交互预览台、口播/SRT 对齐、零依赖整片管线（镜头/场景底/转场/声音三层：真实曲目 BGM+真实录音音效）与 Remotion 合成配方、成片验收，以及缺人物/缺动作时的制造教程。
 ---
 
 # lawyer-svg-kit · 律师视频一站式 Skill
@@ -31,10 +31,10 @@ description: 法律科普/案件讲解视频的一站式 Skill：人物动作资
    - 构图：横屏人物高度 ≥ 画面高度 35%（默认参数约 36%）；自定义窄画幅或缩小构图时用 `cs/os ≥ 1.4` 或 `P.scale ≥ 1.3` 补回，不得让人物缩成角落小人。连续 3 个以上镜头画面上方 1/3 全空 = 构图单调，应加天空 UI（chip/计数器）或换景别。
    - 验收方法：freezedetect 冻结门禁 + 抽段连续播放（delivery-qa.md）。
 7. **声音三层**（防止"成片干口播、不带感"，见 [references/sound.md](references/sound.md)）：
-   - 成片音频 = 口播 + BGM + 音效。BGM 默认必加（`make_bgm.py` 程序化生成，无版权风险；或用户提供的授权音乐）；仅用户明确说不要音乐才省略，且交付时声明。
-   - BGM 全片连续：成片 silencedetect -40dB/0.4s 应 0 静音段；音量自动化间隙比口播 RMS 低 ≈7dB、说话时低 ≈17dB（`mix_sound.py` 自动执行，不手调）。
-   - 按章节铺 mood（serious/steady/upbeat，长片至少两次切换），边界 0.5s 呼吸；关键数字/金句/开头尽量落拍 `t=n×60/bpm`。
-   - 任何渲染路线（含自建引擎）都必须走 `mix_sound.py` 混音并过 delivery-qa.md 声音门禁；只 map 原声 = 不合格。
+   - 成片音频 = 口播 + BGM + 音效，优先级口播 > 音效 > BGM。音效默认 = `assets/sfx` **真实录音库**（CC0 为主，8 音套件 + 114 条备选）；BGM 默认必加 = `fetch_bgm.py` 按章节 mood **运行时下载 Mixkit 真实曲目**（禁止再分发原文件，mp3 只进案件工程；每案核对许可并留 `bgm.credits.json`）。网络失败回退 `make_bgm.py`/`make_sfx.py` 合成兜底，交付必须声明；仅用户明确说不要音乐才省略 BGM 并声明。
+   - BGM 全片连续：成片 silencedetect -40dB/0.4s 应 0 静音段；音量自动化间隙比口播 RMS 低 ≈7dB、说话时低 ≈17dB（`mix_sound.py` 自动执行，不手调）；mix_sound 输出 `sfx_missing` 必须为空。
+   - 按章节铺 mood（serious/steady/upbeat，长片至少两次切换），真实曲目边界 0.8s 交叉淡化（合成兜底 0.5s 呼吸）；关键数字/金句/开头尽量落拍（合成曲 `t=n×60/bpm`，真实曲用 librosa/耳听找重拍）。
+   - 任何渲染路线（含自建引擎）都必须走 `mix_sound.py` 混音并过 delivery-qa.md 声音门禁（含许可台账 + 五秒点耳机听检）；只 map 原声 = 不合格。
 
 ## 1. 先判断入口
 
@@ -106,9 +106,11 @@ references/   资产层：roster · character-forge · action-forge · studio
 pipeline/     零依赖整片模板：film.html(双缓冲转场) · film.config.js · case-actions.js ·
               render.cjs(CDP 逐帧+自动转场音效) · compose.sh(ffmpeg 合成+声音三层) · README.md(照抄指南)
 assets/legal-svg/   51 个法律图标 + catalog.json + 预览图（图示/证据板用）
+assets/sfx/         真实录音音效库（v0.7 默认）：8 音套件 + lib/ 114 条备选 + manifest.json + LICENSES.md
+assets/bgm/         catalog.json：Mixkit 真实曲目选曲清单（只存 ID/元数据，mp3 运行时下载不进仓库）
 remotion/     CameraRig（镜头分层）· LegalMotion（图标动效）· DocumentTransition（文书转场）
-scripts/      prepare_timing.py（SRT + 视频 → timing.json）· make_sfx.py（ffmpeg 合成 8 音效）·
-              make_bgm.py（程序化 BGM：3 情绪+分段铺设）· mix_sound.py（三层混音+自动 ducking）
+scripts/      prepare_timing.py（SRT + 视频 → timing.json）· fetch_bgm.py（真实曲目 BGM：按 mood 下载+组装+许可台账）·
+              mix_sound.py（三层混音+自动 ducking，ogg/mp3 自动解码）· make_bgm.py / make_sfx.py（离线合成兜底）
 docs/         公开 README 截图
 qa/           开发期验收截图（不属于运行资产）
 ```
@@ -143,7 +145,7 @@ qa/           开发期验收截图（不属于运行资产）
 - [ ] 数字停帧抽查：每个关键金额在停留窗口内暂停读值 = 稿件值；count-up ≤ 0.6s、停稳 ≥ 1.2s；无滚动合计（§0.5）
 - [ ] freezedetect 冻结门禁通过（≥ 0.5s 静止段均已解释）；每镜头有镜头运动或持续动作（§0.6）
 - [ ] 转场已实现（非全片硬切）；场景底按剧情选择（非全片 paper）
-- [ ] 声音三层门禁通过（sound.md）：BGM 连续 0 静音段、ducking ≈10dB 摆动、音效每镜头 ≥1 且可闻；或用户明确无音乐并已声明
+- [ ] 声音三层门禁通过（sound.md）：BGM 连续 0 静音段、ducking ≈10dB 摆动、音效每镜头 ≥1 且可闻、sfx_missing 为空；BGM 许可台账 bgm.credits.json（或合成兜底/无音乐已声明）；五秒点耳机听检已做
 - [ ] 成片 MP4 实听实看验收（delivery-qa.md），检查记录留存
 - [ ] 交付成片 + 可编辑工程路径，说明已完成检查与限制；成片文件名 = out/<案件名>_<画幅>.mp4
 - [ ] 私密材料未离开授权目录

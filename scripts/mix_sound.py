@@ -1,13 +1,20 @@
 #!/usr/bin/env python3
-"""mix_sound.py — 声音三层混音：口播 + BGM(自动ducking) + 音效（v0.6）
+"""mix_sound.py — 声音三层混音：口播 + BGM(自动ducking) + 音效（v0.7）
 
 用法：
     python scripts/mix_sound.py --voice voice.wav --events events.json \
         --sfx-dir assets/sfx --bgm bgm.wav --out mixed.wav
 
 与渲染引擎无关：任何路线（pipeline / Remotion / 自建引擎）只要产出
-voice.wav + events.json + bgm.wav，就都走这一步。纯 Python 标准库，
-不依赖 ffmpeg，逐样本确定性混音。
+voice.wav + events.json + bgm.wav，就都走这一步。混音本身纯 Python 标准库、
+逐样本确定性；音效/BGM 若为 ogg/mp3/flac（v0.7 真实录音库默认 ogg），
+用 ffmpeg 解码到临时 wav（ffmpeg 本就是合成路线的必备依赖）。
+
+音效解析：--sfx-dir 下按 <name>.wav / .ogg / .mp3 / .flac 顺序找，加载后自动裁掉
+前导静音（阈值 = max(0.005, 峰值×2%)），让真实录音的发声点对齐 events 秒点。
+assets/sfx 根目录是默认 8 音真实录音套件（whoosh/paper/ching/thud/stamp/crack/pop/scratch），
+lib/ 是 114 条备选真实录音（manifest.json 逐条登记来源与许可），换音直接改 events 的 sfx 名
+或把自有授权音频放根目录同名覆盖。
 
 响度契约（references/sound.md 规则 2，相对口播活跃 RMS）：
     口播间隙/B-roll：BGM ≈ 口播 RMS − 7dB
@@ -19,7 +26,11 @@ import argparse
 import array
 import json
 import math
+import os
+import shutil
+import subprocess
 import sys
+import tempfile
 import wave
 from pathlib import Path
 
@@ -28,6 +39,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 SR = 48000
 HOP = 2400  # 50ms 包络窗
+FFMPEG = os.environ.get("FFMPEG") or shutil.which("ffmpeg") or "ffmpeg"
 
 
 def read_wav(path):
@@ -55,6 +67,26 @@ def read_wav(path):
     return mono
 
 
+def load_audio(path):
+    path = Path(path)
+    if path.suffix.lower() == ".wav":
+        return read_wav(path)
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td) / "decoded.wav"
+        subprocess.run([FFMPEG, "-y", "-v", "error", "-i", str(path),
+                        "-ac", "1", "-ar", str(SR), "-c:a", "pcm_s16le", str(tmp)], check=True)
+        return read_wav(tmp)
+
+
+def trim_lead(x):
+    pk = max((abs(v) for v in x), default=0.0)
+    th = max(0.005, pk * 0.02)
+    i = 0
+    while i < len(x) and abs(x[i]) < th:
+        i += 1
+    return x[i:] if i < len(x) else x
+
+
 def rms_windows(x):
     out = []
     for i in range(0, len(x), HOP):
@@ -75,7 +107,7 @@ def main():
     ap.add_argument("--bed-duck-db", type=float, default=-17, help="说话时 BGM 相对口播 RMS")
     args = ap.parse_args()
 
-    voice = read_wav(Path(args.voice))
+    voice = load_audio(Path(args.voice))
     n = len(voice)
     mix = array.array("d", voice)
 
@@ -85,7 +117,7 @@ def main():
     stats = {"voice_rms_db": round(20 * math.log10(max(1e-9, vr)), 1), "sfx": 0}
 
     if args.bgm:
-        bed = read_wav(Path(args.bgm))
+        bed = load_audio(Path(args.bgm))
         br = math.sqrt(sum(v * v for v in bed) / max(1, len(bed))) or 1e-6
         gap_g = vr * 10 ** (args.bed_gap_db / 20) / br
         duck_g = vr * 10 ** (args.bed_duck_db / 20) / br
@@ -125,12 +157,22 @@ def main():
     if args.events and Path(args.events).exists():
         events = json.loads(Path(args.events).read_text(encoding="utf-8"))
         sfx_dir = Path(args.sfx_dir)
+        cache, missing = {}, []
         for e in events:
-            wav = sfx_dir / f"{e['sfx']}.wav"
-            t = e.get("time", -1)
-            if not wav.exists() or t < 0:
+            name, t = e["sfx"], e.get("time", -1)
+            if t < 0:
                 continue
-            s = read_wav(wav)
+            if name not in cache:
+                hit = next((sfx_dir / f"{name}{ext}" for ext in (".wav", ".ogg", ".mp3", ".flac")
+                            if (sfx_dir / f"{name}{ext}").exists()), None)
+                if hit is None:
+                    missing.append(name)
+                    cache[name] = None
+                else:
+                    cache[name] = trim_lead(load_audio(hit))
+            s = cache[name]
+            if s is None:
+                continue
             i0 = int(t * SR)
             for i, v in enumerate(s):
                 j = i0 + i
@@ -138,6 +180,8 @@ def main():
                     break
                 mix[j] += v * args.sfx_gain
             stats["sfx"] += 1
+        if missing:
+            stats["sfx_missing"] = sorted(set(missing))
 
     peak = max(1e-9, max(abs(v) for v in mix))
     if peak > 0.98:

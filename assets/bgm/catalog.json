@@ -1,0 +1,23 @@
+{
+  "license": "Mixkit Stock Music Free License",
+  "license_url": "https://mixkit.co/license/#musicFree",
+  "checked": "2026-10-13",
+  "allows": "在线视频/社交/广告/播客/教育，商用与非商用均可，无需署名",
+  "forbids": "单独再分发原文件、remix 成纯音乐轨、CD/DVD/电视广播、游戏、Content ID 登记；故原文件只运行时下载到案件工程，不进公开仓库",
+  "source_pattern": "https://assets.mixkit.co/music/{id}/{id}.mp3",
+  "moods": {
+    "serious": [723, 140],
+    "steady": [634, 419],
+    "upbeat": [834, 130]
+  },
+  "tracks": {
+    "723": {"title": "Other World", "artist": "Lily J", "feel": "chillout, tension", "len_s": 96},
+    "140": {"title": "Cyberpunk City", "artist": "Alejandro Magaña (A. M.)", "feel": "mysterious, eerie", "len_s": 100},
+    "634": {"title": "Your Breath", "artist": "Eugenio Mininni", "feel": "corporate, positive", "len_s": 236},
+    "419": {"title": "Pilates and Yoga", "artist": "Arulo", "feel": "ambient, calm", "len_s": 96},
+    "834": {"title": "It's Love", "artist": "Michael Ramir C.", "feel": "corporate, uplifting", "len_s": 97},
+    "130": {"title": "Tech House vibes", "artist": "Alejandro Magaña (A. M.)", "feel": "house, bass and drums, ~122 BPM", "len_s": 102},
+    "171": {"title": "Techno Fights", "artist": "Alejandro Magaña (A. M.)", "feel": "house, propulsive", "len_s": 109},
+    "517": {"title": "Jungle Voices", "artist": "Diego Nava", "feel": "electronic, relaxed", "len_s": 98}
+  }
+}

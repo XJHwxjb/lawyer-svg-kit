@@ -5,7 +5,7 @@
 验收分两级：**资产级**——案件用到的主库动作已在预览台按选定画幅通过 t-sweep（见 [studio.md](studio.md)）；**成片级**——本文件，针对最终渲染的 MP4。资产级通过不能替代成片级。
 
 1. **素材与时间轴**：核对总时长、帧率、画幅（= 项目选定的单一画幅）、音视频流与编码，检查片头片尾没有被截断；逐句对照字幕源文与时间戳，播放对照原声音，处理漂移、错字、溢出与遮挡。口播视频的画面和声音应保持同步，若为刻意裁剪须保持语义完整。
-2. **声音**：播放开头、中间、结尾及加音效处，确认原声完整、音画同步、无削波或明显突兀的音量变化；确认 BGM 连续且随章节换情绪、间隙抬头说话压低（ducking）、音效对齐动作（sound.md 三层）。用波形比对或抽样相关性辅助发现错位，不能代替听检。确认任何音乐和音效的来源与授权。
+2. **声音**：播放开头、中间、结尾及加音效处，确认原声完整、音画同步、无削波或明显突兀的音量变化；确认 BGM 连续且随章节换情绪、间隙抬头说话压低（ducking）、音效对齐动作（sound.md 三层）。用波形比对或抽样相关性辅助发现错位，不能代替听检。核对来源与授权：真实 BGM 路线查 `bgm.credits.json`（曲目/许可/核对日期），音效查 `assets/sfx/LICENSES.md` 与 manifest.json；合成兜底（make_bgm/make_sfx）或无 BGM 必须有向用户声明的记录。
 3. **画面与动作**：从最终文件按场景关键帧及固定间隔抽帧，覆盖开头、转场、结尾；检查黑帧、闪烁、文字截断、视觉拥挤、道具遮挡、越框与行为是否对应口播。对递交、位移和停顿等动作片段连续播放或加密抽帧，不以稀疏静帧代替动作检查。机器黑帧检测是辅助，不能代替视觉审片。
 4. **正确性与交付**：核对价格、数据、名称、案件事实及引用来源（全部应为稿件值，不得残留库内演示默认值）；素材缺失或存在未解决差异时明确说明。记录输出路径、时长、格式和已知限制。交付可播放文件与工程；不要将私人素材或工程上传到公共仓库。
 
@@ -51,7 +51,7 @@ ffmpeg -ss 12.0 -t 2.5 -i out/成片.mp4 -vf fps=5 qa/hold-%02d.jpg
 ffmpeg -i mixed.wav -af astats=metadata=1 -f null - 2>&1 | grep "Peak level"
 ```
 
-再实听音效密集处：音效对齐可见动作（纸落/槌落/钱到），不压口播。无音效的片子必须有向用户声明的记录。
+mix_sound.py 输出的 `sfx_missing` 必须为空（events 引用了 sfx 目录里不存在的名字 = 有音效被静默跳过）。再实听音效密集处：音效对齐可见动作（纸落/槌落/钱到），不压口播。无音效的片子必须有向用户声明的记录。
 
 **6) BGM 连续性门禁（v0.6，SKILL.md §0.7 / sound.md）**
 
@@ -63,11 +63,19 @@ ffmpeg -i out/成片.mp4 -af silencedetect=n=-40dB:d=0.4 -f null - 2>&1 | grep -
 
 **7) ducking 与音效可闻抽查（v0.6）**
 
-取一个 ≥0.6s 的口播间隙的**后半段**（避开章节呼吸 dip）和一个说话段，各 0.3–0.4s 窗比较 BGM 层响度（mixed.wav 减 voice.wav，或听检间隙音乐抬头）：差应 ≈ 6–12dB，说话段 BGM 至少比口播 RMS 低 12dB。再从 events.json 任取 3 个秒点，±0.15s 窗 RMS 应明显高于相邻无事件窗：
+取一个 ≥0.6s 的口播间隙的**后半段**（避开章节交叉淡化/呼吸 dip）和一个说话段，各 0.3–0.4s 窗比较 BGM 层响度（mixed.wav 减 voice.wav，或听检间隙音乐抬头）：差应 ≈ 6–12dB，说话段 BGM 至少比口播 RMS 低 12dB。再从 events.json 任取 3 个秒点，±0.15s 窗 RMS 应明显高于相邻无事件窗：
 
 ```bash
 ffmpeg -ss 4.4 -t 0.4 -i out/成片.mp4 -af astats=metadata=1 -f null - 2>&1 | grep "RMS level"
 ```
+
+**8) BGM 许可台账（v0.7）**
+
+真实曲目路线：`bgm.credits.json` 存在，`license_checked` 为近期日期（每案首次使用前打开 Mixkit license_url 核对许可未变），tracks 逐条含 id/title/artist/license/source_url；mp3 缓存只在案件工程 `bgm-src/`，**不得进公开仓库**。合成兜底路线：无 credits 文件，但交付说明里必须有"合成 BGM 兜底"声明。音效来源台账 = assets/sfx/LICENSES.md + manifest.json（CC0 为主，2 条 MIT 合成音声明已附）。
+
+**9) 五秒点耳机听检（v0.7，命令过了也不豁免）**
+
+戴耳机逐点听：① 开头第一秒（淡入+第一拍）② 章节切换边界（交叉淡化是否自然）③ 关键数字 ching 处（到账感、不压口播）④ 音效最密集处（不糊、不炸）⑤ 收尾淡出。确认真实录音无爆音/截断、情绪随章节变化，记录听检结论。
 
 ## 逐镜头复核：不要只检查文件能播放
 
@@ -88,6 +96,6 @@ ffmpeg -ss 4.4 -t 0.4 -i out/成片.mp4 -af astats=metadata=1 -f null - 2>&1 | g
 
 ## 声音设计
 
-完整规则见 [sound.md](sound.md)（v0.6 声音三层：口播+BGM+音效，BGM 默认必加、自动 ducking、分章节 mood、落拍、每镜头 ≥1 音效）。优先保证口播清晰；音效触发点对应实际接触或动作完成帧（主库导出 JSON 的 `events[].at × dur` 即秒点；pipeline 路线由 render.cjs 自动产出绝对秒点 events.json 并含转场 whoosh，`scripts/make_sfx.py` 合成 8 个无版权占位音、`scripts/make_bgm.py` 程序化生成 BGM、`scripts/mix_sound.py` 三层混音）；不要每个字幕都配音效。仅用来源和授权清楚的素材（禁止从平台视频抽音频）；用户明确不要音乐时才可无 BGM，且须声明。分别检查开头、中段、结尾及音效密集处，并如实报告是否做过听检。
+完整规则见 [sound.md](sound.md)（v0.7 声音三层：口播+真实曲目 BGM+真实录音音效，BGM 默认必加、自动 ducking、分章节 mood、每镜头 ≥1 音效；优先级口播>音效>BGM）。优先保证口播清晰；音效触发点对应实际接触或动作完成帧（主库导出 JSON 的 `events[].at × dur` 即秒点；pipeline 路线由 render.cjs 自动产出绝对秒点 events.json 并含转场 whoosh）。素材：`assets/sfx` 真实录音库（CC0 为主，默认 8 音+114 条备选）、`scripts/fetch_bgm.py` 按 mood 运行时下载 Mixkit 真实曲目（许可台账 bgm.credits.json；网络失败回退 `scripts/make_bgm.py` 合成并声明）、`scripts/mix_sound.py` 三层混音（ogg/mp3 自动 ffmpeg 解码）；`scripts/make_sfx.py` 仅为离线兜底合成音。不要每个字幕都配音效。仅用来源和授权清楚的素材（禁止从平台视频抽音频；Mixkit 原文件禁止再分发、只运行时下载）；用户明确不要音乐时才可无 BGM，且须声明。分别检查开头、中段、结尾及音效密集处，并如实报告是否做过听检。
 
 可用 `ffprobe -v error -show_streams -show_format -of json OUTPUT.mp4` 读取参数。先新建 `qa` 目录，再执行 `ffmpeg -i OUTPUT.mp4 -vf "fps=2/3,scale=384:-2" -q:v 3 qa/frame-%04d.jpg` 生成定间隔缩略图；该命令适用于常见 Windows、macOS、Linux shell，若路径含空格需用引号。核验音轨、源 SRT 和实际内容仍需另做。

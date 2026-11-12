@@ -30,7 +30,7 @@
   - **零依赖管线**（v0.5 `pipeline/`，默认推荐）：film.config.js 配置 → render.cjs 本机 Edge/Chrome 逐帧截图 → compose.sh 合成。内置镜头推拉、双缓冲交叉淡化、6 种场景底、真人左下角 Ø300 小圆、ASS 字幕、音效混音与 loudnorm，不需要 npm/React。
   - **Remotion 合成配方**（`references/remotion.md`）：kit 打包成 ES 模块、`KitShot` 组件逐帧驱动、人物小窗 + 字幕 + 镜头层整片骨架，版本组合已验证。
 - **口播对齐**：`scripts/prepare_timing.py` 把剪映 SRT + ffprobe 时长转成 `timing.json`（校验格式/顺序/重叠）。
-- **声音三层**：`scripts/make_sfx.py` 用 ffmpeg 合成 8 个无版权占位音，`scripts/make_bgm.py` 程序化生成 BGM（3 情绪+分段铺设），`scripts/mix_sound.py` 把口播+BGM+音效混音（自动 ducking），见 references/sound.md。
+- **声音三层（v0.7 真实素材）**：音效 = `assets/sfx` CC0 真实录音库（8 音套件 + 114 条备选）；BGM = `scripts/fetch_bgm.py` 按章节 mood 运行时下载 Mixkit 真实曲目（许可台账 bgm.credits.json，mp3 不进仓库）；`scripts/mix_sound.py` 把口播+BGM+音效混音（自动 ducking，ogg/mp3 自动解码）。`make_sfx.py`/`make_bgm.py` 为离线合成兜底。见 references/sound.md。
 - **叙事与镜头**：事实表先行、revealAt 节奏、反幻灯片清单 + 可执行动感下限（`narrative.md`）；运镜与景深规则（`camera.md` + `camera.js` / `remotion/CameraRig.tsx`）。
 - **两级验收**（`delivery-qa.md`）：资产级预览台 sweep → 成片级 MP4 逐镜头复核 + freezedetect 冻结门禁 + 数字停帧抽查。
 
@@ -94,10 +94,13 @@ camera.js                       零依赖镜头模块（preset / cameraAt / appl
 pipeline/                       零依赖整片模板（film.html / config / render.cjs / compose.sh / README）
 remotion/                       CameraRig / LegalMotion / DocumentTransition 组件
 assets/legal-svg/               51 图标 + catalog.json + 预览图
+assets/sfx/                     真实录音音效库（8 音套件 + lib/ 114 条 + manifest.json + LICENSES.md）
+assets/bgm/catalog.json         Mixkit 真实曲目选曲清单（只存 ID/元数据，mp3 运行时下载）
 scripts/prepare_timing.py       SRT + ffprobe → timing.json
-scripts/make_sfx.py             ffmpeg 合成 8 个音效
-scripts/make_bgm.py             程序化 BGM（3 情绪 + 分段铺设）
+scripts/fetch_bgm.py            真实曲目 BGM（按 mood 下载 + 组装 + 许可台账）
 scripts/mix_sound.py            口播+BGM+音效 三层混音（自动 ducking）
+scripts/make_bgm.py             合成 BGM 兜底（3 情绪 + 分段铺设）
+scripts/make_sfx.py             合成音效兜底（ffmpeg 8 音）
 ```
 
 Skill 的工作方式：读稿 → 确认画幅 → 拆出角色与动作清单 → 查 roster 命中直接用，未命中按 forge 教程造并回写 roster → 分镜/时间轴 → 合成（pipeline 或 Remotion）→ 预览台与成片两级验收 → 交付。
@@ -114,8 +117,8 @@ style.css     预览台样式
 references/   两层流程文档与教程（10 篇）
 pipeline/     零依赖整片模板（配置 → 逐帧渲染 → 合成）
 remotion/     整片用 React 组件（运镜 / 图标动效 / 文书转场）
-assets/       legal-svg 图标库
-scripts/      prepare_timing.py 口播对齐 · make_sfx.py / make_bgm.py / mix_sound.py 声音三层
+assets/       legal-svg 图标库 · sfx 真实录音音效库 · bgm 选曲清单
+scripts/      prepare_timing.py 口播对齐 · fetch_bgm.py / mix_sound.py 真实素材声音三层 · make_bgm.py / make_sfx.py 合成兜底
 docs/         README 用图
 qa/           开发期验收截图（不入库，.gitignore 排除）
 ```
@@ -127,7 +130,7 @@ qa/           开发期验收截图（不入库，.gitignore 排除）
 - 动作契约 `build(S) → { update(t01,P), anchors(P), guidePath(P) }`；`S.chars` 按 cast 装配。
 - 镜头契约（v0.5）：`cameraAt(t01, keys[{at,x,y,scale}])` + `applyCamera(g, cam)`；焦点 `camFocus(x,y)` 用设计空间坐标；全舞台镜头 scale ≥ 1；pipeline 的 film.html 用双世界槽做帧级确定性交叉淡化。
 - Remotion 移植：`setOrientation` 先于 build；全局帧与局部帧不混用；已验证版本 remotion 4.0.534 / react 19.2.0 / typescript 5.9.2。
-- 音效全部由 WebAudio 合成并绑定可见事件点（whoosh/paper/ching/thud/stamp/crack/pop/scratch）；整片按 `events[].at × dur` 对轨，pipeline 由 make_sfx.py/make_bgm.py/mix_sound.py 落地声音三层。
+- 预览台音效由 WebAudio 即时合成（近似音，绑定可见事件点 whoosh/paper/ching/thud/stamp/crack/pop/scratch）；成片声音三层走真实素材：assets/sfx 录音库 + fetch_bgm.py 曲目 + mix_sound.py，按 `events[].at × dur` 对轨。
 
 ## 使用约束
 
@@ -137,4 +140,9 @@ qa/           开发期验收截图（不入库，.gitignore 排除）
 
 ## 许可
 
-MIT，见 [LICENSE](LICENSE)。
+代码 MIT，见 [LICENSE](LICENSE)。
+
+第三方音频素材：`assets/sfx` 为 CC0 1.0 真实录音（112 条）+ 2 条 MIT 合成音，
+逐条来源与声明见 [assets/sfx/LICENSES.md](assets/sfx/LICENSES.md)。BGM 曲目来自
+Mixkit（Stock Music Free License：在线视频商用免费、禁止再分发原文件），
+mp3 一律运行时下载到案件工程，不随本仓库分发。

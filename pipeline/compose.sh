@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# compose.sh — 合成成片（pipeline 模板，v0.6）
-# 动画帧序列 + 口播原声 + ASS 字幕 + 声音三层（BGM+音效）+ 真人小圆（可选）
+# compose.sh — 合成成片（pipeline 模板，v0.7）
+# 动画帧序列 + 口播原声 + ASS 字幕 + 声音三层（真实BGM+真实音效）+ 真人小圆（可选）
 # 用法：改下方「案件配置」→ bash compose.sh
 # 依赖：ffmpeg / ffprobe（PATH 中）；声音混音另需 python3 + scripts/mix_sound.py
 #
@@ -17,7 +17,7 @@ VOICE="voice.wav"          # ← 口播音频（也可填口播视频路径，�
 PERSON=""                  # ← 真人视频路径；留空 = 纯动画成片
 CAPTIONS="captions.ass"    # ← ASS 字幕路径；留空 = 无字幕（文件名用 ASCII，避免转义问题）
 DUR=""                     # ← 成片总秒数；留空 = 自动取 VOICE 时长（推荐）
-BGM="auto"                 # ← auto=程序化生成（无版权风险）| 填路径=自有授权音乐 | off=无BGM（须向用户声明）
+BGM="auto"                 # ← auto=真实曲目（Mixkit 运行时下载，需网络）| synth=程序化合成（离线兜底，须声明）| 填路径=自有授权音乐 | off=无BGM（须声明）
 BGM_MOOD="serious"         # ← 无 sound.json 时的兜底基调：serious|steady|upbeat
 BGM_BPM=0                  # ← 0=按 mood 默认(76/96/124)
 BGM_SECTIONS=""            # ← 无 sound.json 时的兜底分段：JSON 字符串或文件路径
@@ -33,19 +33,32 @@ if [ -z "$DUR" ]; then
 fi
 FADEOUT=$(awk "BEGIN{printf \"%.2f\", $DUR-0.6}")
 
-# 声音三层混音（v0.6，references/sound.md）：口播 + BGM(自动ducking) + 音效 → mixed.wav
-# mix_sound.py 纯 Python、与渲染引擎无关；不做 loudnorm，响度统一在本脚本最后处理。
+# 声音三层混音（v0.7，references/sound.md）：口播 + 真实BGM(自动ducking) + 真实音效 → mixed.wav
+# mix_sound.py 与渲染引擎无关；不做 loudnorm，响度统一在本脚本最后处理。
 AUDIO="$VOICE"
 BED=""
 if [ "$BGM" = "off" ]; then
   echo "BGM=off：成片无 BGM，交付时必须向用户声明（references/sound.md）"
-elif [ "$BGM" = "auto" ]; then
-  if [ -f sound.json ]; then
-    python scripts/make_bgm.py --dur "$DUR" --config sound.json --out bgm.wav
-  else
-    SECT_ARGS=()
-    [ -n "$BGM_SECTIONS" ] && SECT_ARGS=(--sections "$BGM_SECTIONS")
-    python scripts/make_bgm.py --dur "$DUR" --mood "$BGM_MOOD" --bpm "$BGM_BPM" "${SECT_ARGS[@]}" --out bgm.wav
+elif [ "$BGM" = "auto" ] || [ "$BGM" = "synth" ]; then
+  HAVE_REAL=0
+  if [ "$BGM" = "auto" ]; then
+    if [ -f sound.json ]; then
+      python scripts/fetch_bgm.py --dur "$DUR" --config sound.json --out bgm.wav --cache-dir bgm-src && HAVE_REAL=1 || true
+    else
+      SECT_ARGS=()
+      [ -n "$BGM_SECTIONS" ] && SECT_ARGS=(--sections "$BGM_SECTIONS")
+      python scripts/fetch_bgm.py --dur "$DUR" --mood "$BGM_MOOD" "${SECT_ARGS[@]}" --out bgm.wav --cache-dir bgm-src && HAVE_REAL=1 || true
+    fi
+  fi
+  if [ "$HAVE_REAL" != 1 ]; then
+    echo "WARN BGM 回退 make_bgm 合成曲（网络不可用或 BGM=synth），交付时必须向用户声明"
+    if [ -f sound.json ]; then
+      python scripts/make_bgm.py --dur "$DUR" --config sound.json --out bgm.wav
+    else
+      SECT_ARGS=()
+      [ -n "$BGM_SECTIONS" ] && SECT_ARGS=(--sections "$BGM_SECTIONS")
+      python scripts/make_bgm.py --dur "$DUR" --mood "$BGM_MOOD" --bpm "$BGM_BPM" "${SECT_ARGS[@]}" --out bgm.wav
+    fi
   fi
   BED="bgm.wav"
 else
@@ -58,6 +71,7 @@ if [ -f scripts/mix_sound.py ]; then
   python scripts/mix_sound.py --voice "$VOICE" --out mixed.wav "${BED_ARGS[@]}" "${EV_ARGS[@]}" --sfx-dir assets/sfx
   AUDIO="mixed.wav"
   echo "声音三层已混入 mixed.wav"
+  [ -f bgm.credits.json ] && echo "BGM 许可记录: bgm.credits.json（交付时随附核对）"
 else
   echo "WARN 缺 scripts/mix_sound.py，只用原声（不满足 v0.6 声音门禁）"
 fi

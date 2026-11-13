@@ -5,7 +5,7 @@
 - **零依赖**：[camera.js](../camera.js)（`cameraAt` / `applyCamera` / `camFocus` / preset），按 t01∈[0,1] 求值，pipeline/ 模板已接好。
 - **Remotion**：[remotion/CameraRig.tsx](../remotion/CameraRig.tsx)（`cameraAt` / `CameraLayer`），按帧求值，复制到案件项目后使用。
 
-本文档管**动画场景层**的镜头。真人小窗自己的手持漂移是另一回事：用 [face-track.md](face-track.md) 的追踪裁切（`TrackedVideo` 或 sendcmd 预裁切），不要拿场景镜头去追人脸。
+本文档管**动画场景层**的镜头。真人小窗自己的手持漂移是另一回事：用 [face-track.md](face-track.md) 的追踪裁切（`TrackedVideo` 或 sendcmd 预裁切）；源明显手持晃动时用同文档 §6 的稳像（`stabilize_person.py`）。不要拿场景镜头去追人脸。
 
 ## 零依赖路线（camera.js，默认推荐）
 

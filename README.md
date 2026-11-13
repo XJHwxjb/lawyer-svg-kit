@@ -32,7 +32,7 @@
 - **口播对齐**：`scripts/prepare_timing.py` 把剪映 SRT + ffprobe 时长转成 `timing.json`（校验格式/顺序/重叠）。
 - **声音两层（v0.8 真实素材）**：成片 = 口播 + 动作音效，**无 BGM**（律师要求只要音效）。音效 = `assets/sfx` CC0 真实录音库（7 音套件 + 100 条备选，无 whoosh）；`scripts/mix_sound.py` 把口播+音效混音（ogg/mp3 自动解码，无 ducking）。**转场/翻页静音**（whoosh 已移除）。`make_sfx.py` 为离线合成兜底。见 references/sound.md。
 - **叙事与镜头**：事实表先行、revealAt 节奏、反幻灯片清单 + 可执行动感下限（`narrative.md`）；运镜与景深规则（`camera.md` + `camera.js` / `remotion/CameraRig.tsx`）。
-- **手持人脸追踪**：`scripts/face_track.py` 离线检测 → One-Euro 平滑 → 裁切关键帧（JSON + ffmpeg sendcmd 双输出）；Remotion 用 `TrackedVideo.tsx` 逐帧插值人物窗，零依赖管线预裁切人物视频再进小圆。头晃出框、车内/街边杂背景靠它压掉。见 references/face-track.md。
+- **手持人脸追踪 + 稳像**：`scripts/face_track.py` 离线检测 → One-Euro 平滑 → 裁切关键帧（JSON + ffmpeg sendcmd 双输出）；Remotion 用 `TrackedVideo.tsx` 逐帧插值人物窗，零依赖管线预裁切人物视频再进小圆。**明显手持晃动的源（车内自拍/边走边拍）改用 v0.10 `scripts/stabilize_person.py`**：逐帧相似变换锁定人脸位置/大小/眼线，输出已稳像方形 mp4，小圆不再抖。见 references/face-track.md。
 - **两级验收**（`delivery-qa.md`）：资产级预览台 sweep → 成片级 MP4 逐镜头复核 + freezedetect 冻结门禁 + 数字停帧抽查。
 
 ## 双画幅 · 横屏 16:9 / 竖屏 9:16（单选）
@@ -85,7 +85,7 @@ references/workflow.md          整片六阶段工作流（含画幅单选规则
 references/narrative.md         叙事节奏：事实表 / revealAt / 反幻灯片 / 动感下限与数字模式
 references/remotion.md          Remotion 合成配方（bundle / KitShot / 整片骨架）
 references/camera.md            运镜与景深规则（camera.js 零依赖 + CameraRig Remotion）
-references/face-track.md        手持人脸追踪：检测→平滑→裁切轨道，两条合成路线消费
+references/face-track.md        手持人脸追踪 + 稳像：裁切轨道 / 相似变换稳像，两条合成路线消费
 references/legal-icons.md       51 法律图标使用指南
 references/delivery-qa.md       两级验收 + 可执行门禁 + 声音设计 + 成片检查
 references/roster.md            16 人物 × 变体 × 36 动作总表 + 11 领域组合矩阵
@@ -99,6 +99,7 @@ assets/legal-svg/               51 图标 + catalog.json + 预览图
 assets/sfx/                     真实录音音效库（7 音套件 + lib/ 100 条 + manifest.json + LICENSES.md）
 scripts/prepare_timing.py       SRT + ffprobe → timing.json
 scripts/face_track.py           人脸追踪 → 裁切轨道 JSON / ffmpeg sendcmd
+scripts/stabilize_person.py     手持强晃源稳像 → 已锁脸方形 mp4（v0.10）
 scripts/mix_sound.py            口播+音效 两层混音（无 BGM/ducking，ogg/mp3 自动解码）
 scripts/make_sfx.py             合成音效兜底（ffmpeg 7 音）
 ```
@@ -118,7 +119,7 @@ references/   两层流程文档与教程（11 篇）
 pipeline/     零依赖整片模板（配置 → 逐帧渲染 → 合成）
 remotion/     整片用 React 组件（运镜 / 图标动效 / 文书转场 / 追踪人物窗）
 assets/       legal-svg 图标库 · sfx 真实录音音效库
-scripts/      prepare_timing.py 口播对齐 · face_track.py 人脸追踪 · mix_sound.py 口播+音效两层混音 · make_sfx.py 合成兜底
+scripts/      prepare_timing.py 口播对齐 · face_track.py 人脸追踪 · stabilize_person.py 手持稳像 · mix_sound.py 口播+音效两层混音 · make_sfx.py 合成兜底
 docs/         README 用图
 qa/           开发期验收截图（不入库，.gitignore 排除）
 ```

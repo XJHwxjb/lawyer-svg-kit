@@ -135,8 +135,9 @@ bash compose.sh
 - 有 events.json + assets/sfx 时自动混音（口播+音效，音效音量 0.5，不压口播；ogg/mp3 自动 ffmpeg 解码）。
 - 无 BGM、无 ducking（律师要求只要音效）；转场/翻页静音（whoosh 已移除）；句间自然停顿合法。
 - PERSON 留空 = 纯动画；填路径 = 左下角 Ø300 真人小圆（循环播放，声音忽略）。
-  手持/头晃素材先按 [../references/face-track.md](../references/face-track.md) 预裁切：
-  `face_track.py --sendcmd track.cmd` → `ffmpeg -i person.mp4 -vf "sendcmd=f=track.cmd,crop=w=1080:h=1080:x=0:y=0" -an person-tracked.mp4`，PERSON 填裁切后的文件。
+  手持/头晃素材先按 [../references/face-track.md](../references/face-track.md) 处理：
+  缓慢漂移用 `face_track.py --sendcmd track.cmd` → `ffmpeg -i person.mp4 -vf "sendcmd=f=track.cmd,crop=w=1080:h=1080:x=0:y=0" -an person-tracked.mp4`；
+  **明显手持晃动（车内自拍/边走边拍）用 `stabilize_person.py person.mp4 -o person-stable.mp4`**（裁切压不住垂直摆/倾斜/zoom，小圆会抖）。PERSON 填处理后的文件。
 - 响度统一 loudnorm I=-16；首尾 0.35s/0.6s 淡入淡出。
 - 输出 `out/<NAME>_<ORIENT_LABEL>.mp4`——文件名必须与配置一致，别手改 OUT。
 
@@ -169,6 +170,7 @@ ffprobe -v error -show_entries format=duration:stream=width,height -of json out/
 | 转场太频繁/太慢 | 调 FILM.transition（帧数）；不要超过最短镜头帧数的一半 |
 | 字幕压到真人小圆 | captions.ass 的 MarginV 加到 ≥ 360 |
 | 真人小圆切头/晃出框 | 手持素材用了固定裁切；按 ../references/face-track.md 预裁切人物视频再填 PERSON |
+| 真人小圆里画面抖（动画层不抖） | 源是明显手持晃动，裁切追踪只平移压不住；改 `stabilize_person.py` 稳像后填 PERSON（face-track.md §6） |
 | 渲染很慢 | 正常：1080p 约 3–8 帧/秒。900 帧自动重启浏览器；可断点续渲 |
 | 合成极慢/画面卡在约 1 秒 | 个别 ffmpeg 构建的 aac 在"纯数字静音+衰减尾音"上掉进 denormal 浮点陷阱（慢约百倍）。compose.sh 已混入 -86dBFS 不可闻抖动噪声消除；自改音频链路时务必保留那路 amix |
 | 成片干巴巴/完全无音效 | 音轨只 map 了原声（自建引擎常见）。按 references/sound.md 引擎无关强制补 mix_sound 链路（口播+音效），音轨用 mixed.wav |

@@ -83,7 +83,7 @@ description: 法律科普/案件讲解视频的一站式 Skill：人物动作资
 1. **读懂任务**：成片还是样片？素材、输出位置、平台、时长、真人画面安排；**选定画幅**（没写先问）。
 2. **可靠时间轴**：ffprobe 检查素材；SRT 逐句对照原声校对；用 [scripts/prepare_timing.py](scripts/prepare_timing.py) 生成 timing.json。不猜测法律事实与数字。
 3. **逐句分镜**：STORYBOARD.md 覆盖完整时长，每行含原句/含义/人物动作（roster 动作 id）/道具流向/revealAt/转场。叙事与节奏方法见 [references/narrative.md](references/narrative.md)——先事实表，再行为，最后图表文字；避免整片像幻灯片。
-4. **选角与动作准备**：复用 §2（查库 → 造 → 预览台在选中画幅验收）。手持/非固定机位的真人素材先按 [references/face-track.md](references/face-track.md) 生成追踪裁切轨道（两条合成路线都消费它）。
+4. **选角与动作准备**：复用 §2（查库 → 造 → 预览台在选中画幅验收）。手持/非固定机位的真人素材按 [references/face-track.md](references/face-track.md) 处理：缓慢漂移用追踪裁切轨道；**明显手持晃动（车内自拍/边走边拍）用 `stabilize_person.py` 稳像**，否则真人小圆会抖（两条合成路线都消费其产物）。
 5. **合成整片**：两条路线**二选一，不要混用**，都必须满足 §0.5 数字呈现与 §0.6 动感最低要求：
    - **零依赖管线（默认推荐）**：按 [pipeline/README.md](pipeline/README.md) 把模板复制进案件工程，填 `film.config.js` → `node render.cjs` → `bash compose.sh`。镜头推拉、6 种场景底、交叉淡化、音效混音已内置，不需要 npm/React。
    - **Remotion**：需要更复杂合成且环境允许时，按 [references/remotion.md](references/remotion.md) 搭真人/头像层 + 字幕层 + 主库动画场景层；镜头推进用 [references/camera.md](references/camera.md)；图标动效与文书转场用 [remotion/](remotion/README.md) 组件。
@@ -109,6 +109,7 @@ assets/legal-svg/   51 个法律图标 + catalog.json + 预览图（图示/证�
 assets/sfx/         真实录音音效库（v0.8 默认）：7 音套件（无 whoosh）+ lib/ 100 条备选 + manifest.json + LICENSES.md
 remotion/     CameraRig（镜头分层）· LegalMotion（图标动效）· DocumentTransition（文书转场）· TrackedVideo（人脸追踪人物窗）
 scripts/      prepare_timing.py（SRT + 视频 → timing.json）· face_track.py（人脸追踪 → 裁切轨道 JSON / ffmpeg sendcmd）·
+              stabilize_person.py（手持强晃源稳像 → 已锁脸方形 mp4，v0.10）·
               mix_sound.py（口播+音效两层混音，ogg/mp3 自动解码，无 BGM/ducking）· make_sfx.py（离线合成兜底，7 音）
 docs/         公开 README 截图
 qa/           开发期验收截图（不属于运行资产）
@@ -129,6 +130,7 @@ qa/           开发期验收截图（不属于运行资产）
 - **镜头（零依赖）**：`camera.js` 的 `cameraAt(t01, keys[{at,x,y,scale}])` 求值 + `applyCamera(g, cam)` 写 transform；焦点用 `camFocus(x, y)` 传设计空间坐标；全舞台镜头 scale ≥ 1（否则边缘露底）；preset：push/hold/impact/pan/breathe。与 Remotion CameraRig 同一套数学，两条路线观感一致。
 - Remotion 里**全局帧与局部帧不混用**：Sequence 内 `useCurrentFrame()` 从 0 起算；`t01 = 局部帧 / durationInFrames`。
 - **追踪轨道以源视频帧计**：`face_track.py` 的 `track[].f` = 源帧号；Remotion `TrackedVideo` 内部按 fps 换算；零依赖路线用 `--sendcmd` 预裁切人物视频再进 PERSON，不在合成期跑模型。
+- **手持强晃源要稳像不是裁切**：裁切只平移窗口，垂直摆/头倾斜/远近 zoom 会透传进小圆（观感=抖）。`stabilize_person.py` 逐帧相似变换锁脸，输出方形 mp4 直接进 PERSON / 普通 OffthreadVideo；验收看残差 p95 与连续帧条（face-track.md §6）。
 
 ## 6. 交付前自检
 

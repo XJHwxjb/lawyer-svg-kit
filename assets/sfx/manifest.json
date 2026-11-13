@@ -1,12 +1,5 @@
 {
  "kit": {
-  "whoosh": {
-   "file": "whoosh.ogg",
-   "lib": "lib/kit/whoosh.ogg",
-   "license": "CC0 1.0",
-   "source_url": "https://freesound.org/people/qubodup/sounds/60013/",
-   "attribution": "\"Whoosh\" by qubodup (https://freesound.org/people/qubodup/sounds/60013/), CC0"
-  },
   "paper": {
    "file": "paper.wav",
    "lib": "lib/ave/paper-handle-1.wav",
@@ -58,46 +51,6 @@
   }
  },
  "lib": [
-  {
-   "file": "whoosh/fs-264777-swoosh.ogg",
-   "category": "whoosh",
-   "license": "CC0 1.0",
-   "source_url": "https://freesound.org/people/Shinplaster/sounds/264777/",
-   "attribution": "Shinplaster via Freesound (CC0; credit optional)",
-   "note": "Freesound HQ preview of a CC0 sound",
-   "duration_s": 4.0,
-   "origin": "Barty-Bart/motion-graphics"
-  },
-  {
-   "file": "whoosh/fs-169867-swoosh.ogg",
-   "category": "whoosh",
-   "license": "CC0 1.0",
-   "source_url": "https://freesound.org/people/Halgrimm/sounds/169867/",
-   "attribution": "Halgrimm via Freesound (CC0; credit optional)",
-   "note": "Freesound HQ preview of a CC0 sound",
-   "duration_s": 2.21,
-   "origin": "Barty-Bart/motion-graphics"
-  },
-  {
-   "file": "whoosh/fs-127197-fast-simple-chop-5-aif.ogg",
-   "category": "whoosh",
-   "license": "CC0 1.0",
-   "source_url": "https://freesound.org/people/dave.des/sounds/127197/",
-   "attribution": "dave.des via Freesound (CC0; credit optional)",
-   "note": "Freesound HQ preview of a CC0 sound",
-   "duration_s": 0.48,
-   "origin": "Barty-Bart/motion-graphics"
-  },
-  {
-   "file": "whoosh/fs-683101-quick-woosh.ogg",
-   "category": "whoosh",
-   "license": "CC0 1.0",
-   "source_url": "https://freesound.org/people/florianreichelt/sounds/683101/",
-   "attribution": "florianreichelt via Freesound (CC0; credit optional)",
-   "note": "Freesound HQ preview of a CC0 sound",
-   "duration_s": 1.86,
-   "origin": "Barty-Bart/motion-graphics"
-  },
   {
    "file": "pop/fs-447910-plop.ogg",
    "category": "pop",
@@ -306,66 +259,6 @@
    "attribution": "LegitCheese via Freesound (CC0; credit optional)",
    "note": "Freesound HQ preview of a CC0 sound",
    "duration_s": 0.76,
-   "origin": "Barty-Bart/motion-graphics"
-  },
-  {
-   "file": "transition/fs-702773-swipe-wav.ogg",
-   "category": "transition",
-   "license": "CC0 1.0",
-   "source_url": "https://freesound.org/people/LilMati/sounds/702773/",
-   "attribution": "LilMati via Freesound (CC0; credit optional)",
-   "note": "Freesound HQ preview of a CC0 sound",
-   "duration_s": 0.84,
-   "origin": "Barty-Bart/motion-graphics"
-  },
-  {
-   "file": "transition/fs-786514-swoosh-v2.ogg",
-   "category": "transition",
-   "license": "CC0 1.0",
-   "source_url": "https://freesound.org/people/migoreng1/sounds/786514/",
-   "attribution": "migoreng1 via Freesound (CC0; credit optional)",
-   "note": "Freesound HQ preview of a CC0 sound",
-   "duration_s": 0.3,
-   "origin": "Barty-Bart/motion-graphics"
-  },
-  {
-   "file": "transition/fs-856168-cyberpunk-glitch-hologram-tran.ogg",
-   "category": "transition",
-   "license": "CC0 1.0",
-   "source_url": "https://freesound.org/people/brktkrgll/sounds/856168/",
-   "attribution": "brktkrgll via Freesound (CC0; credit optional)",
-   "note": "Freesound HQ preview of a CC0 sound",
-   "duration_s": 2.99,
-   "origin": "Barty-Bart/motion-graphics"
-  },
-  {
-   "file": "transition/fs-816262-broomstick-whoosh-3-quiet-okm1.ogg",
-   "category": "transition",
-   "license": "CC0 1.0",
-   "source_url": "https://freesound.org/people/Sadiquecat/sounds/816262/",
-   "attribution": "Sadiquecat via Freesound (CC0; credit optional)",
-   "note": "Freesound HQ preview of a CC0 sound",
-   "duration_s": 0.41,
-   "origin": "Barty-Bart/motion-graphics"
-  },
-  {
-   "file": "transition/fs-850347-swipe-various.ogg",
-   "category": "transition",
-   "license": "CC0 1.0",
-   "source_url": "https://freesound.org/people/Gravy42/sounds/850347/",
-   "attribution": "Gravy42 via Freesound (CC0; credit optional)",
-   "note": "Freesound HQ preview of a CC0 sound",
-   "duration_s": 4.0,
-   "origin": "Barty-Bart/motion-graphics"
-  },
-  {
-   "file": "transition/fs-683096-woosh.ogg",
-   "category": "transition",
-   "license": "CC0 1.0",
-   "source_url": "https://freesound.org/people/florianreichelt/sounds/683096/",
-   "attribution": "florianreichelt via Freesound (CC0; credit optional)",
-   "note": "Freesound HQ preview of a CC0 sound",
-   "duration_s": 1.59,
    "origin": "Barty-Bart/motion-graphics"
   },
   {
@@ -959,36 +852,6 @@
    "origin": "Barty-Bart/motion-graphics"
   },
   {
-   "file": "whoosh/fs830856.ogg",
-   "category": "whoosh",
-   "license": "CC0 1.0",
-   "source_url": "https://freesound.org/people/MeanRaccoon/sounds/830856/",
-   "attribution": "MeanRaccoon via Freesound (CC0; credit given voluntarily)",
-   "note": "whoosh low by MeanRaccoon",
-   "duration_s": 0.35,
-   "origin": "Barty-Bart/motion-graphics"
-  },
-  {
-   "file": "whoosh/fs810485.ogg",
-   "category": "whoosh",
-   "license": "CC0 1.0",
-   "source_url": "https://freesound.org/people/CVLTIV8R/sounds/810485/",
-   "attribution": "CVLTIV8R via Freesound (CC0; credit given voluntarily)",
-   "note": "Analog Bass, Sweeps, and FX-001 by CVLTIV8R",
-   "duration_s": 0.58,
-   "origin": "Barty-Bart/motion-graphics"
-  },
-  {
-   "file": "whoosh/fs393811.ogg",
-   "category": "whoosh",
-   "license": "CC0 1.0",
-   "source_url": "https://freesound.org/people/deleted_user_6479820/sounds/393811/",
-   "attribution": "deleted_user_6479820 via Freesound (CC0; credit given voluntarily)",
-   "note": "Swish Single 4 by deleted_user_6479820",
-   "duration_s": 0.2,
-   "origin": "Barty-Bart/motion-graphics"
-  },
-  {
    "file": "click/fs788933.ogg",
    "category": "click",
    "license": "CC0 1.0",
@@ -1086,16 +949,6 @@
    "attribution": "BaggoNotes via Freesound (CC0; credit given voluntarily)",
    "note": "Points_Tick2 by BaggoNotes",
    "duration_s": 0.04,
-   "origin": "Barty-Bart/motion-graphics"
-  },
-  {
-   "file": "kit/whoosh.ogg",
-   "category": "whoosh",
-   "license": "CC0 1.0",
-   "source_url": "https://freesound.org/people/qubodup/sounds/60013/",
-   "attribution": "\"Whoosh\" by qubodup (https://freesound.org/people/qubodup/sounds/60013/), CC0",
-   "note": "Whoosh",
-   "duration_s": null,
    "origin": "Barty-Bart/motion-graphics"
   },
   {

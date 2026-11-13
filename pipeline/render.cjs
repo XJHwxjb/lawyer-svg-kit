@@ -1,4 +1,4 @@
-/* render.cjs — 整片逐帧渲染（pipeline 模板，v0.5）
+/* render.cjs — 整片逐帧渲染（pipeline 模板，v0.8）
  * 只用本机 Edge/Chrome + CDP + Node 内置模块，素材不出本机。
  * 需要 Node ≥ 22（内置 WebSocket）。
  *
@@ -10,8 +10,7 @@
  * 产出：
  *   frames/%05d.jpg    全局帧序列（含交叉淡化帧），compose.sh 直接读取
  *   events.json        音效事件绝对秒点 [{time, sfx, shot}]，mix_sound.py 读取
- *                      （含每个镜头边界的自动转场 whoosh，保证每镜头 ≥1 音效）
- *   sound.json         声音配置（BGM mood/bpm/sections + 总时长），make_bgm.py 读取
+ *                      （只含动作内置接触/冲击音效；转场/翻页静音，无自动 whoosh）
  *   film.info.json     时间轴/镜头元数据（验收与对轨用）
  *
  * 与旧版 flash 工程的区别（修掉的坑）：
@@ -224,22 +223,17 @@ async function main() {
     }
     if (todo.length) throw new Error(`仍有 ${todo.length} 帧未渲染`);
 
-    /* 3) 元数据与音效事件（绝对秒点 = (起始帧 + at*(帧数-1)) / fps） */
+    /* 3) 元数据与音效事件（绝对秒点 = (起始帧 + at*(帧数-1)) / fps）
+       只取动作内置 events（接触/冲击点）；转场/翻页不配音（whoosh 已移除）。
+       sfx:[] 的静音镜头由 film.html 把 events 置空，这里自然不产出。 */
     if (LIMIT >= info.shots.length) {
       const events = [];
       for (const s of info.shots) {
         for (const e of s.events || [])
           events.push({ time: +((s.startFrame + e.at * (s.frames - 1)) / FPS).toFixed(3), sfx: e.sfx, shot: s.id });
-        const cfg = FILM.shots[s.index] || {};
-        const muted = Array.isArray(cfg.sfx) && cfg.sfx.length === 0;
-        if (!muted)
-          events.push({ time: +Math.max(0, s.startFrame / FPS - 0.2).toFixed(3), sfx: 'whoosh', shot: s.id, auto: 'transition' });
       }
       events.sort((a, b) => a.time - b.time);
       fs.writeFileSync(path.join(ROOT, 'events.json'), JSON.stringify(events, null, 2));
-      const sound = Object.assign({ bgm: 'auto', mood: 'serious', bpm: 0, sections: [] }, FILM.sound || {});
-      sound.dur = +(info.totalFrames / FPS).toFixed(3);
-      fs.writeFileSync(path.join(ROOT, 'sound.json'), JSON.stringify(sound, null, 2));
       fs.writeFileSync(path.join(ROOT, 'film.info.json'), JSON.stringify(info, null, 2));
       const files = fs.readdirSync(FRAMES).filter(f => f.endsWith('.jpg')).length;
       console.log('FRAME_SEQUENCE ' + JSON.stringify({ total: info.totalFrames, files, events: events.length }));

@@ -1,13 +1,13 @@
-# assets/sfx 许可与来源（v0.7 真实录音库）
+# assets/sfx 许可与来源（v0.8 真实录音库）
 
-114 条真实录音 = 112 条 CC0 1.0 + 2 条 MIT 合成音。逐条登记见 `manifest.json`
+100 条真实录音 = 98 条 CC0 1.0 + 2 条 MIT 合成音。逐条登记见 `manifest.json`
 （file / category / license / source_url / attribution / origin），本文件是汇总说明。
 全部音频可商用、可修改、可随成片分发；两条例外见下方 MIT 声明。
 
 ## 来源仓库
 
 1. **Barty-Bart/motion-graphics**（仓库代码 MIT，Copyright (c) 2026 Bart）
-   `skills/sound-effects/sfx/` 内置 109 条 CC0 1.0 录音（Freesound 作者 qubodup、
+   `skills/sound-effects/sfx/` 内置 95 条 CC0 1.0 录音（Freesound 作者 qubodup、
    ethernel0 等 + Kenney 音效包）。本库只取音频文件，音频本身按 CC0 1.0 授权，
    与仓库代码许可无关。对应 `lib/` 下除 `ave/` 外的全部目录，origin 字段已登记。
 2. **kmilo93sd/agent-video-editor**（MIT，Copyright (c) 2026 kmilo93sd）
@@ -18,11 +18,10 @@
    - cash-register-cha-ching.wav — 仓库自合成（Kenney handleCoins + 合成铃声），MIT
    - stamp-thud.wav — 仓库自合成（Kenney bookPlace1 + impactSoft），MIT
 
-## 默认 8 音套件（根目录，mix_sound.py 按语义名取用）
+## 默认 7 音套件（根目录，mix_sound.py 按语义名取用）
 
 | 语义名 | 文件 | 来源 | 许可 |
 |---|---|---|---|
-| whoosh | whoosh.ogg | qubodup · Freesound 60013 | CC0 1.0 |
 | paper | paper.wav | Luckius · OGA various-paper-sound-effects（paper-handle-1） | CC0 1.0 |
 | ching | ching.wav | agent-video-editor 合成（handleCoins+铃声） | MIT |
 | thud | thud.ogg | Kenney · impact-sounds impactPunch heavy | CC0 1.0 |
@@ -67,6 +66,7 @@ manifest.json 作为来源台账；对外交付如被问及素材来源，按上
 
 ## 不在本库内的素材
 
-- **Mixkit 音效/音乐**：Mixkit Free License 禁止再分发原文件 → 一律运行时下载到
-  案件工程（BGM 见 `scripts/fetch_bgm.py` + `assets/bgm/catalog.json`），不进本仓库。
 - **make_sfx.py 合成音**：离线兜底，产出到 `assets/sfx-synth`，不覆盖本库。
+- **BGM 已移除（v0.8）**：律师要求只加音效、不加背景音乐；fetch_bgm.py / make_bgm.py /
+  assets/bgm 已删除，成片不铺任何背景音乐。
+- **whoosh 挥动/转场音已移除（v0.8）**：转场/翻页静音；lib 内不再保留 whoosh/swoosh 类录音。

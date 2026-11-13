@@ -1,4 +1,4 @@
-# pipeline/ — 零依赖整片模板（v0.7）
+# pipeline/ — 零依赖整片模板（v0.8）
 
 把律师口播变成成片的**可照抄流水线**：`film.config.js 配置 → render.cjs 逐帧截图 → compose.sh 合成`。
 不用 Remotion、不用 npm install，只需要本机 **Edge/Chrome + Node ≥ 22 + ffmpeg + python3**。
@@ -15,8 +15,9 @@ Remotion 路线（references/remotion.md）功能等价，二选一，不要混�
 | 镜头之间硬切 | film.html 双缓冲交叉淡化（`transition` 帧数），帧级确定性 |
 | `hold<1` 导致结尾冻结 | t01 = local/(frames-1)，最后一帧恰好完成，禁止 hold 参数 |
 | 数字一闪而过 / 累加合计乱跳 | 配置层约束 + delivery-qa.md 的停帧抽查（见 SKILL.md §0.5） |
-| 没有音效/干口播 | 声音三层：events.json（含自动转场 whoosh）+ assets/sfx 真实录音库 + fetch_bgm.py 真实曲目 BGM + mix_sound.py 自动 ducking，见 references/sound.md |
-| 合成音"电子味"被用户否掉 | v0.7 默认换真实素材：CC0 录音音效 + Mixkit 曲目（运行时下载）；make_sfx/make_bgm 降级离线兜底 |
+| 没有音效/干口播 | 声音两层：events.json（动作接触/冲击音）+ assets/sfx 真实录音库 + mix_sound.py，无 BGM，见 references/sound.md |
+| 合成音"电子味"被用户否掉 | v0.7 起默认换真实素材：CC0 录音音效；make_sfx 降级离线兜底 |
+| 律师只要音效不要背景音乐 / 翻页有"呼"声 | v0.8 删除 BGM 全链路与 whoosh：转场/翻页静音，只留接触/冲击音效 |
 | 分镜文档与代码漂移 | 单一 STORYBOARD.md → film.config.js 一一对应 |
 
 ## 0. 前置检查
@@ -37,8 +38,8 @@ python --version   # 3.8+；音效脚本用
 ```
 来自 Skill 根目录：  kit.js  camera.js  actions.js
 来自 pipeline/：     film.html  film.config.js  case-actions.js  render.cjs  compose.sh
-来自 scripts/：      fetch_bgm.py  mix_sound.py  make_bgm.py  make_sfx.py   → 放到工程的 scripts/ 子目录
-来自 assets/：       sfx/（真实录音库整目录）  bgm/catalog.json   → 放到工程的 assets/ 子目录
+来自 scripts/：      mix_sound.py  make_sfx.py   → 放到工程的 scripts/ 子目录
+来自 assets/：       sfx/（真实录音库整目录）   → 放到工程的 assets/ 子目录
 ```
 
 复制后工程结构：
@@ -48,10 +49,9 @@ python --version   # 3.8+；音效脚本用
 ├── kit.js  camera.js  actions.js        # 资产库（只读，不改）
 ├── film.html  film.config.js  case-actions.js
 ├── render.cjs  compose.sh
-├── scripts/fetch_bgm.py  scripts/mix_sound.py  scripts/make_bgm.py  scripts/make_sfx.py
-├── assets/sfx/（8 音套件 + lib/ + manifest.json + LICENSES.md）  assets/bgm/catalog.json
+├── scripts/mix_sound.py  scripts/make_sfx.py
+├── assets/sfx/（7 音套件 + lib/ + manifest.json + LICENSES.md）
 ├── voice.wav  captions.ass  person.mp4  # 案件素材（下一步准备）
-├── bgm-src/                             # Mixkit mp3 运行时缓存（自动生成，不进公开仓库）
 └── out/                                 # 成片输出
 ```
 
@@ -92,16 +92,15 @@ ffmpeg -i captions.srt captions.ass
 
 自定义动作写 case-actions.js（文件内有示例），注册后 `act` 用其 id。
 
-## 4. 声音素材（v0.7 默认真实素材，无需生成）
+## 4. 声音素材（v0.8 默认真实音效，无 BGM，无需生成）
 
-- **音效**：随模板复制的 `assets/sfx` 就是真实录音库（CC0 为主，8 音套件 + lib/ 114 条备选，
+- **音效**：随模板复制的 `assets/sfx` 就是真实录音库（CC0 为主，7 音套件 + lib/ 100 条备选，
   来源与许可见 assets/sfx/LICENSES.md）。mix_sound.py 按 events 的语义名自动取用并解码 ogg/wav。
   换音/加音见 assets/sfx/README.md。离线兜底才跑 `python scripts/make_sfx.py --out assets/sfx-synth`
   （合成音，混音改 --sfx-dir 指向它，交付须声明）。
-- **BGM**：compose.sh 自动调 `fetch_bgm.py` 按 `sound.json`（render.cjs 从 film.config.js 的
-  `sound` 字段产出）的 mood/sections **运行时下载 Mixkit 真实曲目**组装：每 mood 两首备选、
-  章节间 0.8s 交叉淡化、RMS 校准、许可台账 bgm.credits.json。需要网络；失败自动回退
-  `make_bgm.py` 合成曲（交付须声明）。Mixkit mp3 只缓存到案件工程 bgm-src/，**不进公开仓库**。
+- **无 BGM**：律师要求只要音效、不要背景音乐。compose.sh 不再下载/合成 BGM，mix_sound.py
+  只混口播+音效（无 ducking）。**转场/翻页静音**：whoosh 已删除，events.json 只含动作内置
+  接触/冲击音效（paper/ching/thud/stamp/crack/pop/scratch）；句间自然停顿合法。
 
 规则与门禁见 [../references/sound.md](../references/sound.md)。
 
@@ -127,14 +126,14 @@ node render.cjs
 
 ## 7. 合成成片
 
-改 compose.sh 顶部「案件配置」（NAME/ORIENT_LABEL/FPS/VOICE/PERSON/CAPTIONS/BGM），然后：
+改 compose.sh 顶部「案件配置」（NAME/ORIENT_LABEL/FPS/VOICE/PERSON/CAPTIONS），然后：
 
 ```bash
 bash compose.sh
 ```
 
-- 有 events.json + assets/sfx 时自动混音（音效音量 0.5，不压口播；ogg/mp3 自动 ffmpeg 解码）。
-- BGM 默认 auto（Mixkit 真实曲目运行时下载，间隙 −7dB / 说话 −17dB 自动 ducking，许可台账 bgm.credits.json）；synth = 合成兜底（须声明）；填路径 = 自有授权音乐；off = 无 BGM（须向用户声明）。
+- 有 events.json + assets/sfx 时自动混音（口播+音效，音效音量 0.5，不压口播；ogg/mp3 自动 ffmpeg 解码）。
+- 无 BGM、无 ducking（律师要求只要音效）；转场/翻页静音（whoosh 已移除）；句间自然停顿合法。
 - PERSON 留空 = 纯动画；填路径 = 左下角 Ø300 真人小圆（循环播放，声音忽略）。
 - 响度统一 loudnorm I=-16；首尾 0.35s/0.6s 淡入淡出。
 - 输出 `out/<NAME>_<ORIENT_LABEL>.mp4`——文件名必须与配置一致，别手改 OUT。
@@ -146,8 +145,8 @@ bash compose.sh
 ```bash
 # 冻结门禁：任何 ≥0.5s 的静止段都要解释（合法静止只有结尾淡出前）
 ffmpeg -i out/成片.mp4 -vf freezedetect=n=-60dB:d=0.5 -f null - 2>&1 | grep freeze
-# 声音连续性门禁：句间不应有静音段（BGM 连续铺设）
-ffmpeg -i out/成片.mp4 -af silencedetect=n=-40dB:d=0.4 -f null - 2>&1 | grep -c silence_start
+# 音效门禁：峰值不过载 + events.json 无 whoosh（转场/翻页静音）；句间静音合法（无 BGM）
+ffmpeg -i out/成片.mp4 -af astats=metadata=1 -f null - 2>&1 | grep "Peak level"
 # 时长/分辨率核对
 ffprobe -v error -show_entries format=duration:stream=width,height -of json out/成片.mp4
 ```
@@ -169,6 +168,6 @@ ffprobe -v error -show_entries format=duration:stream=width,height -of json out/
 | 字幕压到真人小圆 | captions.ass 的 MarginV 加到 ≥ 360 |
 | 渲染很慢 | 正常：1080p 约 3–8 帧/秒。900 帧自动重启浏览器；可断点续渲 |
 | 合成极慢/画面卡在约 1 秒 | 个别 ffmpeg 构建的 aac 在"纯数字静音+衰减尾音"上掉进 denormal 浮点陷阱（慢约百倍）。compose.sh 已混入 -86dBFS 不可闻抖动噪声消除；自改音频链路时务必保留那路 amix |
-| 成片干巴巴/句间全静音 | 音轨只 map 了原声（自建引擎常见）。按 references/sound.md 引擎无关强制补 fetch_bgm（或 make_bgm 兜底）+ mix_sound 链路，音轨用 mixed.wav |
-| fetch_bgm FETCH_FAIL | 网络/代理问题：compose.sh 已自动回退合成曲（交付须声明）；想要真实曲目，给 fetch_bgm.py 加 --proxy http://127.0.0.1:7897 手动跑一遍再合成 |
+| 成片干巴巴/完全无音效 | 音轨只 map 了原声（自建引擎常见）。按 references/sound.md 引擎无关强制补 mix_sound 链路（口播+音效），音轨用 mixed.wav |
+| 翻页/转场还有"呼"声 | 用了旧模板（render.cjs 自动 whoosh / 旧 actions.js / 旧 sfx 库）；更新到 v0.8，删 frames/ 重渲 events |
 | mix_sound 报 sfx_missing | events 引用了 assets/sfx 根目录没有的名字；按 assets/sfx/README.md 补音或改 events |

@@ -22,15 +22,9 @@ const FILM = {
                              // 不要超过最短镜头帧数的一半。
   voiceDuration: 0,          // 口播总秒数（ffprobe 测得）；render.cjs 用它核对总帧数，0=跳过核对
 
-  sound: {                   // v0.7 声音三层（references/sound.md）：口播+真实BGM+真实音效，BGM 默认必加
-    bgm: 'auto',             // auto=Mixkit 真实曲目运行时下载（需网络，许可见 assets/bgm/catalog.json）
-                             // 网络失败 compose.sh 自动回退合成曲并声明；'off'=无BGM（须声明）
-    mood: 'serious',         // 整体基调：serious 悬念/叙事 | steady 平稳分析 | upbeat 轻快解决
-    bpm: 0,                  // 仅合成兜底曲用：0=按 mood 默认(76/96/124)。关键数字/金句/开头尽量落拍
-    sections: [              // 分段铺设：章节边界切 mood（真实曲目间 0.8s 交叉淡化），与 STORYBOARD 章节对齐
-      // { at: 0, mood: 'serious' }, { at: 34.1, mood: 'steady' }, { at: 76, mood: 'upbeat' },
-    ],
-  },
+  // 声音（v0.8，references/sound.md）：成片 = 口播 + 动作音效，无 BGM（律师要求只加音效）。
+  // 音效由动作内置 events 自动产出（接触/冲击点），mix_sound.py 按语义名取 assets/sfx 真实录音。
+  // 转场/翻页静音（whoosh 已移除）；句间口播停顿合法，不铺背景音乐。无需在此配置声音字段。
 
   shots: [
     /* 每项字段说明：
@@ -47,7 +41,8 @@ const FILM = {
        cast     可选。自定义阵容 [{id, who, variant, opt}]；不填用动作自带 cast。
                 飞行道具给出方记得 opt:{noProp:true}。
        sfx      可选。null/不填 = 用动作内置 events；[] = 本镜头静音；
-                也可自定义 [{at:0~1, sfx:'whoosh|paper|ching|thud|stamp|crack|pop|scratch'}]。 */
+                也可自定义 [{at:0~1, sfx:'paper|ching|thud|stamp|crack|pop|scratch'}]。
+                转场/翻页不配音（whoosh 已移除）。 */
     { act: 'doc-handoff', dur: 4.6, bg: 'court', camera: 'push' },
     // money-flow 计数在 t=.8 结束：停留 = dur×(1-.8) ≥ 1.2s → dur 必须 ≥ 6s。
     // focus 指向计数器（设计空间 540,250）；金额是库内演示值，成片须改稿件值。

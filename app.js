@@ -286,13 +286,7 @@ function sfx(name) {
   lastSfx[name] = now;
   const ctx = audio(), t0 = ctx.currentTime;
   const out = master;
-  if (name === 'whoosh') {
-    const src = ctx.createBufferSource(); src.buffer = noiseBuf(.4);
-    const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.2;
-    bp.frequency.setValueAtTime(400, t0); bp.frequency.exponentialRampToValueAtTime(1900, t0 + .3);
-    const g = ctx.createGain(); env(g, t0, .06, .4, .3);
-    src.connect(bp).connect(g).connect(out); src.start(t0); src.stop(t0 + .4);
-  } else if (name === 'paper') {
+  if (name === 'paper') {
     for (let i = 0; i < 2; i++) {
       const src = ctx.createBufferSource(); src.buffer = noiseBuf(.1);
       const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1400;

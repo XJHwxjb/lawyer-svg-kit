@@ -10,7 +10,7 @@ def({
   name, desc, dur,    // dur 秒（预览时钟用）
   cast: [{ id, who, variant?, opt? }],   // 出场角色；id 是 S.chars 的键
   phases: [[tEnd, '阶段名'], ...],        // 阶段 chip，最后一项 tEnd=1.01
-  events: [{ at: t01, sfx: 'whoosh' }],  // 音效事件点（与画面冲击对齐）
+  events: [{ at: t01, sfx: 'paper' }],  // 音效事件点（与画面接触/冲击对齐；转场/翻页不配音）
   build(S) {
     // 建道具节点（S.below 桌景 / S.above 道具 / S.fx 火花chip）
     return {
@@ -66,7 +66,7 @@ def({
   id: 'seal-up', cat: 'focus', name: '查封贴封条', dur: 4.8,
   desc: '封条飞向门板拍平，查封印显现',
   phases: [[.3, '持封条'], [.6, '贴上门板'], [.85, '拍平压实'], [1.01, '查封完成']],
-  events: [{ at: .3, sfx: 'whoosh' }, { at: .6, sfx: 'stamp' }],
+  events: [{ at: .6, sfx: 'stamp' }],
   cast: [{ id: 'bailiff', who: 'police', variant: 'bailiff', opt: { noProp: true } },
          { id: 'rogue', who: 'rogue' }],
   build(S) {
@@ -101,7 +101,7 @@ def({
 
 ## 4. 音效事件表
 
-`whoosh`(挥动/飞出) `paper`(纸张) `ching`(金属/钱) `thud`(落地/闷击) `stamp`(盖章脆响) `crack`(裂开) `pop`(chip 弹出) `scratch`(书写)。预览台按 events 自动合成；成片混音按同一 at 贴真实 SFX。
+`paper`(纸张/落桌接触) `ching`(金属/钱) `thud`(落地/闷击) `stamp`(盖章脆响) `crack`(裂开) `pop`(chip 弹出) `scratch`(书写)。**7 音，无 whoosh**——转场/翻页/挥动飞出静音（v0.8 删除 whoosh）；只有接触/冲击点配音。预览台按 events 自动合成；成片混音按同一 at 贴真实 SFX。
 
 ## 5. 验收清单（每个新动作必跑）
 

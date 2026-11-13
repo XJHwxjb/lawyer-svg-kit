@@ -28,7 +28,7 @@ def({
   id: 'doc-handoff', cat: 'hand', name: '文书递接', dur: 4.6,
   desc: '起诉状从男方手中弧线飞出，女方接住时翻面一次',
   phases: [[.18, '持握示证'], [.55, '弧线递出'], [.75, '接住翻面'], [1.01, '持稳确认']],
-  events: [{ at: .18, sfx: 'whoosh' }, { at: .55, sfx: 'paper' }],
+  events: [{ at: .55, sfx: 'paper' }],
   build(S) {
     const doc = propDoc(el('g', {}, S.above));
     let pos = [0, 0];
@@ -153,7 +153,7 @@ def({
   id: 'stack-split', cat: 'money', name: '钱堆分裂', dur: 4.6,
   desc: '66万总堆蓄力后分裂：10万判决返还飞向男方，其余留存女方',
   phases: [[.2, '总额示数'], [.35, '蓄力压缩'], [.7, '分裂飞送'], [1.01, '落定盖章']],
-  events: [{ at: .35, sfx: 'whoosh' }, { at: .7, sfx: 'thud' }],
+  events: [{ at: .7, sfx: 'thud' }],
   build(S) {
     propTable(el('g', { transform: `translate(${X(540)},${Yg(600)}) scale(${O.os})` }, S.below), 320);
     const all = propStack(el('g', {}, S.above), 6);
@@ -211,7 +211,7 @@ def({
   id: 'approach-retreat', cat: 'move', name: '靠近·退后', dur: 4.8,
   desc: '两人滑入对峙、怒标弹出、僵持微颤，再退回复位',
   phases: [[.4, '靠近对峙'], [.55, '僵持微颤'], [.9, '退后疏远'], [1.01, '复位']],
-  events: [{ at: .02, sfx: 'whoosh' }, { at: .4, sfx: 'thud' }, { at: .55, sfx: 'whoosh' }],
+  events: [{ at: .4, sfx: 'thud' }],
   build(S) {
     const anger = symbolAnger(el('g', { opacity: 0 }, S.fx));
     const dist = el('g', { opacity: 0 }, S.fx);
@@ -286,7 +286,7 @@ def({
   id: 'stamp-drop', cat: 'focus', name: '印章砸落', dur: 4.6,
   desc: '印章举起砸向证据清单：冲击波环+纸面余震+红色认定印显现',
   phases: [[.25, '举章'], [.38, '砸落'], [.6, '冲击余震'], [.85, '抬章'], [1.01, '认定完成']],
-  events: [{ at: .25, sfx: 'whoosh' }, { at: .38, sfx: 'stamp' }],
+  events: [{ at: .38, sfx: 'stamp' }],
   build(S) {
     propTable(el('g', { transform: `translate(${X(540)},${Yg(600)}) scale(${O.os})` }, S.below), 320);
     const doc = propDoc(el('g', {}, S.above), '证据清单');
@@ -398,7 +398,7 @@ function actHandoff(o) {
   return def({
     id: o.id, cat: 'hand', name: o.name, dur: o.dur || 4.6, desc: o.desc, cast: o.cast,
     phases: [[.18, '持握示证'], [.55, '弧线递出'], [.75, '接住翻面'], [1.01, '持稳确认']],
-    events: [{ at: .18, sfx: 'whoosh' }, { at: .55, sfx: 'paper' }],
+    events: [{ at: .55, sfx: 'paper' }],
     build(S) {
       const A = S.chars[o.from], B = S.chars[o.to];
       const fA = faceFlip(A.C, 1), fB = faceFlip(B.C, -1);
@@ -488,7 +488,7 @@ function actStamp(o) {
   return def({
     id: o.id, cat: 'focus', name: o.name, dur: o.dur || 4.6, desc: o.desc, cast: o.cast,
     phases: [[.25, '举章'], [.38, '砸落'], [.6, '冲击余震'], [.85, '抬章'], [1.01, o.chipText]],
-    events: [{ at: .25, sfx: 'whoosh' }, { at: .38, sfx: 'stamp' }, { at: .8, sfx: 'pop' }],
+    events: [{ at: .38, sfx: 'stamp' }, { at: .8, sfx: 'pop' }],
     build(S) {
       const C = S.chars[o.caster], W = o.watch ? S.chars[o.watch] : null;
       const fC = faceFlip(C.C, 1);
@@ -586,7 +586,7 @@ function actMovePair(o) {
   return def({
     id: o.id, cat: 'move', name: o.name, dur: o.dur || 4.8, desc: o.desc, cast: o.cast,
     phases: [[.15, '就位'], [.8, o.grayB ? '押解/搀扶移出' : '同步位移'], [1.01, '离场']],
-    events: [{ at: .1, sfx: 'whoosh' }, { at: .8, sfx: 'thud' }],
+    events: [{ at: .8, sfx: 'thud' }],
     build(S) {
       const A = S.chars[o.a], B = S.chars[o.b];
       const fA = o.faceA != null ? faceFlip(A.C, o.faceA) : 1;
@@ -614,7 +614,7 @@ function actLock(o) {
   return def({
     id: o.id, cat: 'lock', name: o.name, dur: o.dur || 5.2, desc: o.desc, cast: o.cast,
     phases: [[.35, '走近控制'], [.55, '手铐落腕'], [.75, '咔嗒锁定'], [1.01, '灰化低头']],
-    events: [{ at: .05, sfx: 'whoosh' }, { at: .55, sfx: 'ching' }, { at: .75, sfx: 'thud' }],
+    events: [{ at: .55, sfx: 'ching' }, { at: .75, sfx: 'thud' }],
     build(S) {
       const A = S.chars[o.a], B = S.chars[o.b];
       const fA = faceFlip(A.C, 1), fB = faceFlip(B.C, -1);
@@ -656,7 +656,7 @@ function actJoint(o) {
   return def({
     id: o.id, cat: 'lock', name: o.name, dur: o.dur || 5, desc: o.desc, cast: o.cast,
     phases: [[.4, '倾身靠近'], [.6, o.mode === 'seal' ? '双手争章' : '握手达成'], [.85, '脉冲确认'], [1.01, o.chipText]],
-    events: [{ at: .4, sfx: 'whoosh' }, { at: .6, sfx: o.mode === 'seal' ? 'thud' : 'pop' }],
+    events: [{ at: .6, sfx: o.mode === 'seal' ? 'thud' : 'pop' }],
     build(S) {
       const A = S.chars[o.a], B = S.chars[o.b];
       const M = o.mid ? S.chars[o.mid] : null;
@@ -728,7 +728,7 @@ function actCustody(o) {
   return def({
     id: o.id, cat: 'move', name: o.name, dur: 5, desc: o.desc, cast: o.cast,
     phases: [[.2, '居中犹豫'], [.7, '走向归属'], [1.01, o.chipText]],
-    events: [{ at: .2, sfx: 'whoosh' }, { at: .7, sfx: 'pop' }],
+    events: [{ at: .7, sfx: 'pop' }],
     build(S) {
       const M = S.chars.man, W = S.chars.woman, K = S.chars.child;
       const done = chip(el('g', { opacity: 0 }, S.fx), 540, 300, o.chipText, PAL.azure, 22);

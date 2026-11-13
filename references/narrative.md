@@ -94,7 +94,7 @@
 - [ ] 每个镜头 `camera ≠ 'off'`，或镜头内有持续的动作/部件运动（二者至少其一）。入场后完全静止等下一镜 = 不合格。
 - [ ] 镜头之间有转场：pipeline `transition ≥ 1`（默认 12 帧交叉淡化）；Remotion 用 DocumentTransition 或设计的切镜。全片硬切 = 不合格。
 - [ ] 场景底不全片 `paper`（按 §3 的地点映射表选）。
-- [ ] 声音三层齐全（assets/sfx 真实录音库 + fetch_bgm.py 真实曲目 + mix_sound.py，sound.md）：BGM 连续、音效可闻、sfx_missing 为空、许可台账在；合成兜底或用户明确无音乐均已声明。
+- [ ] 声音两层齐全（assets/sfx 真实录音库 + mix_sound.py，sound.md）：音效可闻、sfx_missing 为空、events 无 whoosh（转场/翻页静音）、峰值不过载；无 BGM；合成兜底已声明（如用）。
 - [ ] 成片 freezedetect 无 ≥ 0.5s 的未解释静止段（delivery-qa.md 冻结门禁）。
 - [ ] 构图：横屏人物高度 ≥ 画面 35%（默认 cs 1.15 × P.scale 1.12 ≈ 36%）；窄画幅/缩小构图用 `cs/os ≥ 1.4` 或 `P.scale ≥ 1.3` 补回。连续 3 个以上镜头上方 1/3 全空 → 加天空 UI（chip/计数器，`Ys` 自动抬升）或换景别。竖屏人物贴 GROUND 布置，上方 40% 安全区只放标题/字幕/天空 UI。
 

@@ -1,16 +1,16 @@
-# assets/sfx — 真实录音音效库（v0.7 默认）
+# assets/sfx — 真实录音音效库（v0.8 默认）
 
-律师动画成片的声音三层之一。默认 8 音是真实录音（CC0 为主），不再是合成占位音。
-来源与许可见 [LICENSES.md](LICENSES.md)，逐条台账见 `manifest.json`。
+律师动画成片的声音两层之一（口播 + 音效，无 BGM）。默认 7 音是真实录音（CC0 为主），
+不再是合成占位音。来源与许可见 [LICENSES.md](LICENSES.md)，逐条台账见 `manifest.json`。
 
 ## 结构
 
 ```
 assets/sfx/
-├── whoosh.ogg / paper.wav / ching.wav / thud.ogg /
-│   stamp.wav / crack.ogg / pop.ogg / scratch.wav   ← 默认 8 音（语义名）
-├── lib/            ← 114 条备选真实录音，按类别分目录
-│   ├── kit/ whoosh/ impact/ transition/ ding/ click/
+├── paper.wav / ching.wav / thud.ogg / stamp.wav /
+│   crack.ogg / pop.ogg / scratch.wav               ← 默认 7 音（语义名）
+├── lib/            ← 100 条备选真实录音，按类别分目录
+│   ├── kit/ impact/ transition/ ding/ click/
 │   │   pop/ riser/ ui-blip/ glitch/ typing/ tick/ ambience/ …
 │   └── ave/        ← agent-video-editor 的 5 条（paper/scratch/ching/stamp 备选）
 ├── manifest.json   ← 逐条：file/category/license/source_url/attribution/origin
@@ -36,4 +36,4 @@ assets/sfx/
 
 - 预览台 app.js 的音效是 WebAudio 即时合成的近似音，**只听个响**；
   真实质感以 mix_sound.py 混出的成片为准。
-- 口播 > 音效 > BGM 的优先级与响度契约见 `references/sound.md`。
+- 口播 > 音效 的优先级与响度契约见 `references/sound.md`（v0.8 无 BGM；转场/翻页静音）。

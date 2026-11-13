@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""make_sfx.py — 离线兜底：用 ffmpeg 合成 8 个法律动画音效（v0.7 兜底合成音）
+"""make_sfx.py — 离线兜底：用 ffmpeg 合成 7 个法律动画音效（v0.8 兜底合成音）
 
 默认音效是 assets/sfx 真实录音库（CC0，见 assets/sfx/LICENSES.md）。
 本脚本仅在离线/真实库缺失时使用，产出到 assets/sfx-synth，不覆盖真实库；
@@ -7,12 +7,13 @@
 
 用法：
     python scripts/make_sfx.py --out assets/sfx-synth
-    python scripts/make_sfx.py --out assets/sfx-synth --only whoosh,paper
+    python scripts/make_sfx.py --out assets/sfx-synth --only paper,ching
 
 产出（48kHz 单声道 wav，与 app.js 预览台音效同名同语义）：
-    whoosh  挥动/飞出      paper   纸张/翻面     ching   金钱/到账
-    thud    重物落地       stamp   盖章          crack   碎裂/撕毁
-    pop     气泡/出现      scratch 书写/划动
+    paper   纸张/翻面      ching   金钱/到账     thud    重物落地
+    stamp   盖章           crack   碎裂/撕毁     pop     气泡/出现
+    scratch 书写/划动
+（whoosh 挥动/转场音已移除：律师要求转场/翻页静音。）
 
 全部由 lavfi 信号源合成，不含任何第三方素材。
 """
@@ -27,11 +28,6 @@ if hasattr(sys.stdout, "reconfigure"):
 
 # 每个音效 = lavfi 输入列表 + filter_complex（末端不标号，自动作为输出）
 SFX = {
-    "whoosh": {
-        "inputs": ["anoisesrc=color=pink:sample_rate=48000:duration=0.4:seed=7"],
-        "filter": "[0:a]bandpass=f=1000:width_type=h:w=1500,"
-                  "volume='sin(PI*t/0.4)':eval=frame,volume=1.8,alimiter=limit=0.9",
-    },
     "paper": {
         "inputs": ["anoisesrc=color=white:sample_rate=48000:duration=0.2:seed=11"],
         "filter": "[0:a]highpass=f=1400,"
@@ -82,9 +78,9 @@ SFX = {
 
 
 def main():
-    ap = argparse.ArgumentParser(description="ffmpeg 离线兜底合成 8 个法律动画音效")
+    ap = argparse.ArgumentParser(description="ffmpeg 离线兜底合成 7 个法律动画音效")
     ap.add_argument("--out", default="assets/sfx-synth", help="输出目录（默认 assets/sfx-synth，勿覆盖真实库 assets/sfx）")
-    ap.add_argument("--only", default="", help="只生成逗号分隔的部分音效，如 whoosh,paper")
+    ap.add_argument("--only", default="", help="只生成逗号分隔的部分音效，如 paper,ching")
     args = ap.parse_args()
 
     if not shutil.which("ffmpeg"):

@@ -67,12 +67,16 @@
 
 **合成路线二选一（SKILL.md §3.5），不要混用：**
 
-- **零依赖管线（默认推荐）**：按 [../pipeline/README.md](../pipeline/README.md) 把模板复制进案件工程，把分镜逐行翻译成 `film.config.js` 的 shots（每镜头的 dur/act/bg/camera/focus），`node render.cjs` 逐帧渲染（内置交叉淡化与镜头运动），`bash compose.sh` 合成真人小圆/字幕/音效/响度。这条路线不需要 npm 和 React，镜头、场景底、转场、音效都已内置，照 README 逐步执行即可。
+- **零依赖管线（默认推荐）**：按 [../pipeline/README.md](../pipeline/README.md) 把模板复制进案件工程，把分镜逐行翻译成 `film.config.js` 的 shots（每镜头的 dur/act/bg/camera/focus），`node render.cjs` 逐帧渲染（内置交叉淡化、镜头运动与章节进度条），`bash compose.sh` 合成真人 3:4 小窗/字幕/音效/响度。这条路线不需要 npm 和 React，镜头、场景底、转场、音效都已内置，照 README 逐步执行即可。
 - **Remotion**：按 [remotion.md](remotion.md) 先准备副本和字幕数据，再接入连续播放的真人视频、独立字幕层和按时间启动的动画场景。动画场景用主库 `update(t01, P)` 逐帧驱动（移植方法见 studio.md）；镜头推进用 [camera.md](camera.md)；图标动效与文书转场用 [remotion/](../remotion/README.md) 组件。
 
-用户指定其他工具时，用相同时间轴原则适配，不强制更换框架，但 SKILL.md §0.5（数字呈现）、§0.6（动感最低要求）与 §0.7（声音两层）在任何路线下都必须满足。
+用户指定其他工具时，用相同时间轴原则适配，不强制更换框架，但 SKILL.md §0.5（数字呈现）、§0.6（动感最低要求）、§0.7（声音两层）、§0.8（真人 3:4 小窗）与 §0.9（章节进度条）在任何路线下都必须满足。
 
 **声音两层（v0.8，任何路线必做，[sound.md](sound.md)）**：音效用 `assets/sfx` 真实录音库（CC0 为主，7 音套件，复制 scripts/ 时一并复制 assets/）、`mix_sound.py` 把口播+音效混成 `mixed.wav`（无 BGM、无 ducking），合成脚本音轨用 `mixed.wav`。**不加背景音乐**（律师要求只要音效）；**转场/翻页静音**（whoosh 已移除，events.json 只含动作内置接触/冲击音效）。自建引擎也必须产出 events.json 并走这条链；只 map 原声 = 不合格。句间自然停顿合法（无 BGM）；离线兜底 `make_sfx.py` 合成须声明。
+
+**真人 3:4 小窗（v0.9，有真人素材时必做）**：源视频不是 3:4 就先裁成 3:4，以律师人物为中心——宽源水平居中裁两侧，窄源按 compose.sh `PERSON_CY`（默认 0.30）纵向锚定脸部；默认 300×400 左下角。裁完抽帧目检脸完整不切头（SKILL.md §0.8）。
+
+**章节进度条（v0.9，[chapters.md](chapters.md)）**：读完整口播稿，按语义转折归纳 3~6 章（标签 ≤8 字），边界取 SRT 句边界（变速口播先换算系数），写 chapters.json 到工程根目录；pipeline 渲染自动注入顶部灰框分格条（格宽 ∝ 时长、当前格高亮、底部进度线）。Remotion 路线按同一数据自建等价图层。没有 chapters.json = 不画条。
 
 实现每个镜头时：
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# compose.sh — 合成成片（pipeline 模板，v0.8）
-# 动画帧序列 + 口播原声 + ASS 字幕 + 口播+真实音效（无 BGM）+ 真人小圆（可选）
+# compose.sh — 合成成片（pipeline 模板，v0.9）
+# 动画帧序列 + 口播原声 + ASS 字幕 + 口播+真实音效（无 BGM）+ 真人 3:4 小窗（可选）
 # 用法：改下方「案件配置」→ bash compose.sh
 # 依赖：ffmpeg / ffprobe（PATH 中）；声音混音另需 python3 + scripts/mix_sound.py
 #
@@ -15,12 +15,19 @@ ORIENT_LABEL="横屏16x9"    # ← 横屏16x9 | 竖屏9x16，与 FILM.orient 对
 FPS=30                     # ← 与 FILM.fps 一致
 VOICE="voice.wav"          # ← 口播音频（也可填口播视频路径，自动取其音轨）
 PERSON=""                  # ← 真人视频路径；留空 = 纯动画成片
+PERSON_W=300               # ← 真人小窗宽度 px（v0.9：3:4 矩形窗，高自动 = 宽×4/3）
+PERSON_CY=0.30             # ← 3:4 裁切的纵向锚点：0=贴顶 0.5=居中 1=贴底。
+                           #   律师脸通常在源画面上 1/3，取 0.25~0.40 让脸落在窗内上 1/3；
+                           #   源已是 3:4 时裁切自动退化为全幅，此值无效。
+PERSON_POS="40:main_h-440" # ← 小窗位置（默认左下角，距底/左 40px）。
+                           #   竖屏字幕 MarginV ≥ 460，别压到小窗。
 CAPTIONS="captions.ass"    # ← ASS 字幕路径；留空 = 无字幕（文件名用 ASCII，避免转义问题）
 DUR=""                     # ← 成片总秒数；留空 = 自动取 VOICE 时长（推荐）
 # ────────────────────────────────────────────────────────────────────
 
 OUT="out/${NAME}_${ORIENT_LABEL}.mp4"
 mkdir -p out
+PERSON_H=$(awk "BEGIN{printf \"%d\", $PERSON_W*4/3}")
 
 if [ ! -d frames ]; then echo "缺 frames/ 目录，先跑 node render.cjs"; exit 1; fi
 if [ ! -f "$VOICE" ]; then echo "缺口播音频: $VOICE"; exit 1; fi
@@ -60,16 +67,18 @@ DITHER="-f lavfi -i anoisesrc=color=white:amplitude=0.00005:sample_rate=48000"
 LOUD="amix=inputs=2:normalize=0:duration=first,loudnorm=I=-16:TP=-1.5:LRA=11"
 
 if [ -n "$PERSON" ]; then
-  # 真人左下角 Ø300 小圆（用户标准机位）：裁方→缩300→圆形 alpha→overlay。
+  # 真人 3:4 小窗（v0.9，律师要求）：源视频不是 3:4 就先裁成 3:4，再以人物为中心取窗。
+  # crop 表达式对任意源画幅成立：宽源裁两侧（水平居中），窄源裁上下（纵向按 PERSON_CY 锚定脸）。
+  # 源恰好 3:4 时 w=iw、h=ih，裁切退化为全幅。裁完缩到 PERSON_W×PERSON_H 叠到 PERSON_POS。
   # -stream_loop -1：真人素材短于成片时循环播放。真人声音忽略，只用口播轨。
-  # 注意：竖屏时字幕别压到小圆（字幕底部边距建议 ≥ 360px，见 captions 样式 MarginV）。
   if [ ! -f "$PERSON" ]; then echo "缺真人视频: $PERSON"; exit 1; fi
+  PCROP="crop=w='if(gt(iw/ih,3/4),ih*3/4,iw)':h='if(gt(iw/ih,3/4),ih,iw*4/3)':x='(iw-ow)/2':y='(ih-oh)*${PERSON_CY}'"
   ffmpeg -y -hide_banner -loglevel warning \
     -framerate "$FPS" -i frames/%05d.jpg \
     -stream_loop -1 -i "$PERSON" \
     -i "$AUDIO" \
     $DITHER \
-    -filter_complex "[1:v]scale=300:300:force_original_aspect_ratio=increase,crop=300:300,format=yuva420p,geq=lum='lum(X,Y)':cb='cb(X,Y)':cr='cr(X,Y)':a='if(lte(hypot(X-W/2,Y-H/2),W/2),255,0)'[p];[0:v][p]overlay=40:main_h-340:shortest=0,${VF}[o];[2:a][3:a]${LOUD}[a]" \
+    -filter_complex "[1:v]${PCROP},scale=${PERSON_W}:${PERSON_H},setsar=1[p];[0:v][p]overlay=${PERSON_POS}:shortest=0,${VF}[o];[2:a][3:a]${LOUD}[a]" \
     -map "[o]" -map "[a]" \
     "${ENC[@]}" "$OUT"
 else

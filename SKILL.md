@@ -1,6 +1,6 @@
 ---
 name: lawyer-svg-kit
-description: 法律科普/案件讲解视频的一站式 Skill：人物动作资产库 + 整片制作流程。当用户要做法律类视频、需要案件人物插画或交换/抓捕/敲槌等动作动画、或提到"彩礼案/律师视频/人物库/造人物/造动作"时使用。提供 16 个固定剪影人物（14 个换装变体）、36 个纯时间函数动作、51 个法律图标、横屏 16:9 或竖屏 9:16 单选生成、可交互预览台、口播/SRT 对齐、零依赖整片管线（镜头/场景底/转场/声音两层：口播+真实录音音效，无 BGM、翻页转场静音）与 Remotion 合成配方、成片验收，以及缺人物/缺动作时的制造教程。
+description: 法律科普/案件讲解视频的一站式 Skill：人物动作资产库 + 整片制作流程。当用户要做法律类视频、需要案件人物插画或交换/抓捕/敲槌等动作动画、或提到"彩礼案/律师视频/人物库/造人物/造动作"时使用。提供 16 个固定剪影人物（14 个换装变体）、36 个纯时间函数动作、51 个法律图标、横屏 16:9 或竖屏 9:16 单选生成、可交互预览台、口播/SRT 对齐、零依赖整片管线（镜头/场景底/转场/声音两层：口播+真实录音音效，无 BGM、翻页转场静音/真人 3:4 居中裁切小窗/口播稿自动章节进度条）与 Remotion 合成配方、成片验收，以及缺人物/缺动作时的制造教程。
 ---
 
 # lawyer-svg-kit · 律师视频一站式 Skill
@@ -35,6 +35,13 @@ description: 法律科普/案件讲解视频的一站式 Skill：人物动作资
    - **转场/翻页静音**：whoosh 已从主库 events、render.cjs、预览台与音效库删除；镜头交叉淡化不发声，文书只有落桌/接触才用 paper。句间静音合法（无 BGM，不再要求全片连续有声）。
    - 音效触发点对齐接触/冲击帧（`events[].at × dur`），每镜头 ≥1 个接触/冲击音效；mix_sound 输出 `sfx_missing` 必须为空、峰值不过载（≤0.98）。
    - 任何渲染路线（含自建引擎）都必须走 `mix_sound.py` 混音并过 delivery-qa.md 声音门禁（峰值/可闻/sfx_missing 清零/无 whoosh + 五秒点耳机听检）；只 map 原声 = 不合格。
+8. **真人小窗 3:4 居中**（v0.9，律师要求，见 [references/studio.md](references/studio.md)）：
+   - 真人源视频**不是 3:4 就先裁成 3:4**，且必须以律师人物为中心：宽源（16:9 等）水平居中裁两侧；窄源（9:16 等）按 `PERSON_CY` 纵向锚定脸部（默认 0.30，脸落在窗内上 1/3）。源已是 3:4 则不裁。
+   - 小窗默认 300×400（3:4）左下角，`PERSON_W/PERSON_POS` 可调；竖屏字幕 MarginV ≥ 460 别压窗。裁切效果必须抽帧目检：脸完整在窗内、不切头顶/下巴。
+9. **章节进度条**（v0.9，律师要求，见 [references/chapters.md](references/chapters.md)）：
+   - AI 先读懂本期口播稿，归纳 **3~6 个章节**（标签 ≤8 字），写 `chapters.json`（label/start/end 秒，与成片时间轴一致）；渲染时自动在画面顶部生成灰框分格进度条：格宽 ∝ 章节时长、当前格高亮、底部细进度线。
+   - 章节边界必须对齐口播语义转折（不是均分时长）；标签用观众词（"引言/痛点/怎么办"），不用内部术语。没有 chapters.json = 不画条（兼容旧工程）。
+   - 验收：抽 3 个时间点停帧，高亮格与当时口播内容一致；进度线连续推进无跳变。
 
 ## 1. 先判断入口
 
@@ -85,7 +92,7 @@ description: 法律科普/案件讲解视频的一站式 Skill：人物动作资
 3. **逐句分镜**：STORYBOARD.md 覆盖完整时长，每行含原句/含义/人物动作（roster 动作 id）/道具流向/revealAt/转场。叙事与节奏方法见 [references/narrative.md](references/narrative.md)——先事实表，再行为，最后图表文字；避免整片像幻灯片。
 4. **选角与动作准备**：复用 §2（查库 → 造 → 预览台在选中画幅验收）。
 5. **合成整片**：两条路线**二选一，不要混用**，都必须满足 §0.5 数字呈现与 §0.6 动感最低要求：
-   - **零依赖管线（默认推荐）**：按 [pipeline/README.md](pipeline/README.md) 把模板复制进案件工程，填 `film.config.js` → `node render.cjs` → `bash compose.sh`。镜头推拉、6 种场景底、交叉淡化、音效混音已内置，不需要 npm/React。
+   - **零依赖管线（默认推荐）**：按 [pipeline/README.md](pipeline/README.md) 把模板复制进案件工程，填 `film.config.js` → `node render.cjs` → `bash compose.sh`。镜头推拉、6 种场景底、交叉淡化、音效混音、真人 3:4 小窗、章节进度条已内置，不需要 npm/React。章节条先按 [references/chapters.md](references/chapters.md) 从口播稿生成 chapters.json。
    - **Remotion**：需要更复杂合成且环境允许时，按 [references/remotion.md](references/remotion.md) 搭真人/头像层 + 字幕层 + 主库动画场景层；镜头推进用 [references/camera.md](references/camera.md)；图标动效与文书转场用 [remotion/](remotion/README.md) 组件。
    原声只播放一次，字幕不改变法律含义。
 6. **成片验收交付**：按 [references/delivery-qa.md](references/delivery-qa.md) 对实际导出的 MP4 实听实看；交付成片 + 可编辑工程路径，说明时长、画幅、已完成检查与限制。
@@ -102,9 +109,9 @@ app.js        预览台驱动：时钟 / 控件 / 音效 / 导出 / 双模式库
 index.html    预览台页面（SVG 舞台 + 控件）
 style.css     预览台样式
 references/   资产层：roster · character-forge · action-forge · studio
-              制作层：workflow · narrative · remotion · camera · legal-icons · sound · delivery-qa
-pipeline/     零依赖整片模板：film.html(双缓冲转场) · film.config.js · case-actions.js ·
-              render.cjs(CDP 逐帧，转场/翻页静音) · compose.sh(ffmpeg 合成+声音两层) · README.md(照抄指南)
+              制作层：workflow · narrative · remotion · camera · legal-icons · sound · chapters · delivery-qa
+pipeline/     零依赖整片模板：film.html(双缓冲转场+章节条) · film.config.js · case-actions.js ·
+              render.cjs(CDP 逐帧，转场/翻页静音，注入 chapters.json) · compose.sh(ffmpeg 合成+声音两层+真人3:4小窗) · README.md(照抄指南)
 assets/legal-svg/   51 个法律图标 + catalog.json + 预览图（图示/证据板用）
 assets/sfx/         真实录音音效库（v0.8 默认）：7 音套件（无 whoosh）+ lib/ 100 条备选 + manifest.json + LICENSES.md
 remotion/     CameraRig（镜头分层）· LegalMotion（图标动效）· DocumentTransition（文书转场）
@@ -145,6 +152,8 @@ qa/           开发期验收截图（不属于运行资产）
 - [ ] freezedetect 冻结门禁通过（≥ 0.5s 静止段均已解释）；每镜头有镜头运动或持续动作（§0.6）
 - [ ] 转场已实现（非全片硬切）；场景底按剧情选择（非全片 paper）
 - [ ] 声音两层门禁通过（sound.md）：音效每镜头 ≥1 且可闻、sfx_missing 为空、峰值不过载、events 无 whoosh（转场/翻页静音）；无 BGM；合成兜底已声明（如用）；五秒点耳机听检已做
+- [ ] 真人小窗（如有）：源非 3:4 已裁 3:4 且以人物为中心，抽帧脸完整不切头；字幕未压窗（§0.8）
+- [ ] 章节条（如有 chapters.json）：3~6 格、标签对齐口播语义、停帧抽查高亮格正确、进度线连续（§0.9）
 - [ ] 成片 MP4 实听实看验收（delivery-qa.md），检查记录留存
 - [ ] 交付成片 + 可编辑工程路径，说明已完成检查与限制；成片文件名 = out/<案件名>_<画幅>.mp4
 - [ ] 私密材料未离开授权目录

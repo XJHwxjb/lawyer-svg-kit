@@ -33,6 +33,7 @@
   <g id="worldA"></g>
   <g id="worldB" opacity="0"></g>
   <rect id="grainRect" width="1920" height="1080" filter="url(#grain)" opacity=".5" pointer-events="none"/>
+  <g id="chapterBar"></g>
 </svg>
 <script src="kit.js"></script>
 <script src="camera.js"></script>
@@ -144,6 +145,7 @@ function renderFrame(g) {
   if (i < 0) i = TL.length - 1;
   const e = TL[i], local = g - e.start;
   drive(worldA, slotA, e, local / (e.frames - 1));
+  updateChapterBar(g / FPS);
   const Tn = i > 0 ? Math.min(TRANS, e.frames, TL[i - 1].frames) : 0;
   if (Tn > 0 && local < Tn) {
     drive(worldB, slotB, TL[i - 1], 1); // 上一镜头完成态
@@ -161,12 +163,77 @@ function seekShot(i, t01) {
   const e = TL[i];
   if (!e) throw new Error('镜头不存在: ' + i);
   drive(worldA, slotA, e, clamp01(t01));
+  updateChapterBar((e.start + clamp01(t01) * (e.frames - 1)) / FPS);
   worldA.root.setAttribute('opacity', 1);
   worldB.root.setAttribute('opacity', 0);
 }
 
+/* ---------- 章节进度条（v0.9）：AI 读口播稿生成 chapters.json ----------
+   灰框横条 + N 格（格宽 ∝ 章节时长）+ 当前格高亮 + 底部细进度线。
+   位置默认顶部（抖音章节条模板），chapters.position='bottom' 可移到底部。
+   没有 chapters.json / setChapters 未调用 = 不画（向后兼容 v0.8）。
+   条在 worldA/B 与颗粒之外，转场淡化不影响它；状态只由时间 t 决定（确定性）。 */
+const chapterRoot = document.getElementById('chapterBar');
+let CH = null;
+
+function setChapters(cfg) {
+  chapterRoot.innerHTML = '';
+  CH = null;
+  const list = ((cfg && cfg.chapters) || []).filter(c => c && c.label && c.end > c.start);
+  if (!list.length) return;
+  const port = O.id === 'port';
+  const barH = port ? 88 : 64;
+  const barY = (cfg.position === 'bottom') ? H - barH : 0;
+  const padX = 24, gap = 0;
+  const innerX = padX, innerW = W - padX * 2;
+  const fs = port ? 32 : 28;
+  const total = list.reduce((s, c) => s + (c.end - c.start), 0);
+  const totalEnd = list[list.length - 1].end;
+  // 格宽 ∝ 时长，但保底放得下标签；超宽再整体压缩
+  let segs = list.map(c => {
+    const minW = String(c.label).length * fs + 28;
+    return { label: String(c.label), start: c.start, end: c.end,
+             w: Math.max(minW, innerW * (c.end - c.start) / total) };
+  });
+  const sum = segs.reduce((s, x) => s + x.w, 0);
+  if (sum > innerW) segs.forEach(x => x.w = x.w * innerW / sum);
+  el('rect', { x: 0, y: barY, width: W, height: barH, fill: '#202020', 'fill-opacity': .55 }, chapterRoot);
+  let cx = innerX;
+  segs.forEach((s, i) => {
+    s.x = cx; cx += s.w + gap;
+    s.hl = el('rect', { x: s.x, y: barY, width: s.w, height: barH - 6, fill: '#ffffff', 'fill-opacity': .14, opacity: 0 }, chapterRoot);
+    const f = Math.min(fs, Math.floor((s.w - 16) / s.label.length));
+    s.txt = el('text', { x: s.x + s.w / 2, y: barY + (barH - 6) / 2, 'text-anchor': 'middle',
+      'dominant-baseline': 'central', 'font-size': f, fill: '#ffffff', opacity: .72 }, chapterRoot);
+    s.txt.textContent = s.label;
+    if (i > 0) el('line', { x1: s.x, y1: barY + 12, x2: s.x, y2: barY + barH - 16,
+      stroke: '#ffffff', 'stroke-opacity': .28, 'stroke-width': 2 }, chapterRoot);
+  });
+  const trackY = barY + barH - 6;
+  el('rect', { x: innerX, y: trackY, width: innerW, height: 4, fill: '#ffffff', 'fill-opacity': .22 }, chapterRoot);
+  const fill = el('rect', { x: innerX, y: trackY, width: 0, height: 4, fill: '#ffffff', 'fill-opacity': .95 }, chapterRoot);
+  CH = { segs, fill, innerW, totalEnd, active: -1 };
+  updateChapterBar(0);
+}
+
+function updateChapterBar(t) {
+  if (!CH) return;
+  let idx = CH.segs.findIndex(s => t >= s.start && t < s.end);
+  if (idx < 0) idx = t < CH.segs[0].start ? 0 : CH.segs.length - 1;
+  if (idx !== CH.active) {
+    CH.active = idx;
+    CH.segs.forEach((s, i) => {
+      const on = i === idx;
+      s.hl.setAttribute('opacity', on ? 1 : 0);
+      s.txt.setAttribute('opacity', on ? 1 : .72);
+      s.txt.setAttribute('font-weight', on ? 700 : 400);
+    });
+  }
+  CH.fill.setAttribute('width', (CH.innerW * clamp01(t / CH.totalEnd)).toFixed(1));
+}
+
 window.__film = {
-  renderFrame, seekShot,
+  renderFrame, seekShot, setChapters,
   sceneHTML: () => worldA.scene.innerHTML,
   camTransform: () => worldA.cam.getAttribute('transform'),
   info: {

@@ -61,6 +61,20 @@ mix_sound.py 输出的 `sfx_missing` 必须为空（events 引用了 sfx 目录�
 
 > v0.8 已退役的旧门禁：BGM 连续性（silencedetect 必须 0）、ducking ≈10dB 摆动、bgm.credits.json 许可台账——因为不再加 BGM。句间静音现在合法；silencedetect 只用于排查**异常**长静音（整段口播丢失），不是"必须为 0"。音效来源台账仍查 assets/sfx/LICENSES.md + manifest.json（CC0 为主，2 条 MIT 合成音声明已附）。
 
+**7) 真人小窗与章节条（v0.9）**
+
+```bash
+# 真人小窗：抽 2 帧（开头/中段）目检——窗为 3:4、脸完整在窗内不切头顶/下巴、字幕未压窗
+ffmpeg -ss 3 -i out/成片.mp4 -frames:v 1 qa/person-a.jpg
+ffmpeg -ss 15 -i out/成片.mp4 -frames:v 1 qa/person-b.jpg
+# 章节条：每章中间时刻各停一帧，高亮格标签 = 当时口播话题，进度线 ≈ 已播比例
+ffmpeg -ss 10 -i out/成片.mp4 -frames:v 1 qa/chapter-mid.jpg
+```
+
+- 真人源非 3:4 必须已裁 3:4 且以人物为中心（compose.sh PERSON_CY 锚定脸部）；源是 3:4 则不裁。窗默认 300×400 左下角，竖屏字幕 MarginV ≥ 460。
+- 章节条（有 chapters.json 时）：3~6 格、标签 ≤8 字且来自口播语义（不是均分时长、不是内部术语）；转场帧条不闪不淡；film.info.json 的 chapters 与 chapters.json 一致。无 chapters.json 的工程确认无条无报错。
+- 详细规则见 [chapters.md](chapters.md) 与 SKILL.md §0.8/§0.9。
+
 ## 逐镜头复核：不要只检查文件能播放
 
 用下面的表格检查实际导出的画面，而不是只对照分镜备注或代码。案件数字来自用户材料；以下是检查方法，不是对任何案件事实的认定。

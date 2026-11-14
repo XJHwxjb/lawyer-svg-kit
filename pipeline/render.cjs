@@ -1,4 +1,4 @@
-/* render.cjs — 整片逐帧渲染（pipeline 模板，v0.8）
+/* render.cjs — 整片逐帧渲染（pipeline 模板，v0.9）
  * 只用本机 Edge/Chrome + CDP + Node 内置模块，素材不出本机。
  * 需要 Node ≥ 22（内置 WebSocket）。
  *
@@ -11,7 +11,10 @@
  *   frames/%05d.jpg    全局帧序列（含交叉淡化帧），compose.sh 直接读取
  *   events.json        音效事件绝对秒点 [{time, sfx, shot}]，mix_sound.py 读取
  *                      （只含动作内置接触/冲击音效；转场/翻页静音，无自动 whoosh）
- *   film.info.json     时间轴/镜头元数据（验收与对轨用）
+ *   film.info.json     时间轴/镜头元数据（验收与对轨用；有 chapters.json 时附带 chapters）
+ *
+ * 章节进度条（v0.9）：案件目录放 chapters.json（AI 读口播稿生成，见 references/chapters.md），
+ *   渲染时自动注入合成页顶部灰框章节条；没有该文件 = 不画条（兼容 v0.8）。
  *
  * 与旧版 flash 工程的区别（修掉的坑）：
  *   · t01 = local/(frames-1)：最后一帧恰好完成动作，hold<1 的结尾冻结被禁止。
@@ -36,6 +39,17 @@ const FRAMES = path.join(ROOT, 'frames');
 const HTTP_PORT = Number(process.env.PORT || 8735);
 const RESTART_EVERY = 900; // 每渲 900 帧重启一次浏览器，防内存膨胀
 const LIMIT = Number(process.env.SHOT_LIMIT || FILM.shots.length);
+
+// 章节进度条（v0.9）：可选 chapters.json，AI 读口播稿生成（references/chapters.md）
+const CHAPTERS_FILE = path.join(ROOT, 'chapters.json');
+let CHAPTERS = null;
+if (fs.existsSync(CHAPTERS_FILE)) {
+  CHAPTERS = JSON.parse(fs.readFileSync(CHAPTERS_FILE, 'utf8'));
+  if (!Array.isArray(CHAPTERS.chapters) || !CHAPTERS.chapters.length)
+    throw new Error('chapters.json 的 chapters 必须是非空数组');
+  for (const c of CHAPTERS.chapters)
+    if (!c.label || !(c.end > c.start)) throw new Error('chapters.json 每项需要 label 与 end>start: ' + JSON.stringify(c));
+}
 
 const BROWSER = process.env.BROWSER_PATH || [
   'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
@@ -139,6 +153,7 @@ async function withBrowser(fn) {
       await sleep(120);
     }
     if (!ready) throw new Error('合成页未就绪（film.html 脚本报错？看控制台）');
+    if (CHAPTERS) await evaluate('__film.setChapters(' + JSON.stringify(CHAPTERS) + ')');
 
     return await fn({ send, evaluate, capture, errs });
   } finally {
@@ -183,6 +198,7 @@ async function main() {
       throw new Error('资产验收未通过，先修镜头再渲染');
 
     const info = await withBrowser(async ({ evaluate }) => await evaluate('__film.info'));
+    if (CHAPTERS) info.chapters = CHAPTERS.chapters;
     if (FILM.voiceDuration > 0) {
       const filmDur = info.totalFrames / FPS;
       if (filmDur < FILM.voiceDuration - 0.1)
@@ -198,7 +214,8 @@ async function main() {
       const f = frameFile(g);
       if (!fs.existsSync(f) || fs.statSync(f).size < 2000) todo.push(g);
     }
-    console.log(`RENDER total=${limitFrames} todo=${todo.length} (${CW}x${CH}@${FPS})`);
+    console.log(`RENDER total=${limitFrames} todo=${todo.length} (${CW}x${CH}@${FPS})` +
+      (CHAPTERS ? ` chapters=${CHAPTERS.chapters.length}` : ' chapters=off'));
 
     const t0 = Date.now();
     let attempt = 0, done = 0;

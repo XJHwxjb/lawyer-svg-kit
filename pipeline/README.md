@@ -1,4 +1,4 @@
-# pipeline/ — 零依赖整片模板（v0.8）
+# pipeline/ — 零依赖整片模板（v0.9）
 
 把律师口播变成成片的**可照抄流水线**：`film.config.js 配置 → render.cjs 逐帧截图 → compose.sh 合成`。
 不用 Remotion、不用 npm install，只需要本机 **Edge/Chrome + Node ≥ 22 + ffmpeg + python3**。
@@ -18,6 +18,8 @@ Remotion 路线（references/remotion.md）功能等价，二选一，不要混�
 | 没有音效/干口播 | 声音两层：events.json（动作接触/冲击音）+ assets/sfx 真实录音库 + mix_sound.py，无 BGM，见 references/sound.md |
 | 合成音"电子味"被用户否掉 | v0.7 起默认换真实素材：CC0 录音音效；make_sfx 降级离线兜底 |
 | 律师只要音效不要背景音乐 / 翻页有"呼"声 | v0.8 删除 BGM 全链路与 whoosh：转场/翻页静音，只留接触/冲击音效 |
+| 真人小窗太大/源画幅不一 | v0.9 源非 3:4 自动裁 3:4 以人物为中心，默认 300×400 左下角小窗 |
+| 观众不知道讲到哪 / 律师要进度条 | v0.9 章节进度条：AI 读口播稿生成 chapters.json，顶部灰框分格+高亮+进度线 |
 | 分镜文档与代码漂移 | 单一 STORYBOARD.md → film.config.js 一一对应 |
 
 ## 0. 前置检查
@@ -52,6 +54,7 @@ python --version   # 3.8+；音效脚本用
 ├── scripts/mix_sound.py  scripts/make_sfx.py
 ├── assets/sfx/（7 音套件 + lib/ + manifest.json + LICENSES.md）
 ├── voice.wav  captions.ass  person.mp4  # 案件素材（下一步准备）
+├── chapters.json                        # 可选：章节进度条（AI 读口播稿生成，见 §5）
 └── out/                                 # 成片输出
 ```
 
@@ -68,8 +71,8 @@ ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:no
 ffmpeg -i captions.srt captions.ass
 ```
 
-字幕样式建议：单 Main 样式、白字黑边、底部居中；**有真人小圆时 MarginV ≥ 360**（避免压到左下角 Ø300 圆）。
-竖屏 9:16 时字幕放在下方安全区，上方 40% 留给标题（见 SKILL.md §5）。
+字幕样式建议：单 Main 样式、白字黑边、底部居中；**有真人小窗时 MarginV ≥ 460**（避免压到左下角 300×400 小窗）。
+竖屏 9:16 时字幕放在下方安全区，上方 40% 留给标题（见 SKILL.md §5）；顶部章节条（如有）占 88px，与安全区不冲突。
 
 ## 3. 填 film.config.js（从 STORYBOARD.md 逐行翻译）
 
@@ -104,29 +107,44 @@ ffmpeg -i captions.srt captions.ass
 
 规则与门禁见 [../references/sound.md](../references/sound.md)。
 
-## 5. 冒烟渲染（先渲 3 个镜头检查）
+## 5. 章节进度条（v0.9，可选）
+
+律师要求"视频加进度条"：顶部灰框横条分 N 格，每格 = 口播的一个章节，讲到哪格高亮哪格。
+
+1. **AI 读完整口播稿/SRT**，按语义转折归纳 3~6 个章节，标签 ≤8 字（观众词，不用内部术语）。
+2. 边界秒点取 SRT 句边界；口播变速过（如 1.1x）先换算到成片时间轴。
+3. 写 `chapters.json` 到工程根目录（格式与完整流程见 [../references/chapters.md](../references/chapters.md)）：
+   `{"position":"top","chapters":[{"label":"引言","start":0,"end":5.2}, ...]}`
+4. `node render.cjs` 自动注入：格宽 ∝ 时长、当前格高亮、底部细进度线；条在转场之外不闪不淡。
+5. 没有 chapters.json = 不画条（兼容 v0.8 旧工程）。compose.sh 无需改动。
+
+验收：每章中间时刻停帧，高亮格 = 当时口播话题；进度线 ≈ 已播比例（chapters.md §3）。
+
+## 6. 冒烟渲染（先渲 3 个镜头检查）
 
 ```bash
 SHOT_LIMIT=3 node render.cjs
 ```
 
-检查 `frames/00000.jpg` 等：构图完整、人物接物正确、场景底出现、镜头有推拉。
-**这一步必须实际打开图片看**，不能只看日志。有问题改 film.config.js 后删掉 frames/ 重渲。
+检查 `frames/00000.jpg` 等：构图完整、人物接物正确、场景底出现、镜头有推拉；
+有 chapters.json 时顶部章节条出现、首格高亮。**这一步必须实际打开图片看**，不能只看日志。
+有问题改 film.config.js 后删掉 frames/ 重渲。
 
-## 6. 全量渲染
+## 7. 全量渲染
 
 ```bash
 node render.cjs
 ```
 
 - 断点续渲：已有帧自动跳过；中断后重跑同一命令即可。
-- 产出 `frames/%05d.jpg`（全局序列，含转场帧）、`events.json`、`film.info.json`。
+- 产出 `frames/%05d.jpg`（全局序列，含转场帧）、`events.json`、`film.info.json`（有章节条时附带 chapters）。
 - 开头会跑 ASSET_CHECK：7 相位 + NaN 检查 + 镜头 transform 检查，不过不渲。
 - 若日志出现 `WARN 画面总时长 < 口播`，回 film.config.js 补 dur，删 frames/ 重渲。
 
-## 7. 合成成片
+## 8. 合成成片
 
-改 compose.sh 顶部「案件配置」（NAME/ORIENT_LABEL/FPS/VOICE/PERSON/CAPTIONS），然后：
+改 compose.sh 顶部「案件配置」（NAME/ORIENT_LABEL/FPS/VOICE/PERSON/CAPTIONS，
+真人小窗另有 PERSON_W/PERSON_CY/PERSON_POS），然后：
 
 ```bash
 bash compose.sh
@@ -134,11 +152,14 @@ bash compose.sh
 
 - 有 events.json + assets/sfx 时自动混音（口播+音效，音效音量 0.5，不压口播；ogg/mp3 自动 ffmpeg 解码）。
 - 无 BGM、无 ducking（律师要求只要音效）；转场/翻页静音（whoosh 已移除）；句间自然停顿合法。
-- PERSON 留空 = 纯动画；填路径 = 左下角 Ø300 真人小圆（循环播放，声音忽略）。
+- PERSON 留空 = 纯动画；填路径 = 真人 3:4 小窗（v0.9）：
+  - 源非 3:4 自动裁 3:4：宽源水平居中裁两侧；窄源按 PERSON_CY（默认 0.30）纵向锚定脸部。
+  - 默认 300×400 左下角（PERSON_W 调大小、PERSON_POS 调位置）；循环播放，声音忽略。
+  - 裁切后必须抽帧目检：脸完整在窗内、不切头顶/下巴（PERSON_CY 取 0.25~0.40 微调）。
 - 响度统一 loudnorm I=-16；首尾 0.35s/0.6s 淡入淡出。
 - 输出 `out/<NAME>_<ORIENT_LABEL>.mp4`——文件名必须与配置一致，别手改 OUT。
 
-## 8. 验收（不通过不交付）
+## 9. 验收（不通过不交付）
 
 按 references/delivery-qa.md 执行，至少包括：
 
@@ -165,7 +186,10 @@ ffprobe -v error -show_entries format=duration:stream=width,height -of json out/
 | 画面 NaN/undefined | 动作代码写了画布坐标字面量；场景字面量必须过 X()/Yg()/Ys()（studio.md §8） |
 | 成片结尾画面不动 | dur 之和 < 口播时长；补镜头时长重渲 |
 | 转场太频繁/太慢 | 调 FILM.transition（帧数）；不要超过最短镜头帧数的一半 |
-| 字幕压到真人小圆 | captions.ass 的 MarginV 加到 ≥ 360 |
+| 字幕压到真人小窗 | captions.ass 的 MarginV 加到 ≥ 460 |
+| 章节条没出现 | chapters.json 不在工程根目录 / JSON 语法错 / chapters 为空；看 render.cjs 日志 chapters=off |
+| 章节高亮与口播对不上 | 边界秒点没换算变速系数或章节脱离语义；按 references/chapters.md 重划 |
+| 真人小窗切到头顶/下巴 | PERSON_CY 微调（0.25~0.40）；宽源人物不居中时改 crop x 表达式 |
 | 渲染很慢 | 正常：1080p 约 3–8 帧/秒。900 帧自动重启浏览器；可断点续渲 |
 | 合成极慢/画面卡在约 1 秒 | 个别 ffmpeg 构建的 aac 在"纯数字静音+衰减尾音"上掉进 denormal 浮点陷阱（慢约百倍）。compose.sh 已混入 -86dBFS 不可闻抖动噪声消除；自改音频链路时务必保留那路 amix |
 | 成片干巴巴/完全无音效 | 音轨只 map 了原声（自建引擎常见）。按 references/sound.md 引擎无关强制补 mix_sound 链路（口播+音效），音轨用 mixed.wav |

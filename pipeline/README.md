@@ -23,6 +23,7 @@ Remotion 路线（references/remotion.md）功能等价，二选一，不要混�
 | 切点处画面"抖一下"（缩放跳变） | v0.9.1 跨镜相机连续：新镜头开头 12 帧从上一镜结尾相机状态平滑过渡；配置侧 params.scale 全片统一、impact 只给真冲击 |
 | 律师：只做横屏 / 进度条太细 / 空余空间太多 | v0.10 默认横屏 16:9（竖屏仅显式要求）；章节条高 ×2（横 128/竖 176）+进度线 8px；饱满构图规则（人物高度 ≥45%、文字加大、动效占画布 60~70%，SKILL.md §0.6） |
 | 抖音右列头像/点赞遮右缘 / 数字人物仍偏小 | v0.11 横屏重心左偏 4%W（`dx=-0.04`），右列 x≥W−230 且 y≥45%H 为遮挡区；`cs/os/ts`=1.5/1.3/1.3、计数器字号 56、chip ×1.8（SKILL.md §0.6/§0.8） |
+| 卡片标签压数字等文字重叠 | v0.12 `OVERLAP_CHECK` 门禁：每镜头 4 相位采样文本包围盒两两相交即失败（`OVERLAP_WARN=1` 降级）；自建引擎用 scripts/audit_overlap.js；固定宽容器标签按实测宽度自适应字号 |
 | 分镜文档与代码漂移 | 单一 STORYBOARD.md → film.config.js 一一对应 |
 
 ## 0. 前置检查
@@ -173,6 +174,8 @@ bash compose.sh
 ```bash
 # 冻结门禁：任何 ≥0.5s 的静止段都要解释（合法静止只有结尾淡出前）
 ffmpeg -i out/成片.mp4 -vf freezedetect=n=-60dB:d=0.5 -f null - 2>&1 | grep freeze
+# 文字重叠门禁（v0.12）：render.cjs 自动跑，日志 OVERLAP_CHECK pairs 必须 0；
+# 非空会 FATAL 列出 镜头@相位 "文字A"×"文字B"；确属设计意图 OVERLAP_WARN=1 降级。结果亦在 film.info.json overlaps。
 # 音效门禁：峰值不过载 + events.json 无 whoosh（转场/翻页静音）；句间静音合法（无 BGM）
 ffmpeg -i out/成片.mp4 -af astats=metadata=1 -f null - 2>&1 | grep "Peak level"
 # 时长/分辨率核对

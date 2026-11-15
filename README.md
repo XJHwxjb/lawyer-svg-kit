@@ -33,7 +33,7 @@
 - **声音两层（v0.8 真实素材）**：成片 = 口播 + 动作音效，**无 BGM**（律师要求只要音效）。音效 = `assets/sfx` CC0 真实录音库（7 音套件 + 100 条备选，无 whoosh）；`scripts/mix_sound.py` 把口播+音效混音（ogg/mp3 自动解码，无 ducking）。**转场/翻页静音**（whoosh 已移除）。`make_sfx.py` 为离线合成兜底。见 references/sound.md。
 - **真人圆形小窗右上角 + 章节进度条（v0.10）**：真人源自动裁正方形并以律师人物为中心（compose.sh `PERSON_CY` 锚定脸部），圆遮罩 alphamerge 成 Ø300 小圆，默认右上角章节条下方；AI 读口播稿归纳 3~6 章写 `chapters.json`，渲染自动注入顶部灰框分格进度条（格宽 ∝ 时长、当前格高亮、底部进度线；v0.10 条高 ×2、进度线 8px），无该文件则不画条。见 references/chapters.md。v0.11：横屏重心左偏 4%W 避抖音右侧头像/点赞列（右列 x≥W−230 且 y≥45%H 为遮挡区），人物/数字再放大填满画面（cs 1.5、计数器字号 56、chip ×1.8）。
 - **叙事与镜头**：事实表先行、revealAt 节奏、反幻灯片清单 + 可执行动感下限（`narrative.md`）；运镜与景深规则（`camera.md` + `camera.js` / `remotion/CameraRig.tsx`）。
-- **两级验收**（`delivery-qa.md`）：资产级预览台 sweep → 成片级 MP4 逐镜头复核 + freezedetect 冻结门禁 + 数字停帧抽查。
+- **两级验收**（`delivery-qa.md`）：资产级预览台 sweep → 成片级 MP4 逐镜头复核 + freezedetect 冻结门禁 + 文字重叠门禁（v0.12 `OVERLAP_CHECK`，自建引擎用 `scripts/audit_overlap.js`）+ 数字停帧抽查。
 
 ## 双画幅 · 横屏 16:9 / 竖屏 9:16（单选）
 

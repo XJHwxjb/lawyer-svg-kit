@@ -76,6 +76,23 @@ ffmpeg -ss 10 -i out/成片.mp4 -frames:v 1 qa/chapter-mid.jpg
 - 章节条（有 chapters.json 时）：3~6 格、标签 ≤8 字且来自口播语义（不是均分时长、不是内部术语）；转场帧条不闪不淡；film.info.json 的 chapters 与 chapters.json 一致。无 chapters.json 的工程确认无条无报错。
 - 详细规则见 [chapters.md](chapters.md) 与 SKILL.md §0.8/§0.9。
 
+**8) 文字重叠审查（v0.12）**
+
+```bash
+# 管线工程：render.cjs 已自动门禁，日志里 OVERLAP_CHECK pairs 必须 0（非空会 FATAL 列 镜头@相位 "文字A"×"文字B"）
+grep OVERLAP_CHECK render.log
+# 自建引擎/Remotion 预览页：seek 到单镜稳定时刻（t=0.3/0.5/0.7/0.9，避开转场残影），
+# 控制台或 CDP 执行 scripts/audit_overlap.js 后调用 auditTextOverlap()，pairs 必须为空
+# 烧录字幕/真人小圆不在 DOM：抽帧目检字幕不压场景文字/数字、不压小圆（与 §7 抽帧合并做）
+ffmpeg -ss 8 -i out/成片.mp4 -frames:v 1 qa/overlap-a.jpg
+ffmpeg -ss 20 -i out/成片.mp4 -frames:v 1 qa/overlap-b.jpg
+```
+
+- 判定口径：可见文本包围盒两两相交 >2px×2px 即重叠；opacity<0.05/hidden/defs 内排除；文字压自己底板属正常包含不算。
+- **固定宽容器规则**：卡片/格子/条格里的标签必须按实测文字宽度自适应字号或换行（`getComputedTextLength()` 或 canvas measureText），禁止按"最多 N 字"假设排版——v3 成片"执行 · 破产"压数字即此类。中文按 1 字宽、拉丁/数字按实测，混排不要统一乘字数。
+- 门禁报重叠时先修排版（缩字号/换行/加宽容器/挪位置），不要用 `OVERLAP_WARN=1` 掩盖；该开关只留给确属设计意图的叠字（如描边水印）。
+- 采样局限：revealAt 晚出现的文字可能漏采——关键数字/结论 chip 出现后的时刻额外手动 seek 审一次。
+
 ## 逐镜头复核：不要只检查文件能播放
 
 用下面的表格检查实际导出的画面，而不是只对照分镜备注或代码。案件数字来自用户材料；以下是检查方法，不是对任何案件事实的认定。

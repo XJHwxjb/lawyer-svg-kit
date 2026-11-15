@@ -272,8 +272,39 @@ function updateChapterBar(t) {
   CH.fill.setAttribute('width', (CH.innerW * clamp01(t / CH.totalEnd)).toFixed(1));
 }
 
+/* ---------- 文字重叠审查（v0.12）：可见文本包围盒两两相交 ----------
+   屏幕坐标（含相机 transform）。只看 text×text：chip 底板/背景 rect 不是 text，
+   文字压自己底板属正常包含不会误报。opacity<0.05、hidden、defs/mask 内、零尺寸排除。
+   render.cjs 资产验收按镜头采样调用并门禁；自建引擎用 scripts/audit_overlap.js 同逻辑。 */
+function textAudit() {
+  const rects = [];
+  for (const n of document.querySelectorAll('text')) {
+    if (n.closest('defs,mask,clipPath,pattern')) continue;
+    let op = 1, vis = true;
+    for (let p = n; p && p.nodeType === 1; p = p.parentElement) {
+      const cs = getComputedStyle(p);
+      if (cs.visibility === 'hidden' || cs.display === 'none') { vis = false; break; }
+      op *= parseFloat(cs.opacity || 1);
+    }
+    if (!vis || op < 0.05) continue;
+    const t = (n.textContent || '').trim();
+    if (!t) continue;
+    const r = n.getBoundingClientRect();
+    if (r.width < 2 || r.height < 2) continue;
+    rects.push({ t, x: r.x, y: r.y, w: r.width, h: r.height });
+  }
+  const pairs = [];
+  for (let i = 0; i < rects.length; i++) for (let j = i + 1; j < rects.length; j++) {
+    const a = rects[i], b = rects[j];
+    const ix = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+    const iy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
+    if (ix > 2 && iy > 2) pairs.push({ a: a.t, b: b.t, ix: +ix.toFixed(1), iy: +iy.toFixed(1) });
+  }
+  return pairs;
+}
+
 window.__film = {
-  renderFrame, seekShot, setChapters,
+  renderFrame, seekShot, setChapters, textAudit,
   sceneHTML: () => worldA.scene.innerHTML,
   camTransform: () => worldA.cam.getAttribute('transform'),
   info: {

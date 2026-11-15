@@ -110,8 +110,8 @@ def({
       el('rect', { x: -58, y: -10 - i * 10, width: 116, height: 14, rx: 4, fill: i % 2 ? PAL.seal : '#c03328', stroke: PAL.sealDeep, 'stroke-width': 1, opacity: 0 }, pile));
     const topNote = propNote(el('g', { opacity: 0, transform: 'translate(0,-116) rotate(-4)' }, pile));
     const counter = el('g', {}, S.fx);
-    const cRect = el('rect', { x: X(540) - 130 * O.ts, y: Ys(250), width: 260 * O.ts, height: 62 * O.ts, rx: 31 * O.ts, fill: PAL.ink, opacity: .88 }, counter);
-    const cText = txt(el('text', { x: X(540), y: Ys(250) + 42 * O.ts, 'text-anchor': 'middle', 'font-size': 34 * O.ts, 'font-weight': 800, fill: PAL.gold }, counter), '¥0');
+    const cRect = el('rect', { x: X(540) - 210 * O.ts, y: Ys(250), width: 420 * O.ts, height: 100 * O.ts, rx: 50 * O.ts, fill: PAL.ink, opacity: .88 }, counter);
+    const cText = txt(el('text', { x: X(540), y: Ys(250) + 68 * O.ts, 'text-anchor': 'middle', 'font-size': 56 * O.ts, 'font-weight': 800, fill: PAL.gold }, counter), '¥0');
     let last = [0, 0];
     return {
       update(t, P) {
@@ -136,7 +136,7 @@ def({
         topNote.setAttribute('opacity', arrived === N ? 1 : 0);
         const val = 660000 * E.smooth(seg(t, .06, .8));
         txt(cText, fmtMoney(val));
-        const w = cText.textContent.length * 20 * O.ts + 50 * O.ts;
+        const w = cText.textContent.length * 33 * O.ts + 80 * O.ts;
         cRect.setAttribute('x', X(540) - w / 2); cRect.setAttribute('width', w);
         counter.setAttribute('opacity', t > .04 ? 1 : 0);
         S.man.set(MANX, s, 2 * Math.sin(seg(t, .05, .25) * Math.PI));

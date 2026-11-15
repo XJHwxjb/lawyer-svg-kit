@@ -172,7 +172,7 @@ async function main() {
     /* 1) 资产验收：每个镜头 7 相位，sceneRoot 非空、无 NaN/undefined、镜头 transform 生效 */
     const verify = await withBrowser(async ({ evaluate }) => {
       return await evaluate(`(async () => {
-        const errs = [], nan = [], camBad = [];
+        const errs = [], nan = [], camBad = [], overlaps = [];
         const info = __film.info;
         for (const s of info.shots) {
           try {
@@ -181,6 +181,8 @@ async function main() {
               const html = __film.sceneHTML();
               if (!html.length) throw new Error('sceneRoot 为空');
               if (/NaN|undefined/.test(html)) nan.push(s.id + '@' + f);
+              if (f === .3 || f === .5 || f === .7 || f === .9)
+                for (const p of __film.textAudit()) overlaps.push({ shot: s.id, at: f, ...p });
             }
             if (s.camera !== 'off') {
               __film.seekShot(s.index, .5);
@@ -190,14 +192,20 @@ async function main() {
           } catch (e) { errs.push(s.id + ': ' + e.message); }
         }
         return { orient: info.orient, canvas: [info.W, info.H], totalFrames: info.totalFrames,
-                 shots: info.shots.length, errs, nan, camBad };
+                 shots: info.shots.length, errs, nan, camBad, overlaps };
       })()`, 120000, true);
     });
     console.log('ASSET_CHECK ' + JSON.stringify(verify));
     if (verify.errs.length || verify.nan.length || verify.camBad.length)
       throw new Error('资产验收未通过，先修镜头再渲染');
+    /* v0.12 文字重叠门禁：采样相位发现 text×text 相交即失败（OVERLAP_WARN=1 降级警告） */
+    console.log('OVERLAP_CHECK ' + JSON.stringify({ pairs: verify.overlaps.length, list: verify.overlaps.slice(0, 12) }));
+    if (verify.overlaps.length && !process.env.OVERLAP_WARN)
+      throw new Error('文字重叠审查未通过: ' + verify.overlaps.slice(0, 6).map(o =>
+        `${o.shot}@${o.at} "${o.a}"×"${o.b}"`).join('; ') + '（确属设计意图时 OVERLAP_WARN=1 降级）');
 
     const info = await withBrowser(async ({ evaluate }) => await evaluate('__film.info'));
+    info.overlaps = verify.overlaps;
     if (CHAPTERS) info.chapters = CHAPTERS.chapters;
     if (FILM.voiceDuration > 0) {
       const filmDur = info.totalFrames / FPS;

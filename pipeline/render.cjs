@@ -1,4 +1,4 @@
-/* render.cjs — 整片逐帧渲染（pipeline 模板，v0.9）
+/* render.cjs — 整片逐帧渲染（pipeline 模板，v0.9.1）
  * 只用本机 Edge/Chrome + CDP + Node 内置模块，素材不出本机。
  * 需要 Node ≥ 22（内置 WebSocket）。
  *

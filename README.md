@@ -27,17 +27,17 @@
 
 - **六阶段工作流**（`references/workflow.md`）：读懂任务 → 时间轴 → 分镜 → 选角与动作准备 → 合成 → 验收交付。
 - **两条合成路线，二选一**：
-  - **零依赖管线**（v0.5 `pipeline/`，默认推荐）：film.config.js 配置 → render.cjs 本机 Edge/Chrome 逐帧截图 → compose.sh 合成。内置镜头推拉、双缓冲交叉淡化、6 种场景底、真人 3:4 居中小窗（v0.9）、章节进度条（v0.9）、ASS 字幕、音效混音与 loudnorm，不需要 npm/React。
+  - **零依赖管线**（v0.5 `pipeline/`，默认推荐）：film.config.js 配置 → render.cjs 本机 Edge/Chrome 逐帧截图 → compose.sh 合成。内置镜头推拉、双缓冲交叉淡化、6 种场景底、真人圆形小窗右上角（v0.10）、章节进度条（v0.9，v0.10 加高加粗）、ASS 字幕、音效混音与 loudnorm，不需要 npm/React。
   - **Remotion 合成配方**（`references/remotion.md`）：kit 打包成 ES 模块、`KitShot` 组件逐帧驱动、人物小窗 + 字幕 + 镜头层整片骨架，版本组合已验证。
 - **口播对齐**：`scripts/prepare_timing.py` 把剪映 SRT + ffprobe 时长转成 `timing.json`（校验格式/顺序/重叠）。
 - **声音两层（v0.8 真实素材）**：成片 = 口播 + 动作音效，**无 BGM**（律师要求只要音效）。音效 = `assets/sfx` CC0 真实录音库（7 音套件 + 100 条备选，无 whoosh）；`scripts/mix_sound.py` 把口播+音效混音（ogg/mp3 自动解码，无 ducking）。**转场/翻页静音**（whoosh 已移除）。`make_sfx.py` 为离线合成兜底。见 references/sound.md。
-- **真人 3:4 小窗 + 章节进度条（v0.9）**：真人源非 3:4 自动裁 3:4 并以律师人物为中心（compose.sh `PERSON_CY` 锚定脸部），默认 300×400 左下角；AI 读口播稿归纳 3~6 章写 `chapters.json`，渲染自动注入顶部灰框分格进度条（格宽 ∝ 时长、当前格高亮、底部进度线），无该文件则不画条。见 references/chapters.md。
+- **真人圆形小窗右上角 + 章节进度条（v0.10）**：真人源自动裁正方形并以律师人物为中心（compose.sh `PERSON_CY` 锚定脸部），圆遮罩 alphamerge 成 Ø300 小圆，默认右上角章节条下方；AI 读口播稿归纳 3~6 章写 `chapters.json`，渲染自动注入顶部灰框分格进度条（格宽 ∝ 时长、当前格高亮、底部进度线；v0.10 条高 ×2、进度线 8px），无该文件则不画条。见 references/chapters.md。v0.11：横屏重心左偏 4%W 避抖音右侧头像/点赞列（右列 x≥W−230 且 y≥45%H 为遮挡区），人物/数字再放大填满画面（cs 1.5、计数器字号 56、chip ×1.8）。
 - **叙事与镜头**：事实表先行、revealAt 节奏、反幻灯片清单 + 可执行动感下限（`narrative.md`）；运镜与景深规则（`camera.md` + `camera.js` / `remotion/CameraRig.tsx`）。
 - **两级验收**（`delivery-qa.md`）：资产级预览台 sweep → 成片级 MP4 逐镜头复核 + freezedetect 冻结门禁 + 数字停帧抽查。
 
 ## 双画幅 · 横屏 16:9 / 竖屏 9:16（单选）
 
-画幅是项目级单选：Skill 开工前确认律师选横屏还是竖屏（稿件没写就先问），**只生成选中的那一种**。预览台舞台头的 **横屏 / 竖屏** 切换（或 `O` 键）就是选择入口，选定自动保存、重置/随机不改变；导出 SVG/JSON 跟随当前画幅。横屏拉开双人距离，竖屏保持交接手距、把计数 chip 抬进天空区，上方约 40% 留给标题与字幕。
+画幅是项目级单选：**默认横屏 16:9**（v0.10 律师要求），竖屏 9:16 只在律师显式要求时才做；稿件没写画幅 = 横屏，不必再问。**只生成选中的那一种**。预览台舞台头的 **横屏 / 竖屏** 切换（或 `O` 键）就是选择入口，选定自动保存、重置/随机不改变；导出 SVG/JSON 跟随当前画幅。横屏拉开双人距离，竖屏保持交接手距、把计数 chip 抬进天空区，上方约 40% 留给标题与字幕。
 
 | 横屏 16:9 · 1920×1080 | 竖屏 9:16 · 1080×1920 |
 |---|---|
@@ -101,7 +101,7 @@ scripts/mix_sound.py            口播+音效 两层混音（无 BGM/ducking，o
 scripts/make_sfx.py             合成音效兜底（ffmpeg 7 音）
 ```
 
-Skill 的工作方式：读稿 → 确认画幅 → 拆出角色与动作清单 → 查 roster 命中直接用，未命中按 forge 教程造并回写 roster → 分镜/时间轴 → 合成（pipeline 或 Remotion）→ 预览台与成片两级验收 → 交付。
+Skill 的工作方式：读稿 → 画幅（默认横屏）→ 拆出角色与动作清单 → 查 roster 命中直接用，未命中按 forge 教程造并回写 roster → 分镜/时间轴 → 合成（pipeline 或 Remotion）→ 预览台与成片两级验收 → 交付。
 
 ## 目录结构
 

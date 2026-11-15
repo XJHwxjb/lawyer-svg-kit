@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# compose.sh — 合成成片（pipeline 模板，v0.9）
-# 动画帧序列 + 口播原声 + ASS 字幕 + 口播+真实音效（无 BGM）+ 真人 3:4 小窗（可选）
+# compose.sh — 合成成片（pipeline 模板，v0.10）
+# 动画帧序列 + 口播原声 + ASS 字幕 + 口播+真实音效（无 BGM）+ 真人圆形小窗右上角（可选）
 # 用法：改下方「案件配置」→ bash compose.sh
 # 依赖：ffmpeg / ffprobe（PATH 中）；声音混音另需 python3 + scripts/mix_sound.py
 #
@@ -11,23 +11,24 @@ cd "$(dirname "$0")"
 
 # ── 案件配置（每案必改）──────────────────────────────────────────────
 NAME="示例案件"            # ← 与 film.config.js 的 FILM.name 一致
-ORIENT_LABEL="横屏16x9"    # ← 横屏16x9 | 竖屏9x16，与 FILM.orient 对应
+ORIENT_LABEL="横屏16x9"    # ← 默认横屏16x9；竖屏9x16 仅律师显式要求时用
 FPS=30                     # ← 与 FILM.fps 一致
 VOICE="voice.wav"          # ← 口播音频（也可填口播视频路径，自动取其音轨）
 PERSON=""                  # ← 真人视频路径；留空 = 纯动画成片
-PERSON_W=300               # ← 真人小窗宽度 px（v0.9：3:4 矩形窗，高自动 = 宽×4/3）
-PERSON_CY=0.30             # ← 3:4 裁切的纵向锚点：0=贴顶 0.5=居中 1=贴底。
-                           #   律师脸通常在源画面上 1/3，取 0.25~0.40 让脸落在窗内上 1/3；
-                           #   源已是 3:4 时裁切自动退化为全幅，此值无效。
-PERSON_POS="40:main_h-440" # ← 小窗位置（默认左下角，距底/左 40px）。
-                           #   竖屏字幕 MarginV ≥ 460，别压到小窗。
+PERSON_W=300               # ← 圆形小窗直径 px（v0.10：正方形裁切+圆遮罩）
+PERSON_CY=0.30             # ← 正方形裁切的纵向锚点：0=贴顶 0.5=居中 1=贴底。
+                           #   律师脸通常在源画面上 1/3，取 0.25~0.40 让脸落在圆内上半；
+                           #   宽源（16:9）裁切取全高，此值无效；窄源（9:16）按它锚定脸。
+PERSON_POS="main_w-overlay_w-40:148"
+                           # ← 小窗位置（默认右上角、章节条下方：横屏条高128+20间距）。
+                           #   无章节条或条在底部时改 y=40；竖屏顶部条高176 → y=196。
+                           #   小窗在右上，字幕在底部，互不遮挡。
 CAPTIONS="captions.ass"    # ← ASS 字幕路径；留空 = 无字幕（文件名用 ASCII，避免转义问题）
 DUR=""                     # ← 成片总秒数；留空 = 自动取 VOICE 时长（推荐）
 # ────────────────────────────────────────────────────────────────────
 
 OUT="out/${NAME}_${ORIENT_LABEL}.mp4"
 mkdir -p out
-PERSON_H=$(awk "BEGIN{printf \"%d\", $PERSON_W*4/3}")
 
 if [ ! -d frames ]; then echo "缺 frames/ 目录，先跑 node render.cjs"; exit 1; fi
 if [ ! -f "$VOICE" ]; then echo "缺口播音频: $VOICE"; exit 1; fi
@@ -67,18 +68,24 @@ DITHER="-f lavfi -i anoisesrc=color=white:amplitude=0.00005:sample_rate=48000"
 LOUD="amix=inputs=2:normalize=0:duration=first,loudnorm=I=-16:TP=-1.5:LRA=11"
 
 if [ -n "$PERSON" ]; then
-  # 真人 3:4 小窗（v0.9，律师要求）：源视频不是 3:4 就先裁成 3:4，再以人物为中心取窗。
-  # crop 表达式对任意源画幅成立：宽源裁两侧（水平居中），窄源裁上下（纵向按 PERSON_CY 锚定脸）。
-  # 源恰好 3:4 时 w=iw、h=ih，裁切退化为全幅。裁完缩到 PERSON_W×PERSON_H 叠到 PERSON_POS。
+  # 真人圆形小窗（v0.10，律师要求）：源视频先裁正方形（以人物为中心），缩到直径×直径，
+  # 再用圆遮罩 alphamerge 把圆外变透明，叠到右上角。
+  # crop 对任意源画幅成立：取 min(iw,ih) 边长，水平居中、纵向按 PERSON_CY 锚定脸。
   # -stream_loop -1：真人素材短于成片时循环播放。真人声音忽略，只用口播轨。
   if [ ! -f "$PERSON" ]; then echo "缺真人视频: $PERSON"; exit 1; fi
-  PCROP="crop=w='if(gt(iw/ih,3/4),ih*3/4,iw)':h='if(gt(iw/ih,3/4),ih,iw*4/3)':x='(iw-ow)/2':y='(ih-oh)*${PERSON_CY}'"
+  # 圆遮罩：白圆黑底单帧 PNG（geq 只跑一帧，开销可忽略）
+  ffmpeg -y -v error -f lavfi \
+    -i "color=white:s=${PERSON_W}x${PERSON_W}:r=${FPS},format=gray" \
+    -vf "geq=lum='if(lte(hypot(X-${PERSON_W}/2,Y-${PERSON_W}/2),${PERSON_W}/2),255,0)'" \
+    -frames:v 1 circle_mask.png
+  PCROP="crop=w='min(iw,ih)':h='min(iw,ih)':x='(iw-ow)/2':y='(ih-oh)*${PERSON_CY}'"
   ffmpeg -y -hide_banner -loglevel warning \
     -framerate "$FPS" -i frames/%05d.jpg \
     -stream_loop -1 -i "$PERSON" \
     -i "$AUDIO" \
     $DITHER \
-    -filter_complex "[1:v]${PCROP},scale=${PERSON_W}:${PERSON_H},setsar=1[p];[0:v][p]overlay=${PERSON_POS}:shortest=0,${VF}[o];[2:a][3:a]${LOUD}[a]" \
+    -loop 1 -framerate "$FPS" -i circle_mask.png \
+    -filter_complex "[1:v]fps=${FPS},${PCROP},scale=${PERSON_W}:${PERSON_W},setsar=1,format=rgba[p];[4:v]fps=${FPS},format=gray[m];[p][m]alphamerge[pc];[0:v][pc]overlay=${PERSON_POS}:shortest=0,${VF}[o];[2:a][3:a]${LOUD}[a]" \
     -map "[o]" -map "[a]" \
     "${ENC[@]}" "$OUT"
 else

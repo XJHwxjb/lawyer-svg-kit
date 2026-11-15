@@ -441,8 +441,8 @@ function actMoney(o) {
       const topNote = propNote(el('g', { opacity: 0, transform: 'translate(0,-116) rotate(-4)' }, pile));
       const target = o.mode === 'chip' ? chip(el('g', {}, S.fx), o.pileX != null ? o.pileX : o.toX + 120, 620, o.chipText || '他人账户', PAL.ink, 20) : null;
       const counter = el('g', {}, S.fx);
-      const cRect = el('rect', { x: X(540) - 130 * O.ts, y: Ys(250), width: 260 * O.ts, height: 62 * O.ts, rx: 31 * O.ts, fill: PAL.ink, opacity: .88 }, counter);
-      const cText = txt(el('text', { x: X(540), y: Ys(250) + 42 * O.ts, 'text-anchor': 'middle', 'font-size': 32 * O.ts, 'font-weight': 800, fill: o.mode === 'chip' ? '#e08a63' : PAL.gold }, counter), '¥0');
+      const cRect = el('rect', { x: X(540) - 210 * O.ts, y: Ys(250), width: 420 * O.ts, height: 100 * O.ts, rx: 50 * O.ts, fill: PAL.ink, opacity: .88 }, counter);
+      const cText = txt(el('text', { x: X(540), y: Ys(250) + 68 * O.ts, 'text-anchor': 'middle', 'font-size': 56 * O.ts, 'font-weight': 800, fill: o.mode === 'chip' ? '#e08a63' : PAL.gold }, counter), '¥0');
       let last = [0, 0];
       return {
         update(t, P) {
@@ -469,7 +469,7 @@ function actMoney(o) {
           topNote.setAttribute('opacity', arrived === N && o.mode !== 'chip' ? 1 : 0);
           if (target) target.setAttribute('transform', `scale(${1 + .06 * Math.sin(seg(t, .4, .9) * Math.PI * 3) * P.amp})`);
           txt(cText, (o.label ? o.label + ' ' : '') + fmtMoney(o.amount * E.smooth(seg(t, .06, .8))));
-          const w = cText.textContent.length * 19 * O.ts + 50 * O.ts;
+          const w = cText.textContent.length * 33 * O.ts + 80 * O.ts;
           cRect.setAttribute('x', X(540) - w / 2); cRect.setAttribute('width', w);
           counter.setAttribute('opacity', t > .04 ? 1 : 0);
           A.set(o.fromX, s, 2 * Math.sin(seg(t, .05, .25) * Math.PI), fA);

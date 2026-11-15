@@ -61,9 +61,10 @@ function camPush(focusPt, from = 1, to = 1.1) {
 }
 
 /** 推近后停留：前 pushEnd 段推进，之后保持放大让观众读清数字/文书。数字镜头首选。
-    停留段带 1% 极缓漂移（肉眼几乎不可察），保持画面"活着"，避免触发冻结检测。 */
+    停留段带 2% 极缓漂移（肉眼几乎不可察）：横屏像素半径小，1% 漂移会低于
+    freezedetect -60dB 阈值，动作间隙（如钱流两张钞票之间）会被报冻结。 */
 function camHoldPush(focusPt, pushEnd = .4, from = 1, to = 1.12) {
-  return [camKey(0, focusPt, from), camKey(pushEnd, focusPt, to), camKey(1, focusPt, to * 1.01)];
+  return [camKey(0, focusPt, from), camKey(pushEnd, focusPt, to), camKey(1, focusPt, to * 1.02)];
 }
 
 /** 横移：焦点左侧 → 右侧，scale 恒定。适合时间线/双方对照。 */
@@ -73,12 +74,12 @@ function camPan(fromPt, toPt, scale = 1.08) {
 
 /** 冲击：at 时刻快速 punch 放大，随后落到 settle 并保持。配合敲槌/盖章/摔碎等事件。
     at 应对齐事件秒点 / 镜头总时长。
-    punch 前后带极缓漂移（1% 量级，肉眼难察）：动作等待相位本身可能静止，
-    镜头不留完全静止段，避免触发 freezedetect 冻结门禁。 */
+    punch 前后带极缓漂移（2% 量级，肉眼难察）：动作等待相位本身可能静止，
+    镜头不留完全静止段，避免触发 freezedetect 冻结门禁（横屏 1% 低于阈值）。 */
 function camImpact(focusPt, at = .5, punch = 1.14, settle = 1.06) {
   const pre = Math.max(0, at - .08), post = Math.min(1, at + .18);
   const raw = [camKey(0, focusPt, 1), camKey(pre, focusPt, 1.012),
-    camKey(at, focusPt, punch), camKey(post, focusPt, settle), camKey(1, focusPt, settle * 1.01)];
+    camKey(at, focusPt, punch), camKey(post, focusPt, settle), camKey(1, focusPt, settle * 1.02)];
   return raw.filter((k, i) => i === 0 || k.at > raw[i - 1].at);
 }
 

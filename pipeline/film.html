@@ -73,8 +73,7 @@ document.getElementById('cutShadow').setAttribute('stdDeviation', (SHADOW * .6).
 document.getElementById('cutShadow').setAttribute('dy', (SHADOW * .9).toFixed(1));
 
 /* 世界槽：cam(镜头层) 包 地面+场景底+人物场景；背景渐变与颗粒在槽外不动 */
-function makeWorld(id) {
-  const root = document.getElementById(id);
+function makeWorld(root) {
   root.innerHTML = '';
   const cam = el('g', {}, root);
   const ground = el('rect', { y: GROUND, width: W, height: H - GROUND, fill: T.ground }, cam);
@@ -83,7 +82,10 @@ function makeWorld(id) {
   const scene = el('g', {}, cam);
   return { root, cam, ground, line, furn, scene };
 }
-const worldA = makeWorld('worldA'), worldB = makeWorld('worldB');
+const worldA = makeWorld(document.getElementById('worldA'));
+const worldB = makeWorld(document.getElementById('worldB'));
+/* 离屏世界：只为提前算某镜头的相机状态（跨镜连续用），不挂到舞台 */
+const scratchWorld = makeWorld(el('g', {}));
 
 function resolveAct(a) {
   if (typeof a === 'string') {
@@ -122,20 +124,57 @@ function mountShot(world, entry) {
   api.update(0, P); // 先初始化再取锚点（部分动作 anchors 依赖 update 后的状态）
   const pts = api.anchors(P) || [];
   const a0 = pts[0];
-  const focusPt = s.focus ? camFocus(s.focus[0], s.focus[1])
-    : (a0 && (a0[0] || a0[1]) ? a0 : [W / 2, H * .55]);
+  /* v0.10：横屏右上是真人小圆安全区（x≥W-340, y≤460）。自动焦点若取首锚点
+     （常在给出方手=偏左），推近会把右侧人物甩进安全区盖住头；改取锚点质心
+     并夹在中央带内。竖屏无此安全区，保持首锚点（已交付竖屏构图不变）。 */
+  let auto = a0 && (a0[0] || a0[1]) ? a0 : [W / 2, H * .55];
+  if (O.id === 'land' && pts.length) {
+    const cx = pts.reduce((s, p) => s + p[0], 0) / pts.length;
+    const cy = pts.reduce((s, p) => s + p[1], 0) / pts.length;
+    auto = [Math.min(Math.max(cx, W * .42), W * .62),
+            Math.min(Math.max(cy, H * .35), H * .75)];
+  }
+  const focusPt = s.focus ? camFocus(s.focus[0], s.focus[1]) : auto;
   buildBG(world.furn, s.bg || 'paper', THEME);
   const camKeys = s.camera && s.camera !== 'off' ? presetCamera(s.camera, focusPt) : null;
+  /* 缓存相机首尾状态：跨镜连续（camSpec）要用上一镜的结尾状态 */
+  entry.camKeys = camKeys;
+  entry.camEnd = camKeys ? cameraAt(1, camKeys) : { x: W / 2, y: H / 2, scale: 1 };
   return { api, P, camKeys };
+}
+
+/* 确保某镜头的相机首尾状态已算出（不占用 worldA/B 槽，离屏构建）。
+   seekShot 乱序 / 转场取上一镜结尾时都靠它，保证确定性。 */
+function camSpec(entry) {
+  if (entry.camEnd === undefined) mountShot(scratchWorld, entry);
+  return entry;
 }
 
 const slotA = { i: -1, state: null }, slotB = { i: -1, state: null };
 
+/* 跨镜镜头连续（v0.9.1）：新镜头开头 CAM_SETTLE 帧内，相机从上一镜结尾
+   平滑过渡到本镜关键帧，消除切点处的缩放/焦点跳变（观感上的"抖动"）。 */
+const CAM_SETTLE = 12;
+
 function drive(world, slot, entry, t01) {
-  if (slot.i !== entry.index) { slot.state = mountShot(world, entry); slot.i = entry.index; }
+  if (slot.i !== entry.index) {
+    slot.state = mountShot(world, entry);
+    slot.state.from = entry.index > 0 ? camSpec(TL[entry.index - 1]).camEnd : null;
+    slot.i = entry.index;
+  }
   slot.state.api.update(t01, slot.state.P);
-  if (slot.state.camKeys) applyCamera(world.cam, cameraAt(t01, slot.state.camKeys));
-  else world.cam.removeAttribute('transform');
+  const local = t01 * (entry.frames - 1);
+  const base = slot.state.camKeys ? cameraAt(t01, slot.state.camKeys) : { x: W / 2, y: H / 2, scale: 1 };
+  let cam = base;
+  if (slot.state.from && local < CAM_SETTLE) {
+    const p = camSmooth(local / CAM_SETTLE);
+    cam = {
+      x: camMix(slot.state.from.x, base.x, p),
+      y: camMix(slot.state.from.y, base.y, p),
+      scale: camMix(slot.state.from.scale, base.scale, p),
+    };
+  }
+  applyCamera(world.cam, cam);
 }
 
 /** 渲染全局第 g 帧（0 ≤ g < TOTAL）。确定性：同一 g 同一画面。 */
@@ -182,11 +221,12 @@ function setChapters(cfg) {
   const list = ((cfg && cfg.chapters) || []).filter(c => c && c.label && c.end > c.start);
   if (!list.length) return;
   const port = O.id === 'port';
-  const barH = port ? 88 : 64;
+  /* v0.10：律师要求条更醒目——高度×2、进度线×2 粗、字号加大；左右保持满宽 */
+  const barH = port ? 176 : 128;
   const barY = (cfg.position === 'bottom') ? H - barH : 0;
   const padX = 24, gap = 0;
   const innerX = padX, innerW = W - padX * 2;
-  const fs = port ? 32 : 28;
+  const fs = port ? 44 : 40;
   const total = list.reduce((s, c) => s + (c.end - c.start), 0);
   const totalEnd = list[list.length - 1].end;
   // 格宽 ∝ 时长，但保底放得下标签；超宽再整体压缩
@@ -201,17 +241,17 @@ function setChapters(cfg) {
   let cx = innerX;
   segs.forEach((s, i) => {
     s.x = cx; cx += s.w + gap;
-    s.hl = el('rect', { x: s.x, y: barY, width: s.w, height: barH - 6, fill: '#ffffff', 'fill-opacity': .14, opacity: 0 }, chapterRoot);
+    s.hl = el('rect', { x: s.x, y: barY, width: s.w, height: barH - 10, fill: '#ffffff', 'fill-opacity': .14, opacity: 0 }, chapterRoot);
     const f = Math.min(fs, Math.floor((s.w - 16) / s.label.length));
-    s.txt = el('text', { x: s.x + s.w / 2, y: barY + (barH - 6) / 2, 'text-anchor': 'middle',
+    s.txt = el('text', { x: s.x + s.w / 2, y: barY + (barH - 10) / 2, 'text-anchor': 'middle',
       'dominant-baseline': 'central', 'font-size': f, fill: '#ffffff', opacity: .72 }, chapterRoot);
     s.txt.textContent = s.label;
-    if (i > 0) el('line', { x1: s.x, y1: barY + 12, x2: s.x, y2: barY + barH - 16,
+    if (i > 0) el('line', { x1: s.x, y1: barY + 16, x2: s.x, y2: barY + barH - 26,
       stroke: '#ffffff', 'stroke-opacity': .28, 'stroke-width': 2 }, chapterRoot);
   });
-  const trackY = barY + barH - 6;
-  el('rect', { x: innerX, y: trackY, width: innerW, height: 4, fill: '#ffffff', 'fill-opacity': .22 }, chapterRoot);
-  const fill = el('rect', { x: innerX, y: trackY, width: 0, height: 4, fill: '#ffffff', 'fill-opacity': .95 }, chapterRoot);
+  const trackY = barY + barH - 10;
+  el('rect', { x: innerX, y: trackY, width: innerW, height: 8, fill: '#ffffff', 'fill-opacity': .22 }, chapterRoot);
+  const fill = el('rect', { x: innerX, y: trackY, width: 0, height: 8, fill: '#ffffff', 'fill-opacity': .95 }, chapterRoot);
   CH = { segs, fill, innerW, totalEnd, active: -1 };
   updateChapterBar(0);
 }

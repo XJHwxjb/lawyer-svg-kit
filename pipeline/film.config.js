@@ -13,13 +13,15 @@
 
 const FILM = {
   name: '示例案件',          // 成片文件名前缀：out/<name>_<画幅>.mp4
-  orient: 'land',            // 项目级单选：'land' 横屏16:9 | 'port' 竖屏9:16（律师选定，没写先问）
+  orient: 'land',            // 项目级单选：'land' 横屏16:9 | 'port' 竖屏9:16。
+                             // v0.10 默认横屏（律师要求）；竖屏仅律师显式要求时才改，稿件没写=横屏不必问。
   fps: 30,                   // 与 compose.sh 的 FPS 保持一致
   theme: 'cream',            // cream 纸纹暖 | mist 雾青冷 | dusk 暮色深（全片统一）
   outline: 6,                // 贴纸描边 px（全片统一）
   shadow: 10,                // 投影强度（全片统一）
-  transition: 12,            // 交叉淡化帧数（12帧=0.4s@30fps）。0=硬切（不推荐）。
+  transition: 12,            // 交叉淡化帧数（12帧=0.4s@30fps，建议6~12）。0=硬切（不推荐）。
                              // 不要超过最短镜头帧数的一半。
+                             // v0.9.1：引擎在新镜头开头12帧内从上一镜结尾相机状态平滑过渡，切点不跳缩放。
   voiceDuration: 0,          // 口播总秒数（ffprobe 测得）；render.cjs 用它核对总帧数，0=跳过核对
 
   // 声音（v0.8，references/sound.md）：成片 = 口播 + 动作音效，无 BGM（律师要求只加音效）。
@@ -34,10 +36,14 @@ const FILM = {
        bg       场景底：paper 白纸 | home 家中 | court 法庭 | register 登记处 |
                 office 办公室 | warehouse 仓库。按剧情地点选，别全片 paper。
        camera   镜头：off 固定 | push 全程推进 | hold 推近停留(数字/文书首选) |
-                impact 冲击(对齐敲槌/盖章事件) | pan 横移 | breathe 呼吸兜底。
+                impact 冲击(只给真敲槌/盖章/摔碎事件，at 对齐事件) | pan 横移 | breathe 呼吸兜底。
+                v0.9.1：普通叙事别用 impact，punch 是设计内跳变，滥用=每隔几秒抖一下。
        focus    可选。镜头焦点，设计空间坐标 [x,y]（1080×800, GROUND=700）。
                 不填 = 自动取动作第一个锚点。数字 chip 镜头建议显式指向 chip 位置。
        params   可选。覆盖 {ease, amp, scale}；scale 是人物缩放不是镜头缩放。
+                v0.9.1：scale 全片统一一个值！逐镜不同会让切点内容尺寸跳变（引擎 settle 只补相机）。
+                v0.10 构图饱满、v0.11 再放大：横屏 scale 默认 1.25~1.35（引擎 cs=1.5 → 人物高度 ≥ 画面55%）；
+                主数字字号 ≥70 画布px、chip ≥42、道具/网格宽占画布 60~70%（SKILL.md §0.6）。
        cast     可选。自定义阵容 [{id, who, variant, opt}]；不填用动作自带 cast。
                 飞行道具给出方记得 opt:{noProp:true}。
        sfx      可选。null/不填 = 用动作内置 events；[] = 本镜头静音；

@@ -1,4 +1,4 @@
-# pipeline/ — 零依赖整片模板（v0.9）
+# pipeline/ — 零依赖整片模板（v0.10）
 
 把律师口播变成成片的**可照抄流水线**：`film.config.js 配置 → render.cjs 逐帧截图 → compose.sh 合成`。
 不用 Remotion、不用 npm install，只需要本机 **Edge/Chrome + Node ≥ 22 + ffmpeg + python3**。
@@ -18,8 +18,11 @@ Remotion 路线（references/remotion.md）功能等价，二选一，不要混�
 | 没有音效/干口播 | 声音两层：events.json（动作接触/冲击音）+ assets/sfx 真实录音库 + mix_sound.py，无 BGM，见 references/sound.md |
 | 合成音"电子味"被用户否掉 | v0.7 起默认换真实素材：CC0 录音音效；make_sfx 降级离线兜底 |
 | 律师只要音效不要背景音乐 / 翻页有"呼"声 | v0.8 删除 BGM 全链路与 whoosh：转场/翻页静音，只留接触/冲击音效 |
-| 真人小窗太大/源画幅不一 | v0.9 源非 3:4 自动裁 3:4 以人物为中心，默认 300×400 左下角小窗 |
+| 真人小窗太大/源画幅不一 | v0.9 源自动裁正方形以人物为中心；v0.10 改 Ø300 圆形小窗放右上角（圆遮罩 alphamerge） |
 | 观众不知道讲到哪 / 律师要进度条 | v0.9 章节进度条：AI 读口播稿生成 chapters.json，顶部灰框分格+高亮+进度线 |
+| 切点处画面"抖一下"（缩放跳变） | v0.9.1 跨镜相机连续：新镜头开头 12 帧从上一镜结尾相机状态平滑过渡；配置侧 params.scale 全片统一、impact 只给真冲击 |
+| 律师：只做横屏 / 进度条太细 / 空余空间太多 | v0.10 默认横屏 16:9（竖屏仅显式要求）；章节条高 ×2（横 128/竖 176）+进度线 8px；饱满构图规则（人物高度 ≥45%、文字加大、动效占画布 60~70%，SKILL.md §0.6） |
+| 抖音右列头像/点赞遮右缘 / 数字人物仍偏小 | v0.11 横屏重心左偏 4%W（`dx=-0.04`），右列 x≥W−230 且 y≥45%H 为遮挡区；`cs/os/ts`=1.5/1.3/1.3、计数器字号 56、chip ×1.8（SKILL.md §0.6/§0.8） |
 | 分镜文档与代码漂移 | 单一 STORYBOARD.md → film.config.js 一一对应 |
 
 ## 0. 前置检查
@@ -71,8 +74,8 @@ ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:no
 ffmpeg -i captions.srt captions.ass
 ```
 
-字幕样式建议：单 Main 样式、白字黑边、底部居中；**有真人小窗时 MarginV ≥ 460**（避免压到左下角 300×400 小窗）。
-竖屏 9:16 时字幕放在下方安全区，上方 40% 留给标题（见 SKILL.md §5）；顶部章节条（如有）占 88px，与安全区不冲突。
+字幕样式建议：单 Main 样式、白字黑边、底部居中；真人小圆在右上角、字幕在底部，互不遮挡，**不再需要 MarginV ≥ 460 避窗**（v0.10）。
+竖屏 9:16 时字幕放在下方安全区，上方 40% 留给标题（见 SKILL.md §5）；顶部章节条（如有）占 176px（v0.10 加高），与安全区不冲突。
 
 ## 3. 填 film.config.js（从 STORYBOARD.md 逐行翻译）
 
@@ -90,7 +93,11 @@ ffmpeg -i captions.srt captions.ass
 **硬性要求（验收会查）：**
 - 不允许全片 `camera: 'off'`；不允许全片 `bg: 'paper'`。
 - 数字/金额镜头用 `camera: 'hold'` 并 `focus` 指向数字位置。
-- 敲槌/盖章/摔碎镜头用 `camera: 'impact'`，事件秒点对齐口播。
+- 敲槌/盖章/摔碎镜头用 `camera: 'impact'`，事件秒点对齐口播；**普通叙事镜头不要用 impact**（punch 是设计内跳变，滥用=切点抖）。
+- **`params.scale` 全片统一一个值**（v0.9.1）。它是人物缩放不是镜头缩放；逐镜不同会让切点内容尺寸跳变，引擎的跨镜 settle 只补相机 transform、补不了内容尺寸。
+- **构图饱满（v0.10，v0.11 再放大）**：横屏 `params.scale` 默认 1.25~1.35（引擎 `cs=1.5` → 人物高度 ≥ 画面 55%）；主数字字号 ≥ 70 画布 px（计数器 56×ts）、chip ≥ 42 画布 px（×1.8）；道具/网格/图表横向占画布 60~70%。小圆挪到右上角后，左下/中央释放的空间全部留给动画，不得大片空白（SKILL.md §0.6）。
+- **横屏右上安全区（v0.10）**：x ≥ W−340、y ≤ 460 留给真人小圆，数字 chip/关键道具别放。自动焦点取锚点质心+中央带夹取（竖屏不变）；抽帧发现圆盖人物头时显式填 `focus` 或把接物方左移。
+- **抖音右列遮挡区（v0.11）**：抖音右侧头像/点赞/评论列遮右缘（约右 12%W、y ≥ 45%H 起）。横屏 `dx=-0.04` 整体重心左偏 4%W（人物/道具/场景底/锚点统一左移，竖屏不变）；重要内容不进 x ≥ W−230 且 y ≥ 45%H；小圆在遮挡区上方不受影响。
 - 金额、法条、日期只用稿件值（SKILL.md §0.2）。
 
 自定义动作写 case-actions.js（文件内有示例），注册后 `act` 用其 id。
@@ -115,7 +122,7 @@ ffmpeg -i captions.srt captions.ass
 2. 边界秒点取 SRT 句边界；口播变速过（如 1.1x）先换算到成片时间轴。
 3. 写 `chapters.json` 到工程根目录（格式与完整流程见 [../references/chapters.md](../references/chapters.md)）：
    `{"position":"top","chapters":[{"label":"引言","start":0,"end":5.2}, ...]}`
-4. `node render.cjs` 自动注入：格宽 ∝ 时长、当前格高亮、底部细进度线；条在转场之外不闪不淡。
+4. `node render.cjs` 自动注入：格宽 ∝ 时长、当前格高亮、底部 8px 进度线；条高横屏 128/竖屏 176（v0.10 加高加粗）；条在转场之外不闪不淡。
 5. 没有 chapters.json = 不画条（兼容 v0.8 旧工程）。compose.sh 无需改动。
 
 验收：每章中间时刻停帧，高亮格 = 当时口播话题；进度线 ≈ 已播比例（chapters.md §3）。
@@ -144,7 +151,7 @@ node render.cjs
 ## 8. 合成成片
 
 改 compose.sh 顶部「案件配置」（NAME/ORIENT_LABEL/FPS/VOICE/PERSON/CAPTIONS，
-真人小窗另有 PERSON_W/PERSON_CY/PERSON_POS），然后：
+真人小圆另有 PERSON_W（直径）/PERSON_CY/PERSON_POS），然后：
 
 ```bash
 bash compose.sh
@@ -152,10 +159,10 @@ bash compose.sh
 
 - 有 events.json + assets/sfx 时自动混音（口播+音效，音效音量 0.5，不压口播；ogg/mp3 自动 ffmpeg 解码）。
 - 无 BGM、无 ducking（律师要求只要音效）；转场/翻页静音（whoosh 已移除）；句间自然停顿合法。
-- PERSON 留空 = 纯动画；填路径 = 真人 3:4 小窗（v0.9）：
-  - 源非 3:4 自动裁 3:4：宽源水平居中裁两侧；窄源按 PERSON_CY（默认 0.30）纵向锚定脸部。
-  - 默认 300×400 左下角（PERSON_W 调大小、PERSON_POS 调位置）；循环播放，声音忽略。
-  - 裁切后必须抽帧目检：脸完整在窗内、不切头顶/下巴（PERSON_CY 取 0.25~0.40 微调）。
+- PERSON 留空 = 纯动画；填路径 = 真人圆形小窗（v0.10）：
+  - 源自动裁正方形（取 min(iw,ih) 边长）：宽源水平居中裁两侧；窄源按 PERSON_CY（默认 0.30）纵向锚定脸部。
+  - 默认直径 300、右上角（PERSON_POS 默认 `main_w-overlay_w-40:148` = 章节条下方；无条/条在底改 y=40，竖屏顶条 176 → y=196）；PERSON_W 调大小；循环播放，声音忽略。
+  - 裁切后必须抽帧目检：脸完整在圆内、不切头顶/下巴、圆外透明无方角（PERSON_CY 取 0.25~0.40 微调）。
 - 响度统一 loudnorm I=-16；首尾 0.35s/0.6s 淡入淡出。
 - 输出 `out/<NAME>_<ORIENT_LABEL>.mp4`——文件名必须与配置一致，别手改 OUT。
 
@@ -186,10 +193,10 @@ ffprobe -v error -show_entries format=duration:stream=width,height -of json out/
 | 画面 NaN/undefined | 动作代码写了画布坐标字面量；场景字面量必须过 X()/Yg()/Ys()（studio.md §8） |
 | 成片结尾画面不动 | dur 之和 < 口播时长；补镜头时长重渲 |
 | 转场太频繁/太慢 | 调 FILM.transition（帧数）；不要超过最短镜头帧数的一半 |
-| 字幕压到真人小窗 | captions.ass 的 MarginV 加到 ≥ 460 |
+| 字幕压到真人小圆 | v0.10 小圆在右上、字幕在底部，默认不互压；自改 PERSON_POS 把小圆挪到底部时才需要抬高 MarginV |
 | 章节条没出现 | chapters.json 不在工程根目录 / JSON 语法错 / chapters 为空；看 render.cjs 日志 chapters=off |
 | 章节高亮与口播对不上 | 边界秒点没换算变速系数或章节脱离语义；按 references/chapters.md 重划 |
-| 真人小窗切到头顶/下巴 | PERSON_CY 微调（0.25~0.40）；宽源人物不居中时改 crop x 表达式 |
+| 真人小圆切到头顶/下巴 | PERSON_CY 微调（0.25~0.40）；宽源人物不居中时改 crop x 表达式 |
 | 渲染很慢 | 正常：1080p 约 3–8 帧/秒。900 帧自动重启浏览器；可断点续渲 |
 | 合成极慢/画面卡在约 1 秒 | 个别 ffmpeg 构建的 aac 在"纯数字静音+衰减尾音"上掉进 denormal 浮点陷阱（慢约百倍）。compose.sh 已混入 -86dBFS 不可闻抖动噪声消除；自改音频链路时务必保留那路 amix |
 | 成片干巴巴/完全无音效 | 音轨只 map 了原声（自建引擎常见）。按 references/sound.md 引擎无关强制补 mix_sound 链路（口播+音效），音轨用 mixed.wav |

@@ -12,8 +12,10 @@ const NS = 'http://www.w3.org/2000/svg';
    横屏 16:9 = 1920×1080，竖屏 9:16 = 1080×1920，切换后必须重新 mount。 */
 const DESIGN = { W: 1080, H: 800, GROUND: 700 };
 const ORIENTATIONS = {
-  land: { id: 'land', label: '横屏 16:9', W: 1920, H: 1080, GROUND: 945, os: 1.15, vs: 1.6, cs: 1.15, ts: 1.15 },
-  port: { id: 'port', label: '竖屏 9:16', W: 1080, H: 1920, GROUND: 1640, os: 1.3, vs: 2.0, cs: 1.3, ts: 1.2 },
+  /* v0.11：横屏 cs/os/ts 加大填满画面；dx 整体重心左偏 4%W——抖音右侧头像/点赞列
+     遮挡右缘，左偏后右列留空。竖屏保持已交付构图不变。 */
+  land: { id: 'land', label: '横屏 16:9', W: 1920, H: 1080, GROUND: 945, os: 1.3, vs: 1.6, cs: 1.5, ts: 1.3, dx: -0.04 },
+  port: { id: 'port', label: '竖屏 9:16', W: 1080, H: 1920, GROUND: 1640, os: 1.3, vs: 2.0, cs: 1.3, ts: 1.2, dx: 0 },
 };
 let O = ORIENTATIONS.land;
 let W = O.W, H = O.H, GROUND = O.GROUND;
@@ -22,7 +24,7 @@ function setOrientation(id) {
   W = O.W; H = O.H; GROUND = O.GROUND;
   return O;
 }
-const X = x => x * W / DESIGN.W;
+const X = x => x * W / DESIGN.W + (O.dx || 0) * W;
 const Yg = y => GROUND + (y - DESIGN.GROUND) * O.os;
 const Ys = y => GROUND + (y - DESIGN.GROUND) * O.vs;
 
@@ -445,7 +447,7 @@ function propTable(g, w = 300) {
   return g;
 }
 function chip(g, x, y, text, color, fs = 20) {
-  const cx = X(x), cy = Ys(y), f = fs * O.ts;
+  const cx = X(x), cy = Ys(y), f = fs * O.ts * 1.8;
   const w = text.length * f + 36 * O.ts;
   el('rect', { x: cx - w / 2, y: cy - f * 0.95, width: w, height: f * 1.9, rx: f * 0.95, fill: color, opacity: .95 }, g);
   txt(el('text', { x: cx, y: cy + f * 0.36, 'text-anchor': 'middle', 'font-size': f, 'font-weight': 700, fill: '#fff8ec' }, g), text);

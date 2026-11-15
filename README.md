@@ -7,8 +7,8 @@
 
 ## 资产层：人物动作素材库
 
-- **16 个固定剪影人物**（无表情、色块轮廓、贴纸描边）+ **14 个换装变体**，覆盖当事人 / 司法·执法 / 代理·调解 / 商事 / 民生 / 对抗六组、11 个业务领域。
-- **36 个动作**：文书递接、结婚证合裂、钞票流计数、钱堆分裂、敲槌定音、上铐抓捕、带离现场、抢公章、促成握手、抚养权归属、限高灰化、转移财产曝光……
+- **18 个固定剪影人物**（无表情、色块轮廓、贴纸描边）+ **14 个换装变体**，覆盖当事人 / 司法·执法 / 代理·调解 / 商事 / 民生 / 对抗六组、11 个业务领域。
+- **39 个动作**：文书递接、结婚证合裂、钞票流计数、钱堆分裂、敲槌定音、上铐抓捕、带离现场、抢公章、促成握手、抚养权归属、限高灰化、转移财产曝光、交货签收、签字被否、同行列队……
 - **9 个动作工厂**：新动作多数只需一行配置拼出来；缺人物/缺动作有现造教程。
 - **51 个法律图标**（`assets/legal-svg/`：天平/法槌/文书/证据/案件类）+ 图标级动效组件 `remotion/LegalMotion.tsx`。
 - **纯时间函数**：所有画面状态 = `f(t)`，可 scrub、可逐帧导出、可直接移植 Remotion。
@@ -87,7 +87,7 @@ references/remotion.md          Remotion 合成配方（bundle / KitShot / 整�
 references/camera.md            运镜与景深规则（camera.js 零依赖 + CameraRig Remotion）
 references/legal-icons.md       51 法律图标使用指南
 references/delivery-qa.md       两级验收 + 可执行门禁 + 声音设计 + 成片检查
-references/roster.md            16 人物 × 变体 × 36 动作总表 + 11 领域组合矩阵
+references/roster.md            18 人物 × 变体 × 39 动作总表 + 11 领域组合矩阵
 references/character-forge.md   造人物教程（剪影语法 / 坐标契约 / 完整示例）
 references/action-forge.md      造动作教程（9 工厂选项表 / 自定义机制骨架 / 验收清单）
 references/studio.md            预览台 / 自动化验收 / 导出 / 坐标契约
@@ -108,7 +108,7 @@ Skill 的工作方式：读稿 → 画幅（默认横屏）→ 拆出角色与�
 ```
 kit.js        基础构建器：坐标契约 / 剪影语法 / 人物 draw / 道具 / makeChar / 6 种场景底
 camera.js     零依赖镜头模块（与 CameraRig 同数学，按 t01 求值）
-actions.js    动作工厂 + 36 动作定义（cast / phases / events）
+actions.js    动作工厂 + 39 动作定义（cast / phases / events）
 app.js        预览台驱动（时钟 / 控件 / WebAudio 音效 / 导出 / 双模式库）
 index.html    预览台页面
 style.css     预览台样式

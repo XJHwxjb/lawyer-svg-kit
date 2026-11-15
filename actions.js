@@ -1,4 +1,4 @@
-/* 交换物动画库 · 36 个动作（5 类）+ 9 个动作工厂
+/* 交换物动画库 · 39 个动作（5 类）+ 9 个动作工厂
    每个动作 = build(S) 返回 { update(t01,P), anchors(), guidePath(), phases, events, dur }
    t01 ∈ [0,1]，全部状态由 t 纯函数决定 → 可 scrub、可移植 Remotion。
    坐标写在设计空间 1080×800/GROUND=700，经 X/Yg/Ys 自动映射到横屏 16:9 / 竖屏 9:16。 */
@@ -920,4 +920,126 @@ actMoney({
   amount: 36000, label: '抚养费', pileX: 990, desc: '抚养费钞票流飞向抚养方落堆，小孩依偎在侧',
   cast: [{ id: 'man', who: 'man' }, { id: 'woman', who: 'woman' }, { id: 'child', who: 'child' }],
   extra(S, t, P) { S.chars.child.set(860, P.scale * .9, 0, -1); },
+});
+
+/* ============ 买卖·货款（交付链路） ============ */
+/* 交货签收：货箱从司机手弧线飞到收货员手上，收货章落下确认 */
+def({
+  id: 'goods-handoff', cat: 'hand', name: '交货签收', dur: 5.0,
+  desc: '货箱从司机手中弧线送到收货员手上，收货章落箱确认签收',
+  phases: [[.2, '搬货示证'], [.55, '弧线送出'], [.75, '接货入怀'], [1.01, '收货确认']],
+  events: [{ at: .55, sfx: 'thud' }, { at: .82, sfx: 'stamp' }],
+  cast: [{ id: 'driver', who: 'driver', opt: { noProp: true } }, { id: 'receiver', who: 'receiver', opt: { noProp: true } }],
+  build(S) {
+    const A = S.chars.driver, B = S.chars.receiver;
+    const fA = faceFlip(A.C, 1), fB = faceFlip(B.C, -1);
+    const crate = propCrate(el('g', {}, S.above), 118, 94);
+    const seal = propSealSmall(el('g', { opacity: 0 }, S.above));
+    const done = chip(el('g', { opacity: 0 }, S.fx), 540, 330, '已签收', PAL.jade, 22);
+    let pos = [0, 0], hold = [0, 0];
+    return {
+      update(t, P) {
+        const s = P.scale;
+        const ah = A.hand(320, s, 0, fA), bh = B.hand(760, s, 0, fB);
+        let rot = 0, sc = 1;
+        if (t < .2) { pos = [ah[0], ah[1] - 46 * O.os * ease(P, seg(t, 0, .2))]; }
+        else if (t < .55) { const u = ease(P, seg(t, .2, .55)); pos = qbez(ah, bh, 130 * P.amp, u); rot = lerp(-5, 4, u); }
+        else if (t < .75) { const u = seg(t, .55, .75); pos = bh; rot = 4; sc = 1 + .05 * Math.sin(u * Math.PI); }
+        else { const u = seg(t, .75, 1); pos = bh; sc = 1 + .02 * Math.sin(u * Math.PI * 2); }
+        hold = pos;
+        crate.setAttribute('transform', `translate(${pos[0]},${pos[1] + 44 * O.os}) rotate(${rot}) scale(${sc * O.os})`);
+        const su = seg(t, .78, .9);
+        seal.setAttribute('opacity', su > 0 ? 1 : 0);
+        seal.setAttribute('transform', `translate(${pos[0] + 26 * O.os},${pos[1] - 8 * O.os}) rotate(-12) scale(${(2.2 - 1.2 * E.inQuad(clamp01(su / .6))) * O.os})`);
+        const dp = seg(t, .86, .98);
+        done.setAttribute('opacity', dp);
+        done.setAttribute('transform', `translate(0,${(1 - E.back(dp)) * -24 * O.ts})`);
+        A.set(320, s, 3 * Math.sin(seg(t, .15, .4) * Math.PI), fA);
+        B.set(760, s, -3 * Math.sin(seg(t, .55, .78) * Math.PI), fB);
+      },
+      anchors: () => [hold],
+      guidePath: P => qd(A.hand(320, P.scale, 0, fA), B.hand(760, P.scale, 0, fB), 130 * P.amp),
+    };
+  },
+});
+
+/* 签字被否：笔迹在送货单上描出，对方律师入画，红色否认章砸在签名上 */
+def({
+  id: 'sign-deny', cat: 'focus', name: '签字被否', dur: 5.6,
+  desc: '送货单签名逐笔描出，对方律师上前，否认章砸落覆盖签名',
+  phases: [[.25, '出示送货单'], [.45, '签名字迹描出'], [.7, '对方否认'], [1.01, '签名失效']],
+  events: [{ at: .2, sfx: 'paper' }, { at: .45, sfx: 'scratch' }, { at: .72, sfx: 'stamp' }],
+  cast: [{ id: 'lawyer', who: 'lawyer', opt: { noProp: true } }, { id: 'opponent', who: 'lawyer' }],
+  build(S) {
+    const A = S.chars.lawyer, B = S.chars.opponent;
+    const fA = faceFlip(A.C, 1), fB = faceFlip(B.C, -1);
+    const note = el('g', {}, S.above);
+    el('rect', { x: -110, y: -150, width: 220, height: 300, rx: 6, fill: PAL.paper, stroke: '#c9bda6', 'stroke-width': 2 }, note);
+    el('rect', { x: -92, y: -126, width: 120, height: 14, rx: 3, fill: PAL.seal }, note);
+    txt(el('text', { x: -32, y: -114, 'text-anchor': 'middle', 'font-size': 8, 'font-weight': 700, fill: PAL.paper }, note), '送货单');
+    for (let i = 0; i < 4; i++) el('rect', { x: -92, y: -86 + i * 26, width: 184, height: 6, rx: 3, fill: '#b9ad97' }, note);
+    el('path', { d: 'M-92,44 L92,44', stroke: '#b9ad97', 'stroke-width': 2, 'stroke-dasharray': '5 4' }, note);
+    txt(el('text', { x: -92, y: 20, 'font-size': 10, fill: '#8a8172' }, note), '收货人签收');
+    const sig = el('path', {
+      d: 'M-56,52 q14,-30 24,-6 q8,20 18,-10 q8,-22 18,4 q6,16 16,-8 q8,-16 18,6',
+      fill: 'none', stroke: '#2b3038', 'stroke-width': 3.4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+    }, note);
+    const L = sig.getTotalLength ? sig.getTotalLength() : 200;
+    sig.setAttribute('stroke-dasharray', `${L}`);
+    const deny = el('g', { opacity: 0 }, S.above);
+    el('rect', { x: -66, y: -24, width: 132, height: 52, rx: 4, fill: 'none', stroke: PAL.seal, 'stroke-width': 5, opacity: .95 }, deny);
+    txt(el('text', { x: 0, y: 12, 'text-anchor': 'middle', 'font-size': 26, 'font-weight': 800, fill: PAL.seal, transform: 'rotate(-8)' }, deny), '不认这笔货');
+    const done = chip(el('g', { opacity: 0 }, S.fx), 540, 430, '交付无法证明', PAL.seal, 22);
+    return {
+      update(t, P) {
+        const s = P.scale;
+        const up = ease(P, seg(t, .02, .2));
+        note.setAttribute('transform', `translate(${X(540)},${Yg(lerp(640, 560, up))}) rotate(-2) scale(${1.15 * O.os})`);
+        const su = ease(P, seg(t, .28, .52));
+        sig.setAttribute('stroke-dashoffset', String(L * (1 - su)));
+        const bx = lerp(980, 830, ease(P, seg(t, .55, .78)));
+        B.set(bx, s, 0, fB);
+        A.set(320, s, 2 * Math.sin(seg(t, .1, .35) * Math.PI), fA);
+        const du = seg(t, .7, .8);
+        deny.setAttribute('opacity', du > 0 ? 1 : 0);
+        deny.setAttribute('transform', `translate(${X(520)},${Yg(640)}) rotate(-10) scale(${(2.4 - 1.4 * E.inQuad(clamp01(du / .6))) * O.os})`);
+        const g = seg(t, .78, .95);
+        note.setAttribute('opacity', 1 - .35 * g);
+        const dp = seg(t, .82, .96);
+        done.setAttribute('opacity', dp);
+        done.setAttribute('transform', `translate(0,${(1 - E.back(dp)) * -24 * O.ts})`);
+      },
+      anchors: () => [[X(540), Yg(560)]],
+      guidePath: () => '',
+    };
+  },
+});
+
+/* 同行列队：多个同类剪影自左至右依次淡入成列（这不是个案/我见过很多老板） */
+def({
+  id: 'lineup', cat: 'move', name: '同行列队', dur: 5.0,
+  desc: '五个老板剪影依次淡入成列并灰化，用于"这不是个案"的群像',
+  phases: [[.2, '第一位入列'], [.7, '依次补位'], [1.01, '整列成形']],
+  events: [{ at: .2, sfx: 'pop' }, { at: .5, sfx: 'pop' }, { at: .8, sfx: 'pop' }],
+  cast: ['a', 'b', 'c', 'd', 'e'].map((id, i) => ({ id, who: 'boss', variant: i % 2 ? 'partner' : undefined, opt: { noProp: true } })),
+  build(S) {
+    const ids = ['a', 'b', 'c', 'd', 'e'];
+    const nums = ids.map((id, i) => txt(el('text', {
+      x: X(190 + i * 200), y: GROUND - 340, 'text-anchor': 'middle', 'font-size': 20 * O.ts,
+      'font-weight': 700, fill: PAL.gold, opacity: 0, 'letter-spacing': 2,
+    }, S.fx), '0' + (i + 1)));
+    return {
+      update(t, P) {
+        ids.forEach((id, i) => {
+          const u = seg(t, .05 + i * .12, .3 + i * .12);
+          const C = S.chars[id];
+          C.set(190 + i * 200, P.scale * .94, 0, 1, .55, .9 * E.smooth(u));
+          nums[i].setAttribute('y', GROUND - 336 * P.scale * O.cs);
+          nums[i].setAttribute('opacity', .8 * E.smooth(u));
+        });
+      },
+      anchors: () => [[X(540), GROUND - 300]],
+      guidePath: () => `M${X(190)},${Yg(60)} L${X(990)},${Yg(60)}`,
+    };
+  },
 });

@@ -244,6 +244,26 @@ function drawChild(g, o = {}) {
   hairCap(g, 19, 20, -170, '#3a2f28');
 }
 
+/* 司机：鸭舌帽 + 反光条夹克 + 出货单板夹（货运/交付场景的给出方） */
+function drawDriver(g, o = {}) {
+  bodyBase(g, { torsoC: o.uniform || '#5d6b52', armC: '#4c5943', legC: '#333a47', shoeC: '#23262e' });
+  el('rect', { x: -26, y: -186, width: 52, height: 7, rx: 3.5, fill: '#d7e3ee', opacity: .85 }, g);
+  el('rect', { x: -30, y: -212, width: 60, height: 30, rx: 6, fill: o.uniform || '#5d6b52' }, g);
+  hairCap(g, 24, 26, -272, '#2f2a26');
+  el('path', { d: 'M-26,-282 q26,-16 52,0 l0,5 q-26,-11 -52,0 z', fill: '#2f2a26' }, g);
+  el('rect', { x: 20, y: -286, width: 22, height: 5, rx: 2.5, fill: '#2f2a26' }, g);
+  held(g, propWaybill, o.noProp, -6, .62);
+}
+/* 收货员：工装马甲 + 收货章（交付场景的接物方） */
+function drawReceiver(g, o = {}) {
+  bodyBase(g, { torsoC: o.vest || '#3f5a74', armC: '#33495f', legC: '#333a47', shoeC: '#23262e' });
+  el('path', { d: 'M-26,-200 L-8,-200 L-8,-140 L-26,-140 Z', fill: '#e6ddc8', opacity: .9 }, g);
+  el('path', { d: 'M26,-200 L8,-200 L8,-140 L26,-140 Z', fill: '#e6ddc8', opacity: .9 }, g);
+  el('rect', { x: -4, y: -210, width: 8, height: 74, rx: 3, fill: '#e6ddc8', opacity: .55 }, g);
+  hairCap(g, 24, 26, -272, '#3a2f28');
+  held(g, propSealSmall, o.noProp, 0, 1);
+}
+
 /* ---------- 人物注册表：基础剪影 + 换色换道具变体 ---------- */
 const CHAR_GROUPS = [
   ['party', '当事人'], ['court', '司法·执法'], ['agent', '代理·调解'],
@@ -269,6 +289,8 @@ const CHARS = {
     { id: 'hr', label: 'HR', opt: { prop: 'folder' } }, { id: 'investor', label: '投资人', opt: { prop: 'bag' } },
     { id: 'partner', label: '合伙人', opt: { suit: '#6a5a4a' } }] },
   accountant: { label: '会计', group: 'biz', hand: [80, -158], draw: drawAccountant, desc: '马甲+账本：对账/转移资产曝光', variants: [] },
+  driver: { label: '司机', group: 'biz', hand: [80, -158], draw: drawDriver, desc: '鸭舌帽+出货单板夹：送货/交付/承运，买卖合同给出的货方', variants: [] },
+  receiver: { label: '收货员', group: 'biz', hand: [80, -158], draw: drawReceiver, desc: '工装马甲+收货章：签收/入库/验收，交付场景接物方', variants: [] },
   worker: { label: '工人', group: 'life', hand: [80, -158], draw: drawWorker, desc: '安全帽+工装：讨薪/工伤/劳动合同', variants: [
     { id: 'rider', label: '骑手', opt: { box: true } }, { id: 'injured', label: '工伤者', opt: { bandage: true } },
     { id: 'property', label: '物业', opt: { wrench: true, uniform: '#5a7a6a' } }] },
@@ -345,6 +367,35 @@ function propBag(g) {
   el('path', { d: 'M0,-26 q-6,8 -14,12 q-10,6 -10,18 q0,14 24,14 q24,0 24,-14 q0,-12 -10,-18 q-8,-4 -14,-12 z', fill: '#8a5a33' }, g);
   el('rect', { x: -6, y: -30, width: 12, height: 6, rx: 3, fill: '#6d4526' }, g);
   el('circle', { cx: 0, cy: 4, r: 4, fill: PAL.gold }, g);
+  return g;
+}
+/* 送货单：抬头 + 三行明细 + 签收栏（交付/买卖合同核心证据） */
+function propWaybill(g, title = '送货单') {
+  el('rect', { x: -34, y: -46, width: 68, height: 92, rx: 3, fill: PAL.paper, stroke: '#c9bda6', 'stroke-width': 2 }, g);
+  el('rect', { x: -26, y: -38, width: 52, height: 9, rx: 2, fill: PAL.seal }, g);
+  txt(el('text', { x: 0, y: -30.5, 'text-anchor': 'middle', 'font-size': 7, 'font-weight': 700, fill: PAL.paper }, g), title);
+  for (let i = 0; i < 3; i++)
+    el('rect', { x: -26, y: -22 + i * 11, width: i === 2 ? 30 : 52, height: 3.5, rx: 1.75, fill: '#b9ad97' }, g);
+  el('path', { d: 'M-26,20 L26,20', stroke: '#b9ad97', 'stroke-width': 1.2, 'stroke-dasharray': '2 2' }, g);
+  el('path', { d: 'M-26,30 q8,-8 14,0 q6,6 12,-2', stroke: '#4a4438', 'stroke-width': 1.6, fill: 'none' }, g);
+  return g;
+}
+/* 收货章：小型方章（接物方确认用） */
+function propSealSmall(g) {
+  el('rect', { x: -11, y: -11, width: 22, height: 22, rx: 3, fill: PAL.seal }, g);
+  el('path', { d: 'M-5,-4 h10 M-5,2 h7 M-5,8 h10', stroke: PAL.paper, 'stroke-width': 1.6, opacity: .85 }, g);
+  el('rect', { x: -3, y: -25, width: 6, height: 12, rx: 3, fill: PAL.sealDeep }, g);
+  return g;
+}
+/* 货箱：瓦楞纸箱 + 封箱胶带 + 侧标（货款/交付场景） */
+function propCrate(g, w = 120, h = 96) {
+  const x = -w / 2, y = -h;
+  el('rect', { x, y, width: w, height: h, rx: 3, fill: '#c99a5f', stroke: '#a3743f', 'stroke-width': 2 }, g);
+  el('rect', { x, y, width: w, height: 14, fill: '#d7ab73' }, g);
+  el('rect', { x: -9, y: y - 2, width: 18, height: h + 4, fill: '#e2c79c', opacity: .9 }, g);
+  el('rect', { x: x + 10, y: y + h * .38, width: w * .42, height: 6, rx: 3, fill: '#a3743f', opacity: .55 }, g);
+  el('rect', { x: x + 10, y: y + h * .38 + 12, width: w * .26, height: 5, rx: 2.5, fill: '#a3743f', opacity: .4 }, g);
+  el('path', { d: `M${x + w - 34},${y + h * .62} l16,0 l0,16 l-16,0 z`, fill: 'none', stroke: '#a3743f', 'stroke-width': 1.6, opacity: .5 }, g);
   return g;
 }
 

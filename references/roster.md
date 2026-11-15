@@ -3,7 +3,7 @@
 > 新造人物/动作后必须回写本表。id 即代码键名，预览台 `__kit.setAction(id)` / `__kit.setPortrait(who, variant)` 可直接调用。
 > 全库人物与动作均支持双画幅：`__kit.setOrientation('land')` 横屏 16:9 / `('port')` 竖屏 9:16，坐标自动重排（契约见 studio.md §8）；按项目单选其一生成。
 
-## 1. 人物库 · 16 基础剪影 + 14 变体
+## 1. 人物库 · 18 基础剪影 + 14 变体
 
 六组：`party 当事人` / `court 司法·执法` / `agent 代理·调解` / `biz 商事` / `life 民生` / `other 对抗·其他`。
 `hand` 为接物锚点（局部坐标，脚底原点）；`face` 为天然朝向（woman = -1，其余 1）。
@@ -22,6 +22,8 @@
 | mediator | 调解员 | agent | 工作服+文件夹 | [80,-158] | — |
 | boss | 老板 | biz | 深灰西装金领带+公章+公文包 | [80,-158] | hr→HR(文件夹) · investor→投资人(钱袋) · partner→合伙人(棕西装) |
 | accountant | 会计 | biz | 马甲+账本 | [80,-158] | — |
+| driver | 司机 | biz | 鸭舌帽+反光条夹克+出货单板夹 | [80,-158] | — |
+| receiver | 收货员 | biz | 工装马甲+收货章 | [80,-158] | — |
 | worker | 工人 | life | 金安全帽+工装反光条 | [80,-158] | rider→骑手(保温箱) · injured→工伤者(绷带) · property→物业(扳手+绿工装) |
 | doctor | 医生 | life | 白大褂+听诊器+病历夹 | [80,-158] | — |
 | rogue | 老赖 | other | 鸭舌帽+帽衫+背后钱袋 | [80,-158] | — |
@@ -29,7 +31,7 @@
 
 变体只改 `opt`（颜色/道具/姿态开关），不新建 draw 函数；需要新轮廓才造新人物。
 
-## 2. 动作库 · 36 动作
+## 2. 动作库 · 39 动作
 
 机制列 = 所用工厂（见 action-forge.md）。cast 列省略 `opt:{noProp:true}` 标注规则：飞行道具给出方一律 noProp。
 
@@ -77,6 +79,13 @@
 | custody-move | 抚养权归属 | move | actCustody | man + woman + child |
 | alimony-flow | 抚养费·计数 | money | actMoney(pile,extra) | man + woman + child |
 
+### 交付链路 3 动作（买卖·货款，47 万案定制收编）
+| id | 名称 | 类 | 机制 | cast |
+|---|---|---|---|---|
+| goods-handoff | 交货签收 | hand | 自定义（propCrate+propSealSmall） | driver + receiver |
+| sign-deny | 签字被否 | focus | 自定义（送货单描签+否认章） | lawyer + lawyer(opponent) |
+| lineup | 同行列队 | move | 自定义（五剪影淡入成列+灰化） | boss ×5(交替 partner) |
+
 ## 3. 业务领域 → 推荐组合矩阵
 
 | 领域 | 推荐 cast | 推荐动作链 |
@@ -87,6 +96,7 @@
 | 劳动·讨薪工伤 | worker(+injured) + boss(+hr) | wages-flow → contract-seal → injury-focus → arrest(恶意欠薪移送) |
 | 公司·股权公章 | boss + boss(partner) + accountant | seal-grab → audit-focus → embezzle-expose → verdict-handoff |
 | 合同·债务 | man + woman + rogue | doc-handoff → money-flow → asset-hide → limit-gray → arrest |
+| 买卖·货款交付 | driver + receiver + lawyer | goods-handoff → sign-deny → money-flow；"这不是个案"群像用 lineup |
 | 房产·物业 | man(landlord) + woman(tenant) + worker(property) | retainer-handoff → mediation-handoff → handshake |
 | 交通 | police(traffic) + man + woman | approach-retreat → record-focus → verdict-handoff |
 | 医疗 | doctor + man(patient) | chart-handoff → appraisal-focus → mediation-handoff |

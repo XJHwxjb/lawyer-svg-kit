@@ -53,10 +53,9 @@ if (FILM.orient !== 'land' && FILM.orient !== 'port') throw new Error("FILM.orie
 
 setOrientation(FILM.orient);
 const FPS = FILM.fps || 30;
-const THEME = FILM.theme || 'cream';
+const THEME = resolveTheme(FILM.theme || 'cream');
 const TRANS = Math.max(0, FILM.transition == null ? 12 : FILM.transition);
 const T = THEMES[THEME];
-if (!T) throw new Error('未知色调: ' + THEME);
 
 const stage = document.getElementById('stage');
 stage.setAttribute('viewBox', `0 0 ${W} ${H}`);
@@ -153,7 +152,7 @@ function camSpec(entry) {
 const slotA = { i: -1, state: null }, slotB = { i: -1, state: null };
 
 /* 跨镜镜头连续（v0.9.1）：新镜头开头 CAM_SETTLE 帧内，相机从上一镜结尾
-   平滑过渡到本镜关键帧，消除切点处的缩放/焦点跳变（观感上的"抖动"）。 */
+   平滑过渡到本镜关键帧，消除切点处的焦点/平移跳变（观感上的"抖动"）。 */
 const CAM_SETTLE = 12;
 
 function drive(world, slot, entry, t01) {

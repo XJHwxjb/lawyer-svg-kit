@@ -5,6 +5,8 @@ export type CameraState = {x: number; y: number; scale: number};
 export type CameraKey = CameraState & {frame: number};
 const mix = (a: number, b: number, p: number) => a + (b-a)*p;
 const smooth = (p: number) => {const v = Math.max(0, Math.min(1, p)); return v*v*(3-2*v);};
+/* 与 camera.js camGlide 同：线性为主+少量缓动，首尾不趋零速（v0.13）。 */
+const glide = (p: number) => {const v = Math.max(0, Math.min(1, p)); return .72*v + .28*smooth(v);};
 
 /** keys 必须按帧递增且至少有一项；开始和结束之后保持边界状态。 */
 export function cameraAt(frame: number, keys: readonly CameraKey[]): CameraState {
@@ -13,7 +15,7 @@ export function cameraAt(frame: number, keys: readonly CameraKey[]): CameraState
  const next = keys.findIndex(k => k.frame > frame);
  if (next === 0) return keys[0];
  if (next < 0) return keys[keys.length-1];
- const a=keys[next-1], b=keys[next], p=smooth((frame-a.frame)/(b.frame-a.frame));
+ const a=keys[next-1], b=keys[next], p=glide((frame-a.frame)/(b.frame-a.frame));
  return {x:mix(a.x,b.x,p), y:mix(a.y,b.y,p), scale:mix(a.scale,b.scale,p)};
 }
 

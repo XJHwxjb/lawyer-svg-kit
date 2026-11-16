@@ -1025,7 +1025,7 @@ def({
   build(S) {
     const ids = ['a', 'b', 'c', 'd', 'e'];
     const nums = ids.map((id, i) => txt(el('text', {
-      x: X(190 + i * 200), y: GROUND - 340, 'text-anchor': 'middle', 'font-size': 20 * O.ts,
+      x: X(120 + i * 180), y: GROUND - 340, 'text-anchor': 'middle', 'font-size': 20 * O.ts,
       'font-weight': 700, fill: PAL.gold, opacity: 0, 'letter-spacing': 2,
     }, S.fx), '0' + (i + 1)));
     return {
@@ -1033,13 +1033,13 @@ def({
         ids.forEach((id, i) => {
           const u = seg(t, .05 + i * .12, .3 + i * .12);
           const C = S.chars[id];
-          C.set(190 + i * 200, P.scale * .94, 0, 1, .55, .9 * E.smooth(u));
+          C.set(120 + i * 180, P.scale * .94, 0, 1, .55, .9 * E.smooth(u));
           nums[i].setAttribute('y', GROUND - 336 * P.scale * O.cs);
           nums[i].setAttribute('opacity', .8 * E.smooth(u));
         });
       },
       anchors: () => [[X(540), GROUND - 300]],
-      guidePath: () => `M${X(190)},${Yg(60)} L${X(990)},${Yg(60)}`,
+      guidePath: () => `M${X(120)},${Yg(60)} L${X(840)},${Yg(60)}`,
     };
   },
 });

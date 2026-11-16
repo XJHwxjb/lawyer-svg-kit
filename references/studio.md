@@ -18,7 +18,7 @@ python -m http.server 8734        # 或 npx serve / 任意静态服务
 - 图鉴模式舞台上方两行：**变体**（基础/各变体 pill）、**相关动作**（点 pill 跳回动作库播放）。
 - 舞台头：类别 chip + 名称 + **横屏/竖屏画幅切换**（16:9 / 9:16）+ 画布尺寸徽章 + 阶段 chip；右上大数字 = 库内序号。
 - 画幅是**项目级单选**：切换即选定，自动保存（localStorage `lawyer-kit-orient`），下次打开恢复；重置参数 / 随机风格**不改变**画幅；导出 SVG/JSON 跟随当前画幅。案件只交付选中的那一种画幅。
-- 右栏控件：速度 / 时长 / 缓动(smooth·spring·back·linear) / 幅度 / 缩放 / 描边 / 投影 / 色调(cream·mist·dusk) / 场景底(paper·home·court·register·office·warehouse) / **镜头(off·push·hold·impact·pan·breathe)** / 参考线。
+- 右栏控件：速度 / 时长 / 缓动(smooth·spring·back·linear) / 幅度 / 缩放 / 描边 / 投影 / 色调(cream·mist·dusk；自定义色对象走 pipeline/Remotion 配置，v0.14) / 场景底(paper·home·court·register·office·warehouse) / **镜头(off·push·hold·impact·pan·breathe)** / 参考线。
 - 镜头控件（v0.5）：选择后整个舞台世界（地面+场景底+人物）按 camera.js preset 运动，焦点自动取动作第一个锚点；水印/背景渐变不动。数字镜头验收用 `hold`，敲槌验收用 `impact`。
 - 走带：播放/暂停、重播、循环、时间轴 scrub；刻度 = 音效事件点。
 - 键盘：空格播放暂停，←→ 逐帧（1/30s），**O 切换画幅**。

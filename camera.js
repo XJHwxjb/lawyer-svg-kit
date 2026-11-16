@@ -12,7 +12,10 @@
    3) 整片模板 pipeline/film.html 已接好，案件制作优先用模板，不要手搓。
 
    ── 硬规则 ─────────────────────────────────────────────────────────
-   · 镜头状态一律用画布像素；scale > 1 = 推进放大。
+   · 镜头状态一律用画布像素。
+   · v0.13 去放大化：preset 一律纯平移（scale 恒 1），不做缩放动画——
+     可读性由 params.scale 静态放大承担，冲击感由道具级动画+音效承担。
+     手写 keys 想静态放大可以 scale>1，但必须全程恒定，禁止缩放动画。
    · 全舞台镜头（camWorld 包整个画面）时 scale 必须 ≥ 1，否则画面边缘露底。
      本文件所有 preset 都保证 ≥ 1；手写 keys 时自己守住这条。
    · keys 的 at 必须递增、取值 [0,1]；cameraAt 会校验并抛错。
@@ -26,6 +29,8 @@
 
 const camMix = (a, b, p) => a + (b - a) * p;
 const camSmooth = p => { const v = Math.max(0, Math.min(1, p)); return v * v * (3 - 2 * v); };
+/* 线性为主+少量缓动：首尾速度不趋零，30fps 下不出现"伪冻结"，观感更连续。 */
+const camGlide = p => { const v = Math.max(0, Math.min(1, p)); return .72 * v + .28 * camSmooth(v); };
 
 /** keys: [{at, x, y, scale}]，at 递增；at 之前/之后保持边界状态。返回 {x,y,scale}。 */
 function cameraAt(t01, keys) {
@@ -39,7 +44,7 @@ function cameraAt(t01, keys) {
   if (next === 0) return { x: keys[0].x, y: keys[0].y, scale: keys[0].scale };
   if (next < 0) { const k = keys[keys.length - 1]; return { x: k.x, y: k.y, scale: k.scale }; }
   const a = keys[next - 1], b = keys[next];
-  const p = camSmooth((t01 - a.at) / (b.at - a.at));
+  const p = camGlide((t01 - a.at) / (b.at - a.at));
   return { x: camMix(a.x, b.x, p), y: camMix(a.y, b.y, p), scale: camMix(a.scale, b.scale, p) };
 }
 
@@ -59,37 +64,37 @@ function camFocus(x, y) { return [X(x), Yg(y)]; }
 
 const camKey = (at, pt, scale) => ({ at, x: pt[0], y: pt[1], scale });
 
-/** 全程缓慢推进：from → to。适合叙事铺垫。 */
-function camPush(focusPt, from = 1, to = 1.1) {
-  return [camKey(0, focusPt, from), camKey(1, focusPt, to)];
+/** 全程缓慢平移推进（v0.13 起无缩放）：起幅偏右上，滑向焦点。适合叙事铺垫。 */
+function camPush(focusPt) {
+  return [camKey(0, [focusPt[0] + W * .03, focusPt[1] + H * .015], 1), camKey(1, focusPt, 1)];
 }
 
-/** 推近后停留：前 pushEnd 段推进，之后保持放大让观众读清数字/文书。数字镜头首选。
-    停留段带 2% 极缓漂移（肉眼几乎不可察）：横屏像素半径小，1% 漂移会低于
-    freezedetect -60dB 阈值，动作间隙（如钱流两张钞票之间）会被报冻结。 */
-function camHoldPush(focusPt, pushEnd = .4, from = 1, to = 1.12) {
-  return [camKey(0, focusPt, from), camKey(pushEnd, focusPt, to), camKey(1, focusPt, to * 1.02)];
+/** 停稳+微漂移：前 pushEnd 从略偏起幅滑到焦点，之后继续极缓平移（全程约 2%W）。
+    漂移防 freezedetect 冻结（横屏亚像素阈值）；无缩放，数字/文书镜头首选。 */
+function camHoldPush(focusPt, pushEnd = .4) {
+  return [camKey(0, [focusPt[0] - W * .01, focusPt[1] - H * .004], 1),
+    camKey(pushEnd, focusPt, 1),
+    camKey(1, [focusPt[0] + W * .01, focusPt[1] + H * .004], 1)];
 }
 
-/** 横移：焦点左侧 → 右侧，scale 恒定。适合时间线/双方对照。 */
-function camPan(fromPt, toPt, scale = 1.08) {
+/** 横移：焦点左侧 → 右侧，scale 恒定（默认 1）。适合时间线/双方对照。 */
+function camPan(fromPt, toPt, scale = 1) {
   return [camKey(0, fromPt, scale), camKey(1, toPt, scale)];
 }
 
-/** 冲击：at 时刻快速 punch 放大，随后落到 settle 并保持。配合敲槌/盖章/摔碎等事件。
-    at 应对齐事件秒点 / 镜头总时长。
-    punch 前后带极缓漂移（2% 量级，肉眼难察）：动作等待相位本身可能静止，
-    镜头不留完全静止段，避免触发 freezedetect 冻结门禁（横屏 1% 低于阈值）。 */
-function camImpact(focusPt, at = .5, punch = 1.14, settle = 1.06) {
+/** 冲击：at 时刻焦点快速下震再落回（v0.13 起纯平移轻震，无 punch 缩放），
+    前后带极缓漂移防冻结。配合敲槌/盖章/摔碎等事件，at 对齐事件秒点/镜头总时长。 */
+function camImpact(focusPt, at = .5) {
   const pre = Math.max(0, at - .08), post = Math.min(1, at + .18);
-  const raw = [camKey(0, focusPt, 1), camKey(pre, focusPt, 1.012),
-    camKey(at, focusPt, punch), camKey(post, focusPt, settle), camKey(1, focusPt, settle * 1.02)];
+  const raw = [camKey(0, [focusPt[0] - W * .006, focusPt[1]], 1), camKey(pre, focusPt, 1),
+    camKey(at, [focusPt[0], focusPt[1] + H * .015], 1), camKey(post, focusPt, 1),
+    camKey(1, [focusPt[0] + W * .006, focusPt[1]], 1)];
   return raw.filter((k, i) => i === 0 || k.at > raw[i - 1].at);
 }
 
-/** 呼吸：1 → 1.045 → 1 的极缓起伏。给"否则完全静止"的镜头兜底用。 */
+/** 呼吸：极缓平移起伏（无缩放）。给"否则完全静止"的镜头兜底用。 */
 function camBreathe(focusPt) {
-  return [camKey(0, focusPt, 1), camKey(.5, focusPt, 1.045), camKey(1, focusPt, 1)];
+  return [camKey(0, focusPt, 1), camKey(.5, [focusPt[0] + W * .012, focusPt[1] - H * .008], 1), camKey(1, focusPt, 1)];
 }
 
 /** 按名字取 preset。focusPt 是画布像素（用 camFocus 生成）；缺省用画面中心偏下。

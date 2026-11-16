@@ -12,8 +12,9 @@
 - **9 个动作工厂**：新动作多数只需一行配置拼出来；缺人物/缺动作有现造教程。
 - **51 个法律图标**（`assets/legal-svg/`：天平/法槌/文书/证据/案件类）+ 图标级动效组件 `remotion/LegalMotion.tsx`。
 - **纯时间函数**：所有画面状态 = `f(t)`，可 scrub、可逐帧导出、可直接移植 Remotion。
-- **零依赖镜头模块**（v0.5 `camera.js`）：push/hold/impact/pan/breathe 五种运镜 preset，与 Remotion CameraRig 同一套数学；预览台"镜头"下拉实时切换。
+- **零依赖镜头模块**（v0.5 `camera.js`，v0.13 去放大化）：push/hold/impact/pan/breathe 五种纯平移运镜 preset（scale 恒定），与 Remotion CameraRig 同一套数学；预览台"镜头"下拉实时切换。
 - **6 种场景底**：白纸 / 家中 / 法庭 / 登记处 / 办公室 / 仓库，按剧情地点选，双画幅自动映射。
+- **系列色调**（v0.14 自定义入口）：`theme` 三档 cream/mist/dusk，或自定义 `{bg1,bg2,ground,line}` 色值对象；同系列同色值，背景逐集一致。
 - **双画幅·单选生成**：横屏 16:9（1920×1080）或竖屏 9:16（1080×1920），每个项目选其一生成；坐标自动重排，竖屏上方留标题/字幕安全区。
 - **零依赖预览台**：无构建、无 npm 包，浏览器打开即用。
 

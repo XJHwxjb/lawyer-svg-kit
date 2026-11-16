@@ -1,6 +1,6 @@
 # 用口播视频和 SRT 合成：Remotion 起步配方
 
-> **路线选择（v0.5）**：整片合成有两条等价路线——本文件的 Remotion 配方，或零依赖的 [../pipeline/README.md](../pipeline/README.md)（film.config.js → render.cjs → compose.sh，不需要 npm/React）。环境装不了 Remotion 或不熟悉 React 时走 pipeline；二选一，不要混用。两条路线都必须满足 SKILL.md §0.5（数字呈现）与 §0.6（动感最低要求）：每镜头有镜头运动或持续动作、镜头间有转场、场景底不全片 paper、音效实现或声明。Remotion 路线的镜头用 CameraRig（camera.md），数字镜头用"推近→保持"关键帧并给足 ≥1.2s 阅读停留。
+> **路线选择（v0.5）**：整片合成有两条等价路线——本文件的 Remotion 配方，或零依赖的 [../pipeline/README.md](../pipeline/README.md)（film.config.js → render.cjs → compose.sh，不需要 npm/React）。环境装不了 Remotion 或不熟悉 React 时走 pipeline；二选一，不要混用。两条路线都必须满足 SKILL.md §0.5（数字呈现）与 §0.6（动感最低要求）：每镜头有镜头运动或持续动作、镜头间有转场、场景底不全片 paper、音效实现或声明。Remotion 路线的镜头用 CameraRig（camera.md，v0.13 起纯平移、scale 恒定），数字镜头用"平移→停稳+微漂移"关键帧并给足 ≥1.2s 阅读停留。
 
 本配方帮助 Agent 从视频与带时间戳的字幕搭起**可运行的基底**：真人/头像层 + 逐句字幕层 + 主库动画场景层。它不自动理解法律稿件或生成分镜；场景内容必须按 [workflow.md](workflow.md) 的分镜逐句替换。所有命令在**复制出的案件项目目录**执行，不是 Skill 安装目录；客户素材不得放入公开仓库、Skill 目录或云端。
 
@@ -53,7 +53,7 @@
 mkdir -p src/kit
 cp "<技能目录>/kit.js" "<技能目录>/actions.js" src/kit/
 cat src/kit/kit.js src/kit/actions.js > src/kit/bundle.js
-printf '\nexport { ACTIONS, CHARS, CATS, THEMES, setOrientation, makeChar, buildBG, el, chip, faceFlip };\n' >> src/kit/bundle.js
+printf '\nexport { ACTIONS, CHARS, CATS, THEMES, resolveTheme, setOrientation, makeChar, buildBG, el, chip, faceFlip };\n' >> src/kit/bundle.js
 ```
 
 ## 1. 安置和检查素材
@@ -87,7 +87,7 @@ python "<技能目录>/scripts/prepare_timing.py" --video "public/media/source.m
 ```tsx
 import React, {useEffect, useRef} from 'react';
 import {useCurrentFrame, useVideoConfig} from 'remotion';
-import {ACTIONS, THEMES, setOrientation, makeChar, buildBG, el} from './kit/bundle';
+import {ACTIONS, THEMES, resolveTheme, setOrientation, makeChar, buildBG, el} from './kit/bundle';
 
 const DEFS = `<defs>
   <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
@@ -114,10 +114,11 @@ export const KitShot: React.FC<{actionId: string; orient: 'land' | 'port'; param
     const O = setOrientation(orient);             // 必须先切画幅再 build
     svg.setAttribute('viewBox', `0 0 ${O.W} ${O.H}`);
     svg.innerHTML = DEFS;
-    const T = THEMES[params.theme];
+    const themeName = resolveTheme(params.theme || 'cream');  // v0.14：名字或自定义色对象
+    const T = THEMES[themeName];
     const bg = el('g', {}, svg);
     el('rect', {width: O.W, height: O.H, fill: 'url(#bgGrad)'}, bg);
-    buildBG(bg, params.bg, params.theme);
+    buildBG(bg, params.bg, themeName);
     const scene = el('g', {}, svg);
     const act = ACTIONS.find((a: any) => a.id === actionId)!;
     const below = el('g', {}, scene);

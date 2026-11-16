@@ -69,6 +69,21 @@ const THEMES = {
   dusk:  { bg1: '#3b4054', bg2: '#2a2e3d', ground: '#222532', line: '#4a5068', label: '暮色·深' },
 };
 
+/* v0.14 自定义系列色调：theme 传名字或 {bg1,bg2,ground,line,label?} 对象。
+   对象形式校验后注册为 'custom'，buildBG / 章节条 / Remotion 按名字取色链路不变。
+   同一系列固定同一组色值即保证逐集背景一致。 */
+function resolveTheme(spec) {
+  if (typeof spec === 'string') {
+    if (!THEMES[spec]) throw new Error('未知色调: ' + spec);
+    return spec;
+  }
+  const keys = ['bg1', 'bg2', 'ground', 'line'];
+  if (!spec || keys.some(k => !/^#[0-9a-fA-F]{6}$/.test(spec[k] || '')))
+    throw new Error('自定义色调需 bg1/bg2/ground/line 四个 #rrggbb 色值');
+  THEMES.custom = { bg1: spec.bg1, bg2: spec.bg2, ground: spec.ground, line: spec.line, label: spec.label || '自定义' };
+  return 'custom';
+}
+
 /* ---------- 固定人物（一个姿势，全片不变） ---------- */
 /* 局部坐标：脚底 (0,0)，向上为负。接物点见 CHARS[who].hand。 */
 
@@ -542,8 +557,8 @@ function buildBG(root, kind, theme) {
     const bench = el('g', { transform: `translate(${X(540)},${Yg(560)}) scale(${os})` }, root);
     el('rect', { x: -300, y: 0, width: 600, height: 60, rx: 8, fill: '#8a5a33' }, bench);
     el('rect', { x: -300, y: 0, width: 600, height: 12, rx: 6, fill: '#a06a3c' }, bench);
-    chip(root, 330, 592, '原告', PAL.azure, 18);
-    chip(root, 750, 592, '被告', PAL.magenta, 18);
+    chip(root, 240, 592, '原告', PAL.azure, 18);
+    chip(root, 600, 592, '被告', PAL.magenta, 18);
   } else if (kind === 'register') {
     el('rect', { x: 0, y: Yg(80), width: W, height: 280 * os, fill: PAL.seal, opacity: .22 }, root);
     const emb = el('g', { transform: `translate(${X(540)},${Yg(190)}) scale(${os})` }, root);

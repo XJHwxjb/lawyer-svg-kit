@@ -19,6 +19,8 @@
    · 焦点用 camFocus(x, y)：传设计空间坐标（1080×800, GROUND=700），
      返回画布坐标。不要手写画布像素，换画幅会错位。
    · 一个镜头内焦点固定（mount 时取一次锚点），不要每帧换焦点，否则画面抖。
+   · transform 数值精度：scale 至少 4 位小数（0.0001）。量化到 0.01 会让推近
+     "停数帧跳一次"（放大抖动、平移/静止不抖）；translate 0.01px 即可。
 */
 'use strict';
 
@@ -46,7 +48,9 @@ function applyCamera(g, cam, depth = 1) {
   const d = Math.max(0, Math.min(1, depth));
   const s = camMix(1, cam.scale, d);
   const x = camMix(W / 2, cam.x, d), y = camMix(H / 2, cam.y, d);
-  const r = v => +v.toFixed(2);
+  // scale 精度必须到 0.0001：推近每帧增量仅 ~0.002，若量化到 0.01 会"停数帧跳一次"，
+  // 表现为放大时抖动（平移/静止不受影响）。0.0001 在 1920 宽下边缘位移 <0.1px。
+  const r = v => +v.toFixed(4);
   g.setAttribute('transform', `translate(${r(W / 2 - x * s)}, ${r(H / 2 - y * s)}) scale(${r(s)})`);
 }
 
